@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- LIGHT SCHEME — "Government Trust"             -->
+    <!-- ============================================ -->
+
+    <!-- Primary: Deep Navy -->
+    <color name="md_theme_primary">#0D3B66</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#D3E4F5</color>
+    <color name="md_theme_onPrimaryContainer">#051E33</color>
+
+    <!-- Secondary: Teal -->
+    <color name="md_theme_secondary">#0F8B8D</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_secondaryContainer">#CFF1EF</color>
+    <color name="md_theme_onSecondaryContainer">#003734</color>
+
+    <!-- Tertiary: Amber Gold -->
+    <color name="md_theme_tertiary">#8A6D00</color>
+    <color name="md_theme_onTertiary">#FFFFFF</color>
+    <color name="md_theme_tertiaryContainer">#FCE8B4</color>
+    <color name="md_theme_onTertiaryContainer">#2A1F00</color>
+
+    <!-- Error -->
+    <color name="md_theme_error">#BA1A1A</color>
+    <color name="md_theme_onError">#FFFFFF</color>
+    <color name="md_theme_errorContainer">#FFDAD6</color>
+    <color name="md_theme_onErrorContainer">#410002</color>
+
+    <!-- Background / Surface -->
+    <color name="md_theme_background">#F6F8FA</color>
+    <color name="md_theme_onBackground">#17202A</color>
+    <color name="md_theme_surface">#FFFFFF</color>
+    <color name="md_theme_onSurface">#17202A</color>
+    <color name="md_theme_surfaceVariant">#E3E9EE</color>
+    <color name="md_theme_onSurfaceVariant">#43505C</color>
+
+    <!-- Outline -->
+    <color name="md_theme_outline">#74818E</color>
+    <color name="md_theme_outlineVariant">#C4CDD5</color>
+
+    <!-- Inverse -->
+    <color name="md_theme_inverseSurface">#2B3038</color>
+    <color name="md_theme_inverseOnSurface">#ECF0F4</color>
+    <color name="md_theme_inversePrimary">#A3C9E9</color>
+
+    <!-- Misc -->
+    <color name="md_theme_scrim">#000000</color>
+    <color name="md_theme_surfaceDim">#D6DAE0</color>
+    <color name="md_theme_surfaceBright">#FFFFFF</color>
+    <color name="md_theme_surfaceContainerLowest">#FFFFFF</color>
+    <color name="md_theme_surfaceContainerLow">#F0F3F7</color>
+    <color name="md_theme_surfaceContainer">#EAEDF2</color>
+    <color name="md_theme_surfaceContainerHigh">#E4E8ED</color>
+    <color name="md_theme_surfaceContainerHighest">#DEE2E7</color>
+
+    <!-- ============================================ -->
+    <!-- SEMANTIC STATUS COLORS                       -->
+    <!-- ============================================ -->
+    <color name="status_success">#1B8E5A</color>
+    <color name="status_warning">#8A6D00</color>
+    <color name="status_info">#0D3B66</color>
+    <color name="status_error">#BA1A1A</color>
+
+    <!-- ============================================ -->
+    <!-- SEMANTIC COMPONENT COLORS                    -->
+    <!-- ============================================ -->
+    <color name="field_focused_stroke">#0D3B66</color>
+    <color name="field_error_stroke">#BA1A1A</color>
+    <color name="field_default_stroke">#74818E</color>
+    <color name="shimmer_base">#E4E8ED</color>
+    <color name="shimmer_highlight">#F0F3F7</color>
+    <color name="offline_bar_bg">#FCE8B4</color>
+    <color name="offline_bar_text">#2A1F00</color>
+    <color name="error_banner_bg">#FFDAD6</color>
+    <color name="error_banner_text">#410002</color>
+
+    <!-- Legacy aliases (backward compat) -->
+    <color name="primary">#0D3B66</color>
+    <color name="primary_variant">#082B4D</color>
+    <color name="secondary">#0F8B8D</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="background">#F6F8FA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="error">#BA1A1A</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="text_primary">#17202A</color>
+    <color name="text_secondary">#43505C</color>
+    <color name="divider">#C4CDD5</color>
+
+    <!-- Splash -->
+    <color name="splash_arc_start">#0D3B66</color>
+    <color name="splash_arc_mid">#0F8B8D</color>
+    <color name="splash_arc_end">#D3E4F5</color>
+
+    <!-- Dashboard -->
+    <color name="md_toolbar_bg">#0D3B66</color>
+    <color name="md_on_toolbar">#FFFFFF</color>
+
+    <!-- Short aliases for layout convenience -->
+    <color name="md_background">#F6F8FA</color>
+    <color name="md_on_background">#17202A</color>
+    <color name="md_primary">#0D3B66</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#D3E4F5</color>
+    <color name="md_on_primary_container">#051E33</color>
+    <color name="md_outline_variant">#C4CDD5</color>
+    <color name="md_surface">#FFFFFF</color>
+</resources>

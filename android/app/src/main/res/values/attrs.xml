@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RudaSurveyTheme">
+        <attr name="colorSuccess" format="color" />
+        <attr name="colorOnSuccess" format="color" />
+        <attr name="colorSuccessContainer" format="color" />
+        <attr name="colorOnSuccessContainer" format="color" />
+    </declare-styleable>
+</resources>

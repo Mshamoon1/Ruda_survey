@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/offlineBar"
+    android:layout_width="match_parent"
+    android:layout_height="36dp"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="@drawable/bg_offline_bar"
+    android:visibility="gone"
+    android:paddingStart="@dimen/spacing_12"
+    android:paddingEnd="@dimen/spacing_12">
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_sync"
+        android:contentDescription="Offline"
+        app:tint="@color/md_theme_onTertiaryContainer"
+        android:layout_marginEnd="@dimen/spacing_4" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvOfflineStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Offline - changes will sync when connected"
+        android:textSize="@dimen/text_size_body_small"
+        android:textColor="@color/md_theme_onTertiaryContainer"
+        android:fontFamily="@font/inter_medium" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/offlineProgress"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorSize="16dp"
+        app:trackThickness="2dp"
+        app:indicatorColor="@color/md_theme_onTertiaryContainer" />
+
+</LinearLayout>

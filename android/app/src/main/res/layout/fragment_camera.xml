@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomControls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Stamped image preview -->
+    <ImageView
+        android:id="@+id/ivPreview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:background="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomControls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Flash overlay -->
+    <View
+        android:id="@+id/flashOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/white"
+        android:alpha="0"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomControls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- GPS Status pill -->
+    <LinearLayout
+        android:id="@+id/gpsStatusLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_pill_dark"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="8dp"
+        android:gravity="center_vertical"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ProgressBar
+            android:id="@+id/gpsProgress"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginEnd="6dp"
+            android:indeterminateTint="@color/md_theme_tertiary"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/ivGpsIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="6dp"
+            android:src="@drawable/ic_my_location"
+            android:visibility="gone"
+            app:tint="@color/md_theme_tertiary" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvGpsStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Acquiring location..."
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:fontFamily="@font/inter_medium" />
+    </LinearLayout>
+
+    <!-- Top Overlay -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#80000000"
+        android:padding="@dimen/spacing_12"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_camera"
+            android:contentDescription="@string/camera_title"
+            app:tint="@android:color/white"
+            android:layout_marginEnd="@dimen/spacing_8" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvImageType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/camera_title"
+            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <!-- Bottom Controls -->
+    <LinearLayout
+        android:id="@+id/bottomControls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#CC0D1B24"
+        android:padding="@dimen/spacing_20"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Capture mode controls -->
+        <LinearLayout
+            android:id="@+id/captureControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Image Type Chips (horizontal) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilImageType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/label_image_type"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                app:boxStrokeColor="@android:color/white"
+                app:hintTextColor="@android:color/white"
+                android:layout_marginBottom="@dimen/field_spacing">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerImageType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_body" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Shutter Button -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_8">
+
+                <View
+                    android:layout_width="@dimen/capture_button_size"
+                    android:layout_height="@dimen/capture_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_shutter_button" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCapture"
+                    android:layout_width="@dimen/capture_button_size"
+                    android:layout_height="@dimen/capture_button_size"
+                    android:text="@string/btn_capture"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/text_size_body_small"
+                    app:icon="@drawable/ic_camera"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="@dimen/corner_full"
+                    android:backgroundTint="@android:color/white"
+                    android:textColor="@android:color/black"
+                    app:iconTint="@android:color/black"
+                    app:strokeWidth="0dp" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <!-- Preview mode controls -->
+        <LinearLayout
+            android:id="@+id/previewControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRetake"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height_large"
+                android:layout_weight="1"
+                android:text="Retake"
+                android:textAllCaps="false"
+                android:layout_marginEnd="@dimen/spacing_8"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:strokeColor="@android:color/white"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/inter_medium" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUsePhoto"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height_large"
+                android:layout_weight="1"
+                android:text="Use Photo"
+                android:textAllCaps="false"
+                android:layout_marginStart="@dimen/spacing_8"
+                app:cornerRadius="@dimen/corner_medium"
+                android:backgroundTint="@color/md_theme_secondary"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/inter_medium"
+                app:icon="@drawable/ic_check_circle"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

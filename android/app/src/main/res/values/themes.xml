@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ============================================ -->
+    <!-- LIGHT THEME — "Government Trust"             -->
+    <!-- ============================================ -->
+    <style name="Theme.RudaSurvey" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary: Deep Navy -->
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_onPrimaryContainer</item>
+
+        <!-- Secondary: Teal -->
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_onSecondaryContainer</item>
+
+        <!-- Tertiary: Amber Gold -->
+        <item name="colorTertiary">@color/md_theme_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_onTertiaryContainer</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/md_theme_error</item>
+        <item name="colorOnError">@color/md_theme_onError</item>
+        <item name="colorErrorContainer">@color/md_theme_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/md_theme_onErrorContainer</item>
+
+        <!-- Background / Surface -->
+        <item name="android:colorBackground">@color/md_theme_background</item>
+        <item name="colorOnBackground">@color/md_theme_onBackground</item>
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/md_theme_outline</item>
+        <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
+
+        <!-- Inverse -->
+        <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_inversePrimary</item>
+
+        <!-- Surface Containers -->
+        <item name="colorSurfaceDim">@color/md_theme_surfaceDim</item>
+        <item name="colorSurfaceBright">@color/md_theme_surfaceBright</item>
+        <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest</item>
+        <item name="colorSurfaceContainerLow">@color/md_theme_surfaceContainerLow</item>
+        <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
+
+        <!-- Custom Success Colors -->
+        <item name="colorSuccess">#1B8E5A</item>
+        <item name="colorOnSuccess">#FFFFFF</item>
+        <item name="colorSuccessContainer">#D7F2E3</item>
+        <item name="colorOnSuccessContainer">#00210F</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
+        <!-- Typography -->
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.RudaSurvey.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.RudaSurvey.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.RudaSurvey.BodySmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.RudaSurvey.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.RudaSurvey.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.RudaSurvey.TitleSmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.RudaSurvey.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.RudaSurvey.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.RudaSurvey.LabelSmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.RudaSurvey.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.RudaSurvey.HeadlineMedium</item>
+
+        <!-- Shape: 20dp cards, 12dp buttons/fields, 8dp chips -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.RudaSurvey.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.RudaSurvey.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.RudaSurvey.Large</item>
+    </style>
+
+    <!-- ============================================ -->
+    <!-- SPLASH THEME                                 -->
+    <!-- ============================================ -->
+    <style name="Theme.RudaSurvey.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/md_theme_surface</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="android:statusBarColor">@color/md_theme_surface</item>
+        <item name="android:navigationBarColor">@color/md_theme_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <!-- ============================================ -->
+    <!-- SHAPE APPEARANCES                            -->
+    <!-- ============================================ -->
+    <style name="ShapeAppearance.RudaSurvey.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">@dimen/corner_small</item>
+    </style>
+
+    <style name="ShapeAppearance.RudaSurvey.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">@dimen/corner_medium</item>
+    </style>
+
+    <style name="ShapeAppearance.RudaSurvey.Large" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerSize">@dimen/corner_xl</item>
+    </style>
+
+</resources>

@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/spacing_16"
+            android:paddingBottom="@dimen/spacing_16">
+
+            <!-- Parcel Header -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvParcelCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleLarge"
+                android:textColor="?attr/colorPrimary"
+                android:paddingStart="@dimen/screen_horizontal_margin"
+                android:paddingEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_16" />
+
+            <!-- Section: Parcel Details -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_parcel_info"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:drawableStart="@drawable/ic_document"
+                        android:drawablePadding="@dimen/spacing_8"
+                        android:drawableTint="?attr/colorPrimary"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilParcelCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_parcel_code"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etParcelCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:textAllCaps="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRdValue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_rd_value"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginEnd="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRdValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilPackageNo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_package_no"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginStart="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etPackageNo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Coordinates (side by side) -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_coordinates"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginTop="@dimen/spacing_8"
+                        android:layout_marginBottom="@dimen/spacing_8" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilLatitude"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_latitude"
+                            app:startIconDrawable="@drawable/ic_my_location"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginEnd="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLatitude"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal|numberSigned" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilLongitude"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_longitude"
+                            app:startIconDrawable="@drawable/ic_my_location"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginStart="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLongitude"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal|numberSigned" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Point Image Buttons (side by side) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/field_spacing">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPointImage1"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_medium"
+                            android:layout_weight="1"
+                            android:text="Door Pic"
+                            android:textAllCaps="false"
+                            app:icon="@drawable/ic_camera"
+                            app:iconGravity="textStart"
+                            style="@style/Widget.RudaSurvey.Button.Secondary"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPointImage2"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/button_height_medium"
+                            android:layout_weight="1"
+                            android:text="Front View"
+                            android:textAllCaps="false"
+                            app:icon="@drawable/ic_camera"
+                            app:iconGravity="textStart"
+                            style="@style/Widget.RudaSurvey.Button.Secondary"
+                            android:layout_marginStart="@dimen/spacing_8" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Owner Information -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_ownership"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:drawableStart="@drawable/ic_person"
+                        android:drawablePadding="@dimen/spacing_8"
+                        android:drawableTint="?attr/colorPrimary"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilOwnerName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_owner_name"
+                        app:startIconDrawable="@drawable/ic_person"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etOwnerName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilFatherName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_father_name"
+                        app:startIconDrawable="@drawable/ic_person"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etFatherName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilCnic"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_cnic_no"
+                        app:startIconDrawable="@drawable/ic_account_circle"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etCnic"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilContact"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_contact_number"
+                        app:startIconDrawable="@drawable/ic_phone"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etContact"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilLandOwnerDoc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_land_owner_doc"
+                        app:startIconDrawable="@drawable/ic_document"
+                        style="@style/Widget.RudaSurvey.TextInput">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLandOwnerDoc"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Land Details -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_location"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:drawableStart="@drawable/ic_landscape"
+                        android:drawablePadding="@dimen/spacing_8"
+                        android:drawableTint="?attr/colorPrimary"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilVillage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_village"
+                        app:startIconDrawable="@drawable/ic_location"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etVillage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilKhasraNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_khasra_number"
+                        app:startIconDrawable="@drawable/ic_landscape"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etKhasraNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilElectricityConnection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_electricity_connection"
+                        app:startIconDrawable="@drawable/ic_bolt"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etElectricityConnection"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilLandArea"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_land_area"
+                        app:startIconDrawable="@drawable/ic_square_foot"
+                        style="@style/Widget.RudaSurvey.TextInput">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLandArea"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section: Structure Details -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_structure"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:drawableStart="@drawable/ic_building"
+                        android:drawablePadding="@dimen/spacing_8"
+                        android:drawableTint="?attr/colorPrimary"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilStructureStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_structure_status"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etStructureStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilStructureName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_structure_name"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etStructureName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Length/Width side by side -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilLengthFt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_length_ft"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginEnd="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLengthFt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilWidthFt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/label_width_ft"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginStart="@dimen/spacing_8">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etWidthFt"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilAreaSqft"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_area_sqft"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginTop="@dimen/field_spacing"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAreaSqft"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilConstructionNature"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_construction_nature"
+                        style="@style/Widget.RudaSurvey.TextInput">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etConstructionNature"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Sticky Bottom Action Bar -->
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:dividerColor="@color/md_theme_outlineVariant"
+        app:dividerThickness="1dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_horizontal_margin"
+        android:paddingEnd="@dimen/screen_horizontal_margin"
+        android:paddingTop="@dimen/field_spacing"
+        android:paddingBottom="@dimen/field_spacing"
+        android:gravity="center_vertical"
+        android:background="?attr/colorSurface">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveDraft"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_weight="1"
+            android:text="@string/btn_save_draft"
+            android:textAllCaps="false"
+            style="@style/Widget.RudaSurvey.Button.Secondary"
+            android:layout_marginEnd="@dimen/spacing_8" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReviewChanges"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_weight="1"
+            android:text="View Changes"
+
+            android:textAllCaps="false"
+            style="@style/Widget.RudaSurvey.Button.Primary"
+            android:layout_marginStart="@dimen/spacing_8" />
+
+    </LinearLayout>
+
+</LinearLayout>

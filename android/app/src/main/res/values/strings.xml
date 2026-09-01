@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">RUDA Survey</string>
+
+    <!-- Login -->
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Sign in to RUDA Survey</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_surveyor1">Surveyor 1</string>
+    <string name="hint_supervisor1">Supervisor 1</string>
+    <string name="btn_logout_confirm">Are you sure you want to log out?</string>
+    <string name="btn_logout_cancel">Cancel</string>
+    <string name="btn_logout_confirm_action">Log Out</string>
+    <string name="btn_login">Sign In</string>
+    <string name="btn_logout">Sign Out</string>
+    <string name="error_invalid_credentials">Invalid username or password</string>
+    <string name="error_network">Network error. Check your connection.</string>
+    <string name="error_empty_fields">Please enter username and password</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_welcome">Welcome, %1$s</string>
+    <string name="dashboard_role">Role: %1$s</string>
+    <string name="btn_new_survey">New Survey</string>
+    <string name="btn_sync_now">Sync Now</string>
+    <string name="label_sync_status">Sync Status</string>
+    <string name="label_pending_sync">Pending Syncs</string>
+    <string name="label_last_sync">Last Sync</string>
+    <string name="label_total_surveys">Total Surveys</string>
+    <string name="label_completed">Completed</string>
+    <string name="label_in_progress">In Progress</string>
+    <string name="never">Never</string>
+    <string name="sync_complete">Sync complete</string>
+    <string name="sync_failed">Sync failed</string>
+    <string name="logged_out">Signed out successfully</string>
+
+    <!-- New Survey / Search -->
+    <string name="search_title">Find Parcel</string>
+    <string name="hint_parcel_id">Parcel ID (e.g. RUDA-P14-R00005)</string>
+    <string name="btn_search">Search</string>
+    <string name="btn_advanced_search">Advanced Search</string>
+    <string name="label_advanced_search">Advanced Search</string>
+    <string name="hint_khasra_number">Khasra Number</string>
+    <string name="hint_village">Village</string>
+    <string name="hint_tehsil">Tehsil</string>
+    <string name="hint_mauza_number">Mauza Number</string>
+    <string name="hint_owner_name">Owner Name</string>
+    <string name="btn_view_edit">View / Edit Survey</string>
+    <string name="btn_view_original">View Original Data</string>
+    <string name="label_no_results">No parcels found</string>
+    <string name="label_search_hint">Search by Parcel ID, Khasra, Mauza, or Owner</string>
+    <string name="label_or">OR</string>
+    <string name="error_please_enter_search">Please enter a search term</string>
+    <string name="label_search_by_details">Search by Village, Tehsil, Owner Name, Khasra or Mauza</string>
+    <string name="btn_search_details">Search by Details</string>
+    <string name="loading_options">Loading options…</string>
+    <string name="error_load_options">Unable to load search options</string>
+    <string name="hint_serial_number">Serial Number (Sr. No)</string>
+    <string name="btn_lookup">Look Up</string>
+    <string name="label_sr_no_lookup">Find by Serial Number</string>
+    <string name="label_sr_no_lookup_hint">Enter the Sr. No from the master list</string>
+    <string name="label_found_parcels">Found %1$d parcel(s) for Sr. No %2$d</string>
+    <string name="label_select_parcel">Select a parcel to proceed</string>
+
+    <!-- Survey Form (RTW) -->
+    <string name="form_title">Edit Survey</string>
+    <string name="section_parcel_info">Parcel Information</string>
+    <string name="section_coordinates">Coordinates</string>
+    <string name="section_ownership">Ownership</string>
+    <string name="section_location">Location</string>
+    <string name="section_structure">Structure</string>
+    <string name="label_parcel_code">Survey Sheet Parcel ID</string>
+    <string name="label_rd_value">RD</string>
+    <string name="label_package_no">Package #</string>
+    <string name="label_latitude">Latitude (N)</string>
+    <string name="label_longitude">Longitude (E)</string>
+    <string name="label_owner_name">Owner Name</string>
+    <string name="label_father_name">Father Name</string>
+    <string name="label_cnic_no">CNIC Number</string>
+    <string name="label_contact_number">Contact Number</string>
+    <string name="label_land_owner_doc">Land Owner Document</string>
+    <string name="label_village">Village</string>
+    <string name="label_khasra_number">Khasra Number</string>
+    <string name="label_electricity_connection">Electricity Connection Name</string>
+    <string name="label_land_area">Land Area</string>
+    <string name="label_structure_status">Status of Structure</string>
+    <string name="label_structure_name">Structure Name</string>
+    <string name="label_length_ft">Length (ft)</string>
+    <string name="label_width_ft">Width (ft)</string>
+    <string name="label_area_sqft">Area (ft²)</string>
+    <string name="label_construction_nature">Nature of Construction</string>
+    <string name="btn_save_draft">Save Draft</string>
+    <string name="btn_take_photo">Take Photo</string>
+    <string name="btn_review_changes">Review Changes</string>
+    <string name="btn_submit_revision">Submit Revision</string>
+    <string name="btn_point_image1">Point Image 1</string>
+    <string name="btn_point_image2">Point Image 2</string>
+    <string name="hint_change_reason">Reason for change</string>
+    <string name="label_change_reason">Reason for change</string>
+    <string name="draft_saved">Draft saved</string>
+
+    <!-- Camera -->
+    <string name="camera_title">Capture Photo</string>
+    <string name="label_image_type">Image Type</string>
+    <string name="btn_capture">Capture</string>
+    <string name="photo_captured">Photo captured (%1$s)</string>
+    <string name="capture_failed">Capture failed: %1$s</string>
+    <string name="camera_start_failed">Camera start failed</string>
+    <string name="type_front">FRONT</string>
+    <string name="type_second">SECOND</string>
+    <string name="type_point1">POINT_1</string>
+    <string name="type_point2">POINT_2</string>
+
+    <!-- Review -->
+    <string name="review_title">Review &amp; Submit</string>
+    <string name="label_changes_to_submit">Changes to Submit</string>
+    <string name="label_base_revision">Base Revision: #%1$d</string>
+    <string name="btn_confirm_submit">Confirm &amp; Submit</string>
+    <string name="submitting">Submitting…</string>
+    <string name="revision_submitted">Revision submitted successfully</string>
+    <string name="error_submit_failed">Submit failed: %1$s</string>
+
+    <!-- Sheet -->
+    <string name="sheet_title">Survey Sheet</string>
+    <string name="label_survey_data">Survey Data</string>
+    <string name="label_images">Images</string>
+    <string name="btn_download_pdf">Download PDF</string>
+    <string name="btn_share_pdf">Share PDF</string>
+    <string name="btn_export_excel">Export to Excel</string>
+    <string name="label_downloading">Downloading…</string>
+    <string name="pdf_downloaded">PDF downloaded</string>
+    <string name="pdf_share_error">Error sharing PDF</string>
+    <string name="excel_exported">Excel exported</string>
+    <string name="label_no_images">No images</string>
+    <string name="error_load_failed">Failed to load: %1$s</string>
+    <string name="error_nothing_to_share">Nothing to share</string>
+    <string name="error_excel_not_available">Excel not available. Please try again.</string>
+
+    <!-- Search Result Item -->
+    <string name="label_parcel">Parcel: %1$s</string>
+    <string name="label_khasra">Khasra: %1$s</string>
+    <string name="label_mauza">Mauza: %1$s</string>
+    <string name="label_owner">Owner: %1$s</string>
+    <string name="label_location">Location: %1$s, %1$s</string>
+
+    <!-- Common -->
+    <string name="loading">Loading…</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="error_generic">An error occurred. Please try again.</string>
+    <string name="label_not_available">N/A</string>
+</resources>

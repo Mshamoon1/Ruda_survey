@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <!-- Top branded panel -->
+    <View
+        android:id="@+id/brandedPanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_splash_gradient"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.40" />
+
+    <!-- Bottom rounded overlay -->
+    <View
+        android:id="@+id/bottomOverlay"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginTop="-20dp"
+        app:layout_constraintTop_toBottomOf="@id/brandedPanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingStart="@dimen/screen_horizontal_margin"
+            android:paddingEnd="@dimen/screen_horizontal_margin"
+            android:paddingTop="60dp"
+            android:paddingBottom="@dimen/spacing_32">
+
+            <!-- Logo in branded area -->
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/logo"
+                android:contentDescription="@string/app_name"
+                android:layout_marginBottom="@dimen/spacing_12" />
+
+            <!-- App Title -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineLarge"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="@dimen/spacing_4" />
+
+            <!-- Subtitle -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/login_subtitle"
+                android:textAppearance="@style/TextAppearance.RudaSurvey.BodyLarge"
+                android:textColor="#B3FFFFFF"
+                android:layout_marginBottom="@dimen/spacing_40" />
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Form Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="@dimen/corner_xl"
+                app:cardElevation="@dimen/elevation_2"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="@dimen/spacing_16">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <!-- Username -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_username"
+                        app:startIconDrawable="@drawable/ic_person"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etUsername"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Password -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_password"
+                        app:startIconDrawable="@drawable/ic_lock"
+                        app:endIconMode="password_toggle"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/spacing_16">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:textSize="@dimen/text_size_body" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Error Text -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvError"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_error_banner"
+                        android:padding="@dimen/spacing_12"
+                        android:textColor="@color/md_theme_onErrorContainer"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:visibility="gone"
+                        android:layout_marginBottom="@dimen/spacing_12" />
+
+                    <!-- Login Button -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height_large"
+                        android:layout_marginBottom="@dimen/spacing_16">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnLogin"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="@string/btn_login"
+                            android:textSize="@dimen/text_size_body_large"
+                            app:icon="@drawable/ic_login"
+                            app:iconGravity="textStart"
+                            style="@style/Widget.RudaSurvey.Button.Primary" />
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/buttonProgressBar"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:visibility="gone"
+                            app:indicatorSize="24dp"
+                            app:trackThickness="2dp"
+                            app:indicatorColor="@color/md_theme_onPrimary" />
+
+                    </FrameLayout>
+
+                    <!-- Hint Chips -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quick fill"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:layout_marginBottom="@dimen/spacing_8" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipSurveyor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hint_surveyor1"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:fontFamily="@font/inter_medium"
+                            style="@style/Widget.RudaSurvey.Chip.Filter"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipSupervisor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hint_supervisor1"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:fontFamily="@font/inter_medium"
+                            style="@style/Widget.RudaSurvey.Chip.Filter" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Bottom spacer -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="2" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

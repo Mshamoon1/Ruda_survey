@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.ruda.survey.ui.auth.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.ruda.survey.ui.dashboard.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_newSurvey"
+            app:destination="@id/newSurveyFragment"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+        <action
+            android:id="@+id/action_dashboard_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/nav_fade_in"
+            app:exitAnim="@anim/nav_fade_out"
+            app:popEnterAnim="@anim/nav_fade_in"
+            app:popExitAnim="@anim/nav_fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newSurveyFragment"
+        android:name="com.ruda.survey.ui.survey.NewSurveyFragment"
+        android:label="New Survey"
+        tools:layout="@layout/fragment_new_survey">
+        <action
+            android:id="@+id/action_newSurvey_to_originalData"
+            app:destination="@id/surveyFormFragment"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/surveyFormFragment"
+        android:name="com.ruda.survey.ui.survey.SurveyFormFragment"
+        android:label="Survey Form"
+        tools:layout="@layout/fragment_survey_form">
+        <action
+            android:id="@+id/action_form_to_camera"
+            app:destination="@id/cameraFragment"
+            app:enterAnim="@anim/nav_push_up_enter"
+            app:exitAnim="@anim/nav_push_up_exit"
+            app:popEnterAnim="@anim/nav_pull_down_enter"
+            app:popExitAnim="@anim/nav_pull_down_exit" />
+        <action
+            android:id="@+id/action_form_to_review"
+            app:destination="@id/reviewFragment"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.ruda.survey.ui.camera.CameraFragment"
+        android:label="Camera"
+        tools:layout="@layout/fragment_camera" />
+
+    <fragment
+        android:id="@+id/reviewFragment"
+        android:name="com.ruda.survey.ui.survey.ReviewFragment"
+        android:label="Review &amp; Submit"
+        tools:layout="@layout/fragment_review">
+        <action
+            android:id="@+id/action_review_to_sheet"
+            app:destination="@id/sheetFragment"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/sheetFragment"
+        android:name="com.ruda.survey.ui.survey.SheetFragment"
+        android:label="Survey Sheet"
+        tools:layout="@layout/fragment_sheet" />
+
+</navigation>

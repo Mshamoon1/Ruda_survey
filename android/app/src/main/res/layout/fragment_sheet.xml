@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/sheet_title"
+            app:titleTextAppearance="@style/TextAppearance.RudaSurvey.TitleLarge"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="?attr/colorOnSurface" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/contentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/section_vertical_spacing">
+
+            <!-- Header Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card.Tonal"
+                android:layout_marginTop="@dimen/spacing_16">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvParcelCode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleLarge"
+                        android:textColor="@color/md_theme_onPrimaryContainer" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvSource"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:alpha="0.8"
+                        android:layout_marginTop="@dimen/spacing_4" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvSurveyor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:alpha="0.7"
+                        android:layout_marginTop="@dimen/spacing_2" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvChangedAt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:alpha="0.7"
+                        android:layout_marginTop="@dimen/spacing_2" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvKhasraMauza"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                        android:textColor="@color/md_theme_onPrimaryContainer"
+                        android:layout_marginTop="@dimen/spacing_4" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Export Actions (segmented row) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/screen_horizontal_margin"
+                android:paddingEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_8"
+                android:layout_marginBottom="@dimen/spacing_8">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDownloadPdf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/btn_download_pdf"
+                    android:textAllCaps="false"
+                    app:icon="@drawable/ic_download"
+                    app:iconGravity="top"
+                    style="@style/Widget.RudaSurvey.Button.Secondary"
+                    android:layout_marginEnd="@dimen/spacing_4"
+                    app:iconSize="20dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSharePdf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/btn_share_pdf"
+                    android:textAllCaps="false"
+                    app:icon="@drawable/ic_share"
+                    app:iconGravity="top"
+                    style="@style/Widget.RudaSurvey.Button.Secondary"
+                    android:layout_marginStart="@dimen/spacing_4"
+                    android:layout_marginEnd="@dimen/spacing_4"
+                    app:iconSize="20dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnExportExcel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/btn_export_excel"
+                    android:textAllCaps="false"
+                    app:icon="@drawable/ic_upload"
+                    app:iconGravity="top"
+                    style="@style/Widget.RudaSurvey.Button.Secondary"
+                    android:layout_marginStart="@dimen/spacing_4"
+                    app:iconSize="20dp" />
+
+            </LinearLayout>
+
+            <!-- PDF Progress -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pdfProgressLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/field_spacing"
+                app:cardCornerRadius="@dimen/corner_medium"
+                app:cardBackgroundColor="@color/md_theme_primaryContainer"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_12">
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/pdfProgressBar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:indeterminate="true"
+                        app:indicatorColor="@color/md_theme_primary"
+                        app:trackColor="@color/md_theme_primaryContainer"
+                        android:layout_marginEnd="@dimen/spacing_12" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvPdfStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="@color/md_theme_onPrimaryContainer" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Survey Data Section -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_survey_data"
+                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:paddingStart="@dimen/screen_horizontal_margin"
+                android:paddingTop="@dimen/spacing_16"
+                android:paddingBottom="@dimen/spacing_8" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card.Outlined">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvFields"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:fontFamily="monospace"
+                    android:textSize="@dimen/text_size_body_small"
+                    android:textColor="?attr/colorOnSurface"
+                    android:lineSpacingExtra="4dp" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Images Section -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_images"
+                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:paddingStart="@dimen/screen_horizontal_margin"
+                android:paddingTop="@dimen/spacing_16"
+                android:paddingBottom="@dimen/spacing_8" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card.Outlined">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvImages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_no_images"
+                    android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Loading -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_12"
+                app:indicatorColor="@color/md_theme_primary"
+                app:trackColor="@color/md_theme_primaryContainer" />
+
+            <!-- Error -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                android:textColor="@color/md_theme_error"
+                android:visibility="gone"
+                android:padding="@dimen/screen_horizontal_margin" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

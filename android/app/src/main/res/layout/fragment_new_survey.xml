@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/search_title"
+            app:titleTextAppearance="@style/TextAppearance.RudaSurvey.TitleLarge"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="?attr/colorOnSurface" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/spacing_16"
+            android:paddingBottom="@dimen/section_vertical_spacing">
+
+            <!-- Serial Number Lookup Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/field_spacing">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Header -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_sr_no_lookup"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="@dimen/spacing_4" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_sr_no_lookup_hint"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <!-- Serial Number Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilSerialNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_serial_number"
+                        app:startIconDrawable="@drawable/ic_search"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSerialNumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:textSize="@dimen/text_size_body"
+                            android:imeOptions="actionSearch" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Lookup Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSerialLookup"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height_medium"
+                        android:text="@string/btn_lookup"
+                        android:textAllCaps="false"
+                        app:icon="@drawable/ic_search"
+                        app:iconGravity="textStart"
+                        style="@style/Widget.RudaSurvey.Button.Primary" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Advanced Search Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/field_spacing">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Header -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_advanced_search"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="@dimen/spacing_4" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_search_by_details"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="@dimen/field_spacing" />
+
+                    <!-- Owner Name -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilOwnerName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_owner_name"
+                        app:startIconDrawable="@drawable/ic_person"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etOwnerName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:textSize="@dimen/text_size_body"
+                            android:imeOptions="actionSearch" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Village + Tehsil row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilVillage"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/spacing_8"
+                            android:hint="@string/hint_village"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                            <AutoCompleteTextView
+                                android:id="@+id/spinnerVillage"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:textSize="@dimen/text_size_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilTehsil"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/spacing_8"
+                            android:hint="@string/hint_tehsil"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                            <AutoCompleteTextView
+                                android:id="@+id/spinnerTehsil"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:textSize="@dimen/text_size_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Khasra + Mauza row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilKhasraNumber"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/spacing_8"
+                            android:hint="@string/hint_khasra_number"
+                            style="@style/Widget.RudaSurvey.TextInput">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etKhasraNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:textSize="@dimen/text_size_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilMauzaNumber"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/spacing_8"
+                            android:hint="@string/hint_mauza_number"
+                            style="@style/Widget.RudaSurvey.TextInput">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMauzaNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:textSize="@dimen/text_size_body" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Search Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAdvancedSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height_medium"
+                        android:text="@string/btn_search_details"
+                        android:textAllCaps="false"
+                        app:icon="@drawable/ic_search"
+                        app:iconGravity="textStart"
+                        style="@style/Widget.RudaSurvey.Button.Primary" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Loading -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/md_theme_primary"
+                app:trackColor="@color/md_theme_primaryContainer"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_8" />
+
+            <!-- Result Count -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone"
+                android:paddingStart="@dimen/screen_horizontal_margin"
+                android:paddingTop="@dimen/spacing_8"
+                android:paddingBottom="@dimen/spacing_8" />
+
+            <!-- Search Results -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSearchResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:clipToPadding="false"
+                android:paddingTop="@dimen/spacing_4"
+                android:visibility="gone" />
+
+            <!-- View Original Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewOriginal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height_medium"
+                android:text="@string/btn_view_original"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_document"
+                app:iconGravity="textStart"
+                style="@style/Widget.RudaSurvey.Button.Text"
+                android:visibility="gone"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_8" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

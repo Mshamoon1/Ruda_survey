@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/errorBanner"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_error_banner"
+    android:padding="@dimen/spacing_12"
+    android:visibility="gone"
+    android:layout_marginStart="@dimen/screen_horizontal_margin"
+    android:layout_marginEnd="@dimen/screen_horizontal_margin"
+    android:layout_marginTop="@dimen/spacing_8">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_warning"
+        android:contentDescription="Error"
+        app:tint="@color/md_theme_onErrorContainer"
+        android:layout_marginEnd="@dimen/spacing_8" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvErrorMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text=""
+        android:textSize="@dimen/text_size_body_small"
+        android:textColor="@color/md_theme_onErrorContainer"
+        android:fontFamily="@font/inter_medium" />
+
+    <ImageView
+        android:id="@+id/btnDismissError"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_close"
+        android:contentDescription="Dismiss"
+        app:tint="@color/md_theme_onErrorContainer"
+        android:padding="@dimen/spacing_4" />
+
+</LinearLayout>
