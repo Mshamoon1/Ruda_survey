@@ -13,6 +13,7 @@ urlpatterns = [
     path("auth/refresh/", ThrottledTokenRefreshView.as_view(), name="auth-refresh"),
     path("auth/logout/", views.LogoutView.as_view(), name="auth-logout"),
     path("auth/me/", views.me, name="auth-me"),
+    path("auth/users/", views.CreateUserView.as_view(), name="auth-create-user"),
 
     # ---- surveys -------------------------------------------------------
     path("surveys/search/", views.survey_search, name="survey-search"),

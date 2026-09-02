@@ -42,6 +42,8 @@ from surveys.api.serializers import (
     SheetSerializer,
     StatusChangeSerializer,
     UserSerializer,
+    UserCreateSerializer,
+    UserCreateResponseSerializer,
 )
 from surveys.models import AuditLog, Parcel, SurveyChange, SurveyMaster
 from surveys.services import audit as audit_service
@@ -150,6 +152,35 @@ class ThrottledTokenRefreshView(TokenRefreshView):
 @permission_classes([IsAuthenticated])
 def me(request):
     return Response(UserSerializer(request.user).data)
+
+
+class CreateUserView(generics.GenericAPIView):
+    """POST /api/v1/auth/users/ — admin-only user creation."""
+
+    serializer_class = UserCreateSerializer
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    @extend_schema(
+        request=UserCreateSerializer,
+        responses={201: UserCreateResponseSerializer},
+        tags=["auth"],
+    )
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        audit_service.record(
+            action="USER_CREATED",
+            user=request.user,
+            entity_type="User",
+            entity_id=user.pk,
+            details={"created_username": user.username, "role": serializer.validated_data.get("role", "SURVEYOR")},
+            request=request,
+        )
+        return Response(
+            UserCreateResponseSerializer(user).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 # --------------------------------------------------------------------------- #

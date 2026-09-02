@@ -14,6 +14,7 @@ from surveys.models import (
     SurveyMaster,
     UserProfile,
 )
+from surveys.models.user_profile import UserRole
 
 User = get_user_model()
 
@@ -38,6 +39,52 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, trim_whitespace=True)
     password = serializers.CharField(max_length=128, trim_whitespace=False,
                                      write_only=True)
+
+
+class UserCreateSerializer(serializers.Serializer):
+    """POST /api/v1/auth/users/ — admin-only user creation."""
+
+    username = serializers.CharField(max_length=150, trim_whitespace=True)
+    password = serializers.CharField(max_length=128, trim_whitespace=False,
+                                     write_only=True)
+    first_name = serializers.CharField(max_length=150, required=False,
+                                       default="", trim_whitespace=True)
+    last_name = serializers.CharField(max_length=150, required=False,
+                                      default="", trim_whitespace=True)
+    email = serializers.EmailField(required=False, default="")
+    role = serializers.ChoiceField(choices=UserRole.choices,
+                                   default=UserRole.SURVEYOR)
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return value
+
+    def validate_email(self, value):
+        if value and User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        role = validated_data.pop("role", UserRole.SURVEYOR)
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        UserProfile.objects.filter(user=user).update(role=role)
+        user.refresh_from_db()
+        return user
+
+
+class UserCreateResponseSerializer(serializers.ModelSerializer):
+    """Safe response — never exposes password."""
+
+    role = serializers.CharField(source="survey_profile.role", read_only=True)
+
+    class Meta:
+        model = User
+        fields = ("id", "username", "first_name", "last_name", "email",
+                  "role", "is_active", "date_joined")
 
 
 # ---- parcel / master --------------------------------------------------------
