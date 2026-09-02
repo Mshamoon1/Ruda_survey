@@ -87,10 +87,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("RUDA_DB_NAME", "Ruda_Survey"),
-        "USER": os.environ.get("RUDA_DB_USER", "ruda_app"),
-        "PASSWORD": os.environ.get("RUDA_DB_PASSWORD", ""),
-        "HOST": os.environ.get("RUDA_DB_HOST", "localhost"),
-        "PORT": os.environ.get("RUDA_DB_PORT", "5433"),
+        "USER": os.environ.get("RUDA_DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("RUDA_DB_PASSWORD", "Postgres"),
+        "HOST": os.environ.get("RUDA_DB_HOST", "10.1.10.1"),
+        "PORT": os.environ.get("RUDA_DB_PORT", "5432"),
         "CONN_MAX_AGE": 60,
     }
 }
