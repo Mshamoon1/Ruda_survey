@@ -8,102 +8,72 @@ import retrofit2.http.*
 
 interface SurveyApi {
 
-    @POST("auth/login/")
-    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    @GET("surveys")
+    suspend fun getAllSurveys(): Response<SurveyListResponse>
 
-    @POST("auth/refresh/")
-    suspend fun refresh(@Body request: RefreshRequest): Response<RefreshResponse>
+    @GET("survey/{id}")
+    suspend fun getSurveyById(@Path("id") id: String): Response<SurveyDataWrapper>
 
-    @POST("auth/logout/")
-    suspend fun logout(@Body request: LogoutRequest): Response<Unit>
-
-    @GET("auth/me/")
-    suspend fun me(): Response<UserDto>
-
-    @GET("surveys/parcel/{parcel_code}/")
-    suspend fun parcelLookup(@Path("parcel_code") parcelCode: String): Response<ParcelLookupResponse>
-
-    @GET("surveys/{parcel_code}/original/")
-    suspend fun originalData(@Path("parcel_code") parcelCode: String): Response<Map<String, Any>>
-
-    @GET("surveys/{parcel_code}/current/")
-    suspend fun currentData(@Path("parcel_code") parcelCode: String): Response<CurrentDataResponse>
-
-    @GET("surveys/{parcel_code}/revisions/")
-    suspend fun revisionHistory(
-        @Path("parcel_code") parcelCode: String,
-        @Query("page") page: Int = 1,
-        @Query("page_size") pageSize: Int = 20
-    ): Response<RevisionListResponse>
-
-    @POST("surveys/{parcel_code}/revisions/")
-    suspend fun createRevision(
-        @Path("parcel_code") parcelCode: String,
-        @Body request: RevisionCreateRequest
-    ): Response<RevisionCreateResponse>
+    @GET("sr_no/{sr_no}")
+    suspend fun getSurveyBySrNo(@Path("sr_no") srNo: Int): Response<SurveyDataWrapper>
 
     @Multipart
-    @POST("surveys/{parcel_code}/revisions/{revision_no}/images/")
-    suspend fun uploadImage(
-        @Path("parcel_code") parcelCode: String,
-        @Path("revision_no") revisionNo: Int,
-        @Part("image_type") imageType: RequestBody,
-        @Part file: MultipartBody.Part,
-        @Part("latitude") latitude: RequestBody? = null,
-        @Part("longitude") longitude: RequestBody? = null,
-        @Part("accuracy") accuracy: RequestBody? = null,
-        @Part("area_name") areaName: RequestBody? = null,
-        @Part("captured_at") capturedAt: RequestBody? = null,
-        @Part("point_id") pointId: RequestBody? = null,
-        @Part("sequence_no") sequenceNo: RequestBody? = null,
-        @Part("qr_payload") qrPayload: RequestBody? = null
-    ): Response<ImageUploadResponse>
+    @POST("survey")
+    suspend fun createSurvey(
+        @Part("sr_no") srNo: RequestBody,
+        @Part("parcel_id") parcelId: RequestBody?,
+        @Part("rd") rd: RequestBody?,
+        @Part("pkg") pkg: RequestBody?,
+        @Part("lat") lat: RequestBody?,
+        @Part("lng") lng: RequestBody?,
+        @Part("village") village: RequestBody?,
+        @Part("owner_name") ownerName: RequestBody?,
+        @Part("cnic") cnic: RequestBody?,
+        @Part("f_name") fName: RequestBody?,
+        @Part("khasra_no") khasraNo: RequestBody?,
+        @Part("phone") phone: RequestBody?,
+        @Part("electricity_connection_name") electricity: RequestBody?,
+        @Part("land_are") landArea: RequestBody?,
+        @Part("status") status: RequestBody?,
+        @Part("structural_name") structuralName: RequestBody?,
+        @Part("length") length: RequestBody?,
+        @Part("width") width: RequestBody?,
+        @Part("area") area: RequestBody?,
+        @Part("nature_of_construction") natureOfConstruction: RequestBody?,
+        @Part landOwnerDoc: MultipartBody.Part?,
+        @Part imgOne: MultipartBody.Part?,
+        @Part imgTwo: MultipartBody.Part?
+    ): Response<CreateSurveyResponse>
 
-    @POST("surveys/{parcel_code}/revisions/{revision_no}/status/")
-    suspend fun changeRevisionStatus(
-        @Path("parcel_code") parcelCode: String,
-        @Path("revision_no") revisionNo: Int,
-        @Body request: StatusChangeRequest
-    ): Response<Map<String, Any>>
+    @Multipart
+    @PUT("survey/{id}")
+    suspend fun updateSurvey(
+        @Path("id") id: String,
+        @Part("sr_no") srNo: RequestBody,
+        @Part("parcel_id") parcelId: RequestBody?,
+        @Part("rd") rd: RequestBody?,
+        @Part("pkg") pkg: RequestBody?,
+        @Part("lat") lat: RequestBody?,
+        @Part("lng") lng: RequestBody?,
+        @Part("village") village: RequestBody?,
+        @Part("owner_name") ownerName: RequestBody?,
+        @Part("cnic") cnic: RequestBody?,
+        @Part("f_name") fName: RequestBody?,
+        @Part("khasra_no") khasraNo: RequestBody?,
+        @Part("phone") phone: RequestBody?,
+        @Part("electricity_connection_name") electricity: RequestBody?,
+        @Part("land_are") landArea: RequestBody?,
+        @Part("status") status: RequestBody?,
+        @Part("structural_name") structuralName: RequestBody?,
+        @Part("nature_of_construction") natureOfConstruction: RequestBody?,
+        @Part("length") length: RequestBody?,
+        @Part("width") width: RequestBody?,
+        @Part("area") area: RequestBody?,
+        @Part landOwnerDoc: MultipartBody.Part?,
+        @Part imgOne: MultipartBody.Part?,
+        @Part imgTwo: MultipartBody.Part?
+    ): Response<CreateSurveyResponse>
 
-    @GET("surveys/{parcel_code}/sheet/")
-    suspend fun surveySheet(
-        @Path("parcel_code") parcelCode: String
-    ): Response<SheetResponse>
-
-    @GET("surveys/{parcel_code}/pdf/")
-    @Streaming
-    suspend fun surveyPdf(
-        @Path("parcel_code") parcelCode: String
-    ): Response<okhttp3.ResponseBody>
-
-    @GET("surveys/{parcel_code}/export/")
-    @Streaming
-    suspend fun surveyExport(
-        @Path("parcel_code") parcelCode: String
-    ): Response<okhttp3.ResponseBody>
-
-    @GET("surveys/search/")
-    suspend fun searchSurveys(
-        @Query("village") village: String? = null,
-        @Query("tehsil") tehsil: String? = null,
-        @Query("owner_name") ownerName: String? = null,
-        @Query("khasra_number") khasraNumber: String? = null,
-        @Query("mauza_number") mauzaNumber: String? = null
-    ): Response<SearchResponse>
-
-    @GET("surveys/search-options/")
-    suspend fun searchOptions(
-        @Query("tehsil") tehsil: String? = null
-    ): Response<SearchOptionsResponse>
-
-    @GET("surveys/owners/")
-    suspend fun searchOwners(
-        @Query("q") query: String
-    ): Response<OwnerSuggestionsResponse>
-
-    @GET("surveys/sr-no/{sr_no}/")
-    suspend fun lookupBySrNo(
-        @Path("sr_no") srNo: Int
-    ): Response<SrNoLookupResponse>
+    @DELETE("survey/{id}")
+    suspend fun deleteSurvey(@Path("id") id: String): Response<SurveyDataWrapper>
 }

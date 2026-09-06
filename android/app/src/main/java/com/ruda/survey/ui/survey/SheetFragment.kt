@@ -2,6 +2,7 @@ package com.ruda.survey.ui.survey
 
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -9,7 +10,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,20 +19,19 @@ import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
 import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.databinding.FragmentSheetBinding
+import com.ruda.survey.domain.model.SurveyItem
 import com.ruda.survey.domain.model.UiState
 import com.ruda.survey.domain.repository.SurveyRepository
-import com.ruda.survey.utils.MotionConstants
 import com.ruda.survey.utils.animateTapFeedback
-import com.ruda.survey.utils.isReducedMotionEnabled
-import com.ruda.survey.utils.staggerFadeIn
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class SheetFragment : Fragment() {
     private var _binding: FragmentSheetBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SurveyViewModel
-    private var currentParcelCode: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -44,239 +43,228 @@ class SheetFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val repository: SurveyRepository = RepositoryFactory.create(requireContext().applicationContext)
-        val factory = SurveyViewModelFactory(repository, appContext = requireContext().applicationContext)
+        val factory = SurveyViewModelFactory(repository)
         viewModel = ViewModelProvider(requireActivity(), factory)[SurveyViewModel::class.java]
 
-        if (savedInstanceState != null) {
-            currentParcelCode = savedInstanceState.getString("parcel_code", "")
+        val survey = viewModel.currentSurvey
+        if (survey == null) {
+            findNavController().popBackStack()
+            return
         }
 
-        viewModel.loadSheet()
+        displaySurvey(survey)
+        displayImages(survey)
+        setupClickListeners(survey)
 
         binding.toolbar.setNavigationOnClickListener {
-            if (isAdded) findNavController().navigateUp()
+            if (isAdded) findNavController().popBackStack(R.id.surveyFormFragment, false)
         }
-
-        setupClickListeners()
-        observeStates()
     }
 
-    private fun setupClickListeners() {
+    private fun displaySurvey(survey: SurveyItem) {
+        binding.tvParcelCode.text = survey.village.ifBlank { "N/A" }
+        binding.tvSource.text = "SR No: ${survey.srNo}"
+        binding.tvSurveyor.text = survey.ownerName.ifBlank { "N/A" }
+        binding.tvChangedAt.text = survey.structuralName.ifBlank { "N/A" }
+
+        val khasra = survey.khasraNo
+        if (khasra.isNotBlank()) {
+            binding.tvKhasraMauza.text = "Khasra: $khasra"
+            binding.tvKhasraMauza.visibility = View.VISIBLE
+        } else {
+            binding.tvKhasraMauza.visibility = View.GONE
+        }
+
+        val fieldsText = buildString {
+            appendLine("Parcel ID: ${survey.parcelId.ifBlank { "N/A" }}")
+            appendLine("Owner: ${survey.ownerName.ifBlank { "N/A" }}")
+            appendLine("Father: ${survey.fName.ifBlank { "N/A" }}")
+            appendLine("CNIC: ${survey.cnic.ifBlank { "N/A" }}")
+            appendLine("Phone: ${survey.phone.ifBlank { "N/A" }}")
+            appendLine("Village: ${survey.village.ifBlank { "N/A" }}")
+            appendLine("Khasra: ${survey.khasraNo.ifBlank { "N/A" }}")
+            appendLine("Land Owner Doc: ${survey.landOwnerDoc.ifBlank { "N/A" }}")
+            appendLine("Electricity: ${survey.electricityConnectionName.ifBlank { "N/A" }}")
+            appendLine("Land Area: ${survey.landArea.ifBlank { "N/A" }}")
+            appendLine("RD: ${survey.rd.ifBlank { "N/A" }}")
+            appendLine("Package: ${survey.pkg.ifBlank { "N/A" }}")
+            appendLine("")
+            appendLine("Structure:")
+            appendLine("  Name: ${survey.structuralName.ifBlank { "N/A" }}")
+            appendLine("  Status: ${survey.status.ifBlank { "N/A" }}")
+            appendLine("  Construction: ${survey.natureOfConstruction.ifBlank { "N/A" }}")
+            appendLine("  Length: ${survey.length.ifBlank { "N/A" }}")
+            appendLine("  Width: ${survey.width.ifBlank { "N/A" }}")
+            appendLine("  Area: ${survey.area.ifBlank { "N/A" }}")
+            appendLine("")
+            if (survey.lat != 0.0 || survey.lng != 0.0) {
+                appendLine("GPS: ${survey.lat}, ${survey.lng}")
+            } else {
+                appendLine("GPS: Not available")
+            }
+        }
+        binding.tvFields.text = fieldsText
+
+        binding.contentLayout.visibility = View.VISIBLE
+    }
+
+    private fun displayImages(survey: SurveyItem) {
+        val pendingImages = viewModel.pendingImages.value
+        val imageViews = mutableListOf<View>()
+
+        val img1Bytes = pendingImages.find { it.imageType == "imgOne" }?.stampedBytes
+            ?: pendingImages.find { it.imageType == "imgOne" }?.originalBytes
+            ?: survey.image1Bytes
+
+        val img2Bytes = pendingImages.find { it.imageType == "imgTwo" }?.stampedBytes
+            ?: pendingImages.find { it.imageType == "imgTwo" }?.originalBytes
+            ?: survey.image2Bytes
+
+        if (img1Bytes != null) {
+            val bitmap = BitmapFactory.decodeByteArray(img1Bytes, 0, img1Bytes.size)
+            if (bitmap != null) {
+                binding.ivImage1.setImageBitmap(bitmap)
+                binding.ivImage1.visibility = View.VISIBLE
+                binding.tvImage1Label.visibility = View.VISIBLE
+                binding.tvImage1Label.text = "Door Pic"
+            }
+        } else if (survey.imgOne.isNotBlank()) {
+            binding.tvImage1Label.text = "Door Pic (server): ${survey.imgOne}"
+            binding.tvImage1Label.visibility = View.VISIBLE
+        }
+
+        if (img2Bytes != null) {
+            val bitmap = BitmapFactory.decodeByteArray(img2Bytes, 0, img2Bytes.size)
+            if (bitmap != null) {
+                binding.ivImage2.setImageBitmap(bitmap)
+                binding.ivImage2.visibility = View.VISIBLE
+                binding.tvImage2Label.visibility = View.VISIBLE
+                binding.tvImage2Label.text = "Front View"
+            }
+        } else if (survey.imgTwo.isNotBlank()) {
+            binding.tvImage2Label.text = "Front View (server): ${survey.imgTwo}"
+            binding.tvImage2Label.visibility = View.VISIBLE
+        }
+
+        val hasAny = img1Bytes != null || img2Bytes != null || survey.imgOne.isNotBlank() || survey.imgTwo.isNotBlank()
+        if (!hasAny) {
+            binding.tvImages.text = "No images available"
+        }
+    }
+
+    private fun setupClickListeners(survey: SurveyItem) {
         binding.btnDownloadPdf.setOnClickListener {
             it.animateTapFeedback {
-                viewModel.requestDownloadPdf()
+                generateAndSavePdf(survey)
             }
         }
 
         binding.btnSharePdf.setOnClickListener {
             it.animateTapFeedback {
-                viewModel.requestSharePdf()
+                sharePdf(survey)
             }
         }
 
         binding.btnExportExcel.setOnClickListener {
             it.animateTapFeedback {
-                viewModel.downloadExcel()
+                generateAndSaveExcel(survey)
             }
         }
     }
 
-    private fun observeStates() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.sheetState.collect { state ->
-                when (state) {
-                    is UiState.Loading -> {
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.contentLayout.visibility = View.GONE
-                    }
-                    is UiState.Success -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.contentLayout.visibility = View.VISIBLE
-                        val data = state.data
-                        currentParcelCode = data.parcelCode
-                        binding.tvParcelCode.text = data.parcelCode
-                        binding.tvSource.text = "Source: ${data.source} (Rev ${data.revisionNo})"
-                        binding.tvSurveyor.text = data.surveyor ?: "N/A"
-                        binding.tvChangedAt.text = data.changedAt ?: "N/A"
-
-                        val khasra = data.fields["khasra_number"]?.toString()
-                        val mauza = data.fields["mauza_number"]?.toString()
-                        if (!khasra.isNullOrBlank() || !mauza.isNullOrBlank()) {
-                            val khasraMauzaText = buildString {
-                                if (!khasra.isNullOrBlank()) append("Khasra: $khasra")
-                                if (!mauza.isNullOrBlank()) {
-                                    if (isNotEmpty()) append(" | ")
-                                    append("Mauza: $mauza")
-                                }
-                            }
-                            binding.tvKhasraMauza.text = khasraMauzaText
-                            binding.tvKhasraMauza.visibility = View.VISIBLE
-                        } else {
-                            binding.tvKhasraMauza.visibility = View.GONE
-                        }
-
-                        val fieldsText = data.fields.entries.joinToString("\n") { (k, v) ->
-                            "$k: ${v ?: "\u2014"}"
-                        }
-                        binding.tvFields.text = fieldsText
-
-                        val imagesText = data.images.joinToString("\n") {
-                            "${it.imageType}: ${it.contentType ?: "unknown"}"
-                        }
-                        binding.tvImages.text = imagesText.ifBlank { "No images" }
-
-                        // Fade-in content with stagger
-                        animateContentIn()
-                    }
-                    is UiState.Error -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.tvError.text = state.message
-                        binding.tvError.visibility = View.VISIBLE
-                        binding.tvError.alpha = 0f
-                        binding.tvError.animate()
-                            .alpha(1f)
-                            .setDuration(200)
-                            .start()
-                    }
-                    is UiState.Empty -> { }
-                }
-            }
-        }
+    private fun generateAndSavePdf(survey: SurveyItem) {
+        binding.pdfProgressLayout.visibility = View.VISIBLE
+        binding.tvPdfStatus.text = "Generating PDF..."
+        binding.btnDownloadPdf.isEnabled = false
+        binding.btnSharePdf.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.pdfState.collect { state ->
-                when (state) {
-                    is UiState.Loading -> {
-                        binding.pdfProgressLayout.visibility = View.VISIBLE
-                        binding.tvPdfStatus.text = getString(R.string.loading)
-                        binding.btnDownloadPdf.isEnabled = false
-                        binding.btnSharePdf.isEnabled = false
-                    }
-                    is UiState.Success -> {
-                        binding.pdfProgressLayout.visibility = View.GONE
-                        binding.btnDownloadPdf.isEnabled = true
-                        binding.btnSharePdf.isEnabled = true
-                        val pdfBytes = state.data
-                        if (viewModel.pendingShareAction) {
-                            sharePdfDirectly(pdfBytes)
-                        } else {
-                            savePdfToDownloads(pdfBytes)
-                        }
-                        viewModel.resetPdfState()
-                    }
-                    is UiState.Error -> {
-                        binding.pdfProgressLayout.visibility = View.GONE
-                        binding.btnDownloadPdf.isEnabled = true
-                        binding.btnSharePdf.isEnabled = true
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                        viewModel.resetPdfState()
-                    }
-                    is UiState.Empty -> { }
+            try {
+                val pdfBytes = withContext(Dispatchers.IO) {
+                    com.ruda.survey.utils.PdfGenerator.generate(survey)
                 }
+                val fileName = "survey_${survey.srNo}.pdf"
+                val uri = saveToDownloads(fileName, "application/pdf", pdfBytes)
+                binding.pdfProgressLayout.visibility = View.GONE
+                binding.btnDownloadPdf.isEnabled = true
+                binding.btnSharePdf.isEnabled = true
+                if (uri != null) {
+                    Snackbar.make(binding.root, "PDF saved to Downloads", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(binding.root, "Failed to save PDF", Snackbar.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                binding.pdfProgressLayout.visibility = View.GONE
+                binding.btnDownloadPdf.isEnabled = true
+                binding.btnSharePdf.isEnabled = true
+                Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun sharePdf(survey: SurveyItem) {
+        binding.pdfProgressLayout.visibility = View.VISIBLE
+        binding.tvPdfStatus.text = "Generating PDF..."
+        binding.btnSharePdf.isEnabled = false
+        binding.btnDownloadPdf.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.excelState.collect { state ->
-                when (state) {
-                    is UiState.Loading -> {
-                        binding.btnExportExcel.isEnabled = false
-                    }
-                    is UiState.Success -> {
-                        binding.btnExportExcel.isEnabled = true
-                        val excelBytes = state.data
-                        saveExcelFile(excelBytes)
-                        viewModel.resetExcelState()
-                    }
-                    is UiState.Error -> {
-                        binding.btnExportExcel.isEnabled = true
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                        viewModel.resetExcelState()
-                    }
-                    is UiState.Empty -> { }
+            try {
+                val pdfBytes = withContext(Dispatchers.IO) {
+                    com.ruda.survey.utils.PdfGenerator.generate(survey)
                 }
-            }
-        }
-    }
-
-    private fun animateContentIn() {
-        val reduced = view?.isReducedMotionEnabled() ?: return
-        if (reduced) return
-
-        val views = listOf(
-            binding.tvParcelCode.parent?.parent as? View,
-            binding.btnDownloadPdf.parent?.parent as? View,
-            binding.tvFields.parent?.parent as? View,
-            binding.tvImages.parent?.parent as? View
-        ).filterNotNull()
-
-        views.forEachIndexed { index, view ->
-            view.alpha = 0f
-            view.translationY = 16f
-            view.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(MotionConstants.DURATION_STANDARD)
-                .setStartDelay(index * MotionConstants.CARD_STAGGER)
-                .setInterpolator(MotionConstants.EASING_ENTRANCE)
-                .start()
-        }
-    }
-
-    private fun savePdfToDownloads(pdfBytes: ByteArray) {
-        try {
-            val fileName = "survey_$currentParcelCode.pdf"
-            val uri = saveToDownloads(fileName, "application/pdf", pdfBytes)
-            if (uri != null) {
-                Snackbar.make(binding.root, "PDF saved to Downloads", Snackbar.LENGTH_SHORT).show()
-            } else {
-                Snackbar.make(binding.root, "Failed to save PDF", Snackbar.LENGTH_LONG).show()
-            }
-        } catch (e: Exception) {
-            Snackbar.make(binding.root, "Failed to save PDF: ${e.message}", Snackbar.LENGTH_LONG).show()
-        }
-    }
-
-    private fun sharePdfDirectly(pdfBytes: ByteArray) {
-        try {
-            val fileName = "survey_$currentParcelCode.pdf"
-            val pdfsDir = File(requireContext().cacheDir, "pdfs")
-            pdfsDir.mkdirs()
-            val tempFile = File(pdfsDir, "share_$fileName")
-            tempFile.writeBytes(pdfBytes)
-            val uri = FileProvider.getUriForFile(
-                requireContext(),
-                "${requireContext().packageName}.fileprovider",
-                tempFile
-            )
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "application/pdf"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(shareIntent, "Share PDF"))
-        } catch (e: Exception) {
-            Snackbar.make(binding.root, "Failed to share PDF: ${e.message}", Snackbar.LENGTH_LONG).show()
-        }
-    }
-
-    private fun saveExcelFile(excelBytes: ByteArray) {
-        try {
-            val fileName = "survey_$currentParcelCode.xlsx"
-            val uri = saveToDownloads(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelBytes)
-
-            if (uri != null) {
-                val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                val pdfsDir = File(requireContext().cacheDir, "pdfs")
+                pdfsDir.mkdirs()
+                val tempFile = File(pdfsDir, "survey_${survey.srNo}.pdf")
+                tempFile.writeBytes(pdfBytes)
+                val uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    "${requireContext().packageName}.fileprovider",
+                    tempFile
+                )
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/pdf"
+                    putExtra(Intent.EXTRA_STREAM, uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                startActivity(openIntent)
-                Snackbar.make(binding.root, "Excel saved to Downloads", Snackbar.LENGTH_SHORT).show()
-            } else {
-                Snackbar.make(binding.root, "Failed to save Excel", Snackbar.LENGTH_LONG).show()
+                startActivity(Intent.createChooser(shareIntent, "Share PDF"))
+                binding.pdfProgressLayout.visibility = View.GONE
+                binding.btnSharePdf.isEnabled = true
+                binding.btnDownloadPdf.isEnabled = true
+            } catch (e: Exception) {
+                binding.pdfProgressLayout.visibility = View.GONE
+                binding.btnSharePdf.isEnabled = true
+                binding.btnDownloadPdf.isEnabled = true
+                Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
-        } catch (e: Exception) {
-            Snackbar.make(binding.root, "Failed to save Excel: ${e.message}", Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    private fun generateAndSaveExcel(survey: SurveyItem) {
+        binding.btnExportExcel.isEnabled = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val excelBytes = withContext(Dispatchers.IO) {
+                    com.ruda.survey.utils.ExcelExporter.generate(survey)
+                }
+                val fileName = "survey_${survey.srNo}.xlsx"
+                val uri = saveToDownloads(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelBytes)
+                binding.btnExportExcel.isEnabled = true
+                if (uri != null) {
+                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivity(openIntent)
+                    Snackbar.make(binding.root, "Excel saved to Downloads", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(binding.root, "Failed to save Excel", Snackbar.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                binding.btnExportExcel.isEnabled = true
+                Snackbar.make(binding.root, "Excel error: ${e.message}", Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -307,11 +295,6 @@ class SheetFragment : Fragment() {
             resolver.delete(uri, null, null)
             null
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("parcel_code", currentParcelCode)
     }
 
     override fun onDestroyView() {

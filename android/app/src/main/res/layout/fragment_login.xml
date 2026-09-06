@@ -97,17 +97,17 @@
                     android:orientation="vertical"
                     android:padding="@dimen/card_padding">
 
-                    <!-- Username -->
+                    <!-- Email -->
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilUsername"
+                        android:id="@+id/tilEmail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_username"
+                        android:hint="@string/hint_email"
                         app:startIconDrawable="@drawable/ic_person"
                         style="@style/Widget.RudaSurvey.TextInput"
                         android:layout_marginBottom="@dimen/field_spacing">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etUsername"
+                            android:id="@+id/etEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"

@@ -26,4 +26,14 @@ class DemoTokenManager(context: Context) : TokenManager {
     }
 
     override fun hasTokens(): Boolean = getAccessToken() != null
+
+    override fun saveSurveyId(id: String) {
+        prefs.edit().putString("last_survey_id", id).apply()
+    }
+
+    override fun getSurveyId(): String? = prefs.getString("last_survey_id", null)
+
+    override fun clearSurveyId() {
+        prefs.edit().remove("last_survey_id").apply()
+    }
 }

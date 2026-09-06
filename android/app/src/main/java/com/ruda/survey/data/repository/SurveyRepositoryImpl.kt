@@ -1,383 +1,170 @@
 package com.ruda.survey.data.repository
 
 import com.ruda.survey.data.dto.*
-import com.ruda.survey.data.local.SurveyDao
 import com.ruda.survey.data.remote.SurveyApi
-import com.ruda.survey.utils.TokenManager
 import com.ruda.survey.domain.model.*
 import com.ruda.survey.domain.repository.SurveyRepository
+import com.ruda.survey.utils.TokenManager
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
 class SurveyRepositoryImpl(
     private val api: SurveyApi,
-    private val dao: SurveyDao,
-    private val tokenManager: TokenManager,
-    private val gson: com.google.gson.Gson = com.google.gson.Gson()
+    private val tokenManager: TokenManager
 ) : SurveyRepository {
 
-    override suspend fun login(username: String, password: String): Result<AuthState> {
+    override suspend fun getAllSurveys(): Result<List<SurveyItem>> {
         return try {
-            val response = api.login(LoginRequest(username, password))
+            val response = api.getAllSurveys()
             if (response.isSuccessful) {
                 val body = response.body()!!
-                tokenManager.saveTokens(body.access, body.refresh)
-                Result.success(AuthState(
-                    isLoggedIn = true,
-                    username = body.user.username,
-                    role = body.user.role
-                ))
+                Result.success(body.data.map { it.toDomain() })
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Login failed"))
+                Result.failure(Exception("Failed to load surveys"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun logout(): Result<Unit> {
+    override suspend fun getSurveyById(id: String): Result<SurveyItem> {
         return try {
-            val refresh = tokenManager.getRefreshToken()
-            if (refresh != null) {
-                api.logout(LogoutRequest(refresh))
-            }
-            tokenManager.clearTokens()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            tokenManager.clearTokens()
-            Result.success(Unit)
-        }
-    }
-
-    override suspend fun getParcelInfo(parcelCode: String): Result<ParcelInfo> {
-        return try {
-            val response = api.parcelLookup(parcelCode)
+            val response = api.getSurveyById(id)
             if (response.isSuccessful) {
                 val body = response.body()!!
-                Result.success(ParcelInfo(
-                    parcelCode = body.parcel.parcel_code,
-                    sourceNid = body.parcel.source_nid,
-                    village = body.parcel.village,
-                    tehsil = body.parcel.tehsil,
-                    district = body.parcel.district,
-                    ownerNameCurrent = body.parcel.owner_name_current,
-                    masterLineCount = body.original.size,
-                    revisionNo = body.revision_no,
-                    source = body.source,
-                    currentRevision = body.current_revision?.let {
-                        CurrentRevisionInfo(
-                            revisionNo = it.revision_no,
-                            fullPayload = it.full_payload,
-                            changedFields = it.changed_fields,
-                            status = it.status
-                        )
-                    },
-                    khasraNumber = body.parcel.khasra_number,
-                    mauzaNumber = body.parcel.mauza_number
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Parcel not found"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getCurrentSurvey(parcelCode: String): Result<SurveyData> {
-        return try {
-            val response = api.currentData(parcelCode)
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(SurveyData(
-                    parcelCode = parcelCode,
-                    source = body.source,
-                    revisionNo = body.revision_no,
-                    fields = body.data,
-                    original = emptyMap(),
-                    images = emptyList(),
-                    surveyor = null,
-                    changedAt = null
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to load survey"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getOriginalSurvey(parcelCode: String): Result<SurveyData> {
-        return try {
-            val response = api.originalData(parcelCode)
-            if (response.isSuccessful) {
-                @Suppress("UNCHECKED_CAST")
-                val body = response.body()!!
-                val lines = body["lines"] as? List<Map<String, Any?>> ?: emptyList()
-                val fields = if (lines.isNotEmpty()) lines.first() else emptyMap()
-                Result.success(SurveyData(
-                    parcelCode = parcelCode,
-                    source = "master",
-                    revisionNo = 0,
-                    fields = fields,
-                    original = fields,
-                    images = emptyList(),
-                    surveyor = null,
-                    changedAt = null
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to load original data"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun createRevision(
-        parcelCode: String,
-        data: Map<String, Any?>,
-        changeReason: String?,
-        clientUuid: String,
-        parentRevisionNo: Int?
-    ): Result<RevisionResult> {
-        return try {
-            // Filter to only fields the backend accepts for revisions
-            val allowed = setOf(
-                "rd_value", "latitude", "longitude", "package_no", "village",
-                "owner_name", "father_name", "cnic_no", "khasra_number", "mauza_number",
-                "contact_number", "land_owner_doc", "electricity_connection_name", "land_area",
-                "structure_status", "structure_name", "length_ft", "width_ft",
-                "area_sqft", "construction_nature"
-            )
-            val filteredData = data.filterKeys { it in allowed }
-
-            val request = RevisionCreateRequest(
-                client_uuid = clientUuid,
-                data = filteredData,
-                change_reason = changeReason,
-                parent_revision_no = parentRevisionNo
-            )
-            val response = api.createRevision(parcelCode, request)
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(RevisionResult(
-                    replayed = body.replayed,
-                    revisionNo = body.revision_no,
-                    status = body.status,
-                    diff = body.diff,
-                    fullPayload = body.full_payload
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to create revision"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun uploadImage(
-        parcelCode: String,
-        revisionNo: Int,
-        imageType: String,
-        imageBytes: ByteArray,
-        fileName: String,
-        latitude: Double?,
-        longitude: Double?,
-        accuracy: Float?,
-        areaName: String?,
-        capturedAt: Long?,
-        pointId: String?,
-        sequenceNo: Int,
-        qrPayload: String?,
-        stampedBytes: ByteArray?
-    ): Result<ImageInfo> {
-        return try {
-            val uploadBytes = stampedBytes ?: imageBytes
-            val mediaType = if (fileName.endsWith(".png")) {
-                "image/png".toMediaTypeOrNull()
-            } else {
-                "image/jpeg".toMediaTypeOrNull()
-            }
-            val requestFile = uploadBytes.toRequestBody(mediaType)
-            val filePart = MultipartBody.Part.createFormData("file", fileName, requestFile)
-            val typePart = imageType.toRequestBody("text/plain".toMediaTypeOrNull())
-
-            val latPart = latitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val lngPart = longitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val accPart = accuracy?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val areaPart = areaName?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val captPart = capturedAt?.let {
-                java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", java.util.Locale.US)
-                    .format(java.util.Date(it))
-                    .toRequestBody("text/plain".toMediaTypeOrNull())
-            }
-            val pointPart = pointId?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val seqPart = sequenceNo.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            val qrPart = qrPayload?.toRequestBody("text/plain".toMediaTypeOrNull())
-
-            val response = api.uploadImage(
-                parcelCode, revisionNo, typePart, filePart,
-                latPart, lngPart, accPart, areaPart, captPart, pointPart, seqPart, qrPart
-            )
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(ImageInfo(
-                    imageType = body.image_type,
-                    checksumSha256 = body.checksum_sha256,
-                    storageKey = body.storage_key,
-                    contentType = body.content_type,
-                    fileSize = body.file_size,
-                    uploadedAt = null
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Image upload failed"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getSurveySheet(parcelCode: String): Result<SurveyData> {
-        return try {
-            val response = api.surveySheet(parcelCode)
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(SurveyData(
-                    parcelCode = parcelCode,
-                    source = body.source,
-                    revisionNo = body.current_revision_no ?: 0,
-                    fields = body.fields,
-                    original = body.original,
-                    images = body.images.map {
-                        ImageInfo(it.image_type, it.checksum_sha256, it.file_path,
-                                  it.content_type, it.file_size, it.uploaded_at)
-                    },
-                    surveyor = body.surveyor,
-                    changedAt = body.changed_at
-                ))
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to load sheet"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun downloadPdf(parcelCode: String): Result<ByteArray> {
-        return try {
-            val response = api.surveyPdf(parcelCode)
-            if (response.isSuccessful) {
-                val bytes = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    response.body()!!.bytes()
+                val data = body.data as? Map<*, *>
+                if (data != null) {
+                    Result.success(mapToSurveyItem(data))
+                } else {
+                    Result.failure(Exception("Invalid response format"))
                 }
-                Result.success(bytes)
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to download PDF"))
+                Result.failure(Exception("Survey not found"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun downloadExcel(parcelCode: String): Result<ByteArray> {
+    override suspend fun getSurveyBySrNo(srNo: Int): Result<SurveyItem> {
         return try {
-            val response = api.surveyExport(parcelCode)
+            val response = api.getSurveyBySrNo(srNo)
             if (response.isSuccessful) {
-                val bytes = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    response.body()!!.bytes()
+                val body = response.body()!!
+                val data = body.data as? Map<*, *>
+                if (data != null) {
+                    Result.success(mapToSurveyItem(data))
+                } else {
+                    Result.failure(Exception("Invalid response format"))
                 }
-                Result.success(bytes)
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to download Excel"))
+                Result.failure(Exception("Survey not found"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun searchParcels(village: String?, tehsil: String?, ownerName: String?, khasraNumber: String?, mauzaNumber: String?): Result<List<SearchParcel>> {
+    override suspend fun createSurvey(item: SurveyItem): Result<SurveyItem> {
         return try {
-            val response = api.searchSurveys(village, tehsil, ownerName, khasraNumber, mauzaNumber)
+            val response = api.createSurvey(
+                srNo = item.srNo.toString().toTextBody(),
+                parcelId = item.parcelId.toTextBodyOrNull(),
+                rd = item.rd.toTextBodyOrNull(),
+                pkg = item.pkg.toTextBodyOrNull(),
+                lat = item.lat.toString().toTextBody(),
+                lng = item.lng.toString().toTextBody(),
+                village = item.village.toTextBodyOrNull(),
+                ownerName = item.ownerName.toTextBodyOrNull(),
+                cnic = item.cnic.toTextBodyOrNull(),
+                fName = item.fName.toTextBodyOrNull(),
+                khasraNo = item.khasraNo.toTextBodyOrNull(),
+                phone = item.phone.toTextBodyOrNull(),
+                electricity = item.electricityConnectionName.toTextBodyOrNull(),
+                landArea = item.landArea.toTextBodyOrNull(),
+                status = item.status.toTextBodyOrNull(),
+                structuralName = item.structuralName.toTextBodyOrNull(),
+                length = item.length.toTextBodyOrNull(),
+                width = item.width.toTextBodyOrNull(),
+                area = item.area.toTextBodyOrNull(),
+                natureOfConstruction = item.natureOfConstruction.toTextBodyOrNull(),
+                landOwnerDoc = item.landOwnerDoc.toTextBodyOrNull()?.let { body ->
+                    MultipartBody.Part.createFormData("land_owner_doc", item.landOwnerDoc, body)
+                },
+                imgOne = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg"),
+                imgTwo = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
+            )
             if (response.isSuccessful) {
                 val body = response.body()!!
-                Result.success(body.results.map { result ->
-                    SearchParcel(
-                        parcelCode = result.parcel_code,
-                        khasraNumber = result.khasra_number,
-                        mauzaNumber = result.mauza_number,
-                        ownerName = result.owner_name,
-                        village = result.village,
-                        tehsil = result.tehsil,
-                        district = result.district,
-                        sourceNid = result.source_nid
-                    )
-                })
+                if (body.success && body.data != null) {
+                    Result.success(body.data.toDomain())
+                } else {
+                    Result.failure(Exception(body.message))
+                }
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Search failed"))
+                val errorBody = response.errorBody()?.string()
+                Result.failure(Exception(errorBody ?: "Create failed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun getSearchOptions(tehsil: String?): Result<Pair<List<String>, List<String>>> {
+    override suspend fun updateSurvey(item: SurveyItem): Result<SurveyItem> {
         return try {
-            val response = api.searchOptions(tehsil)
+            val response = api.updateSurvey(
+                id = item.id,
+                srNo = item.srNo.toString().toTextBody(),
+                parcelId = item.parcelId.toTextBodyOrNull(),
+                rd = item.rd.toTextBodyOrNull(),
+                pkg = item.pkg.toTextBodyOrNull(),
+                lat = item.lat.toString().toTextBody(),
+                lng = item.lng.toString().toTextBody(),
+                village = item.village.toTextBodyOrNull(),
+                ownerName = item.ownerName.toTextBodyOrNull(),
+                cnic = item.cnic.toTextBodyOrNull(),
+                fName = item.fName.toTextBodyOrNull(),
+                khasraNo = item.khasraNo.toTextBodyOrNull(),
+                phone = item.phone.toTextBodyOrNull(),
+                electricity = item.electricityConnectionName.toTextBodyOrNull(),
+                landArea = item.landArea.toTextBodyOrNull(),
+                status = item.status.toTextBodyOrNull(),
+                structuralName = item.structuralName.toTextBodyOrNull(),
+                natureOfConstruction = item.natureOfConstruction.toTextBodyOrNull(),
+                length = item.length.toTextBodyOrNull(),
+                width = item.width.toTextBodyOrNull(),
+                area = item.area.toTextBodyOrNull(),
+                landOwnerDoc = item.landOwnerDoc.toTextBodyOrNull()?.let { body ->
+                    MultipartBody.Part.createFormData("land_owner_doc", item.landOwnerDoc, body)
+                },
+                imgOne = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg"),
+                imgTwo = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
+            )
             if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(Pair(body.villages, body.tehsils))
+                val responseBody = response.body()!!
+                if (responseBody.success && responseBody.data != null) {
+                    Result.success(responseBody.data.toDomain())
+                } else {
+                    Result.failure(Exception(responseBody.message))
+                }
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to load search options"))
+                val errorBody = response.errorBody()?.string()
+                Result.failure(Exception(errorBody ?: "Update failed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    override suspend fun searchOwnerSuggestions(query: String): Result<List<com.ruda.survey.domain.model.OwnerSuggestion>> {
+    override suspend fun deleteSurvey(id: String): Result<Unit> {
         return try {
-            val response = api.searchOwners(query)
+            val response = api.deleteSurvey(id)
             if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(body.results.map { com.ruda.survey.domain.model.OwnerSuggestion(it.owner_name, it.record_count) })
+                Result.success(Unit)
             } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Failed to search owners"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun lookupBySerialNumber(srNo: Int): Result<List<com.ruda.survey.domain.model.SrNoLookupResult>> {
-        return try {
-            val response = api.lookupBySrNo(srNo)
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                Result.success(body.parcels.map { parcel ->
-                    com.ruda.survey.domain.model.SrNoLookupResult(
-                        parcelCode = parcel.parcel_code,
-                        village = parcel.village,
-                        tehsil = parcel.tehsil,
-                        district = parcel.district,
-                        ownerName = parcel.owner_name,
-                        masterLineCount = parcel.master_line_count
-                    )
-                })
-            } else {
-                val error = parseError(response)
-                Result.failure(Exception(error?.message ?: "Serial number lookup failed"))
+                Result.failure(Exception("Delete failed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -388,14 +175,92 @@ class SurveyRepositoryImpl(
 
     override fun isLoggedIn(): Boolean = tokenManager.hasTokens()
 
-    private fun parseError(response: retrofit2.Response<*>): ApiErrorDetail? {
-        return try {
-            val errorBody = response.errorBody()?.string()
-            if (errorBody != null) {
-                gson.fromJson(errorBody, ApiErrorResponse::class.java).error
-            } else null
-        } catch (e: Exception) {
-            null
-        }
+    override fun saveSurveyId(id: String) {
+        tokenManager.saveSurveyId(id)
     }
+
+    override fun getSurveyId(): String? = tokenManager.getSurveyId()
+
+    override fun clearSurveyId() {
+        tokenManager.clearSurveyId()
+    }
+
+    private fun String?.toTextBody(): RequestBody =
+        (this ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+
+    private fun String?.toTextBodyOrNull(): RequestBody? =
+        this?.toRequestBody("text/plain".toMediaTypeOrNull())
+
+    private fun ByteArray.toImagePart(fieldName: String, fileName: String): MultipartBody.Part {
+        val mediaType = if (fileName.endsWith(".png")) {
+            "image/png".toMediaTypeOrNull()
+        } else {
+            "image/jpeg".toMediaTypeOrNull()
+        }
+        val body = this.toRequestBody(mediaType)
+        return MultipartBody.Part.createFormData(fieldName, fileName, body)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun mapToSurveyItem(data: Map<*, *>): SurveyItem {
+        val coords = data["coordinates"] as? Map<*, *> ?: emptyMap<String, Any>()
+        val ident = data["identification"] as? Map<*, *> ?: emptyMap<String, Any>()
+        val area = data["covered_area"] as? Map<*, *> ?: emptyMap<String, Any>()
+
+        return SurveyItem(
+            id = data["_id"]?.toString() ?: "",
+            srNo = (data["sr_no"] as? Number)?.toInt() ?: 0,
+            parcelId = data["parcel_id"]?.toString() ?: "",
+            rd = data["rd"]?.toString() ?: "",
+            pkg = data["pkg"]?.toString() ?: "",
+            village = data["village"]?.toString() ?: "",
+            status = data["status"]?.toString() ?: "",
+            structuralName = data["stractural_name"]?.toString() ?: "",
+            natureOfConstruction = data["nature_of_construction"]?.toString() ?: "",
+            imgOne = data["imgOne"]?.toString() ?: "",
+            imgTwo = data["imgTwo"]?.toString() ?: "",
+            lat = (coords["lat"] as? Number)?.toDouble() ?: 0.0,
+            lng = (coords["lng"] as? Number)?.toDouble() ?: 0.0,
+            ownerName = ident["owner_name"]?.toString() ?: "",
+            fName = ident["f_name"]?.toString() ?: "",
+            cnic = ident["cnic"]?.toString() ?: "",
+            khasraNo = ident["khasra_no"]?.toString() ?: "",
+            phone = ident["phone"]?.toString() ?: "",
+            landOwnerDoc = ident["land_owner_doc"]?.toString() ?: "",
+            electricityConnectionName = ident["electricity_connection_name"]?.toString() ?: "",
+            landArea = ident["land_area"]?.toString() ?: "",
+            length = area["length"]?.toString() ?: "",
+            width = area["width"]?.toString() ?: "",
+            area = area["area"]?.toString() ?: ""
+        )
+    }
+}
+
+private fun SurveyItemDto.toDomain(): SurveyItem {
+    return SurveyItem(
+        id = id,
+        srNo = sr_no,
+        parcelId = parcel_id ?: "",
+        rd = rd ?: "",
+        pkg = pkg ?: "",
+        village = village ?: "",
+        status = status ?: "",
+        structuralName = structuralName ?: "",
+        natureOfConstruction = nature_of_construction ?: "",
+        imgOne = imgOne ?: "",
+        imgTwo = imgTwo ?: "",
+        lat = coordinates?.lat ?: 0.0,
+        lng = coordinates?.lng ?: 0.0,
+        ownerName = identification?.owner_name ?: "",
+        fName = identification?.f_name ?: "",
+        cnic = identification?.cnic ?: "",
+        khasraNo = identification?.khasra_no ?: "",
+        phone = identification?.phone ?: "",
+        landOwnerDoc = identification?.land_owner_doc ?: "",
+        electricityConnectionName = identification?.electricity_connection_name ?: "",
+        landArea = identification?.land_area ?: "",
+        length = covered_area?.length ?: "",
+        width = covered_area?.width ?: "",
+        area = covered_area?.area ?: ""
+    )
 }

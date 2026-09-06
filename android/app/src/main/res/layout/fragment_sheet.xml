@@ -243,6 +243,68 @@
                     android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_8">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="@dimen/spacing_4">
+
+                        <ImageView
+                            android:id="@+id/ivImage1"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
+                            android:background="#F5F5F5" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvImage1Label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:visibility="gone"
+                            android:layout_marginTop="@dimen/spacing_4" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="@dimen/spacing_4">
+
+                        <ImageView
+                            android:id="@+id/ivImage2"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
+                            android:background="#F5F5F5" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvImage2Label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:visibility="gone"
+                            android:layout_marginTop="@dimen/spacing_4" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Loading -->

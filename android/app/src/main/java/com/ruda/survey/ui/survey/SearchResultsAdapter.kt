@@ -28,13 +28,11 @@ class SearchResultsAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: SearchParcel) {
-            binding.tvParcelCode.text = item.parcelCode
+            binding.tvParcelCode.text = "SR No: ${item.srNo}"
             binding.tvKhasra.text = item.village?.let { "Village: $it" } ?: "Village: N/A"
-            binding.tvMauza.text = item.tehsil?.let { "Tehsil: $it" } ?: "Tehsil: N/A"
+            binding.tvMauza.text = item.structuralName?.let { "Structure: $it" } ?: "Structure: N/A"
             binding.tvOwner.text = item.ownerName?.let { "Owner: $it" } ?: "Owner: N/A"
-            binding.tvLocation.text = buildString {
-                item.district?.let { append(it) }
-            }.ifBlank { "" }
+            binding.tvLocation.text = item.natureOfConstruction?.ifBlank { "" } ?: ""
 
             binding.root.setOnClickListener { onItemClick(item) }
         }
@@ -42,7 +40,7 @@ class SearchResultsAdapter(
 
     companion object DiffCallback : DiffUtil.ItemCallback<SearchParcel>() {
         override fun areItemsTheSame(oldItem: SearchParcel, newItem: SearchParcel): Boolean {
-            return oldItem.parcelCode == newItem.parcelCode
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: SearchParcel, newItem: SearchParcel): Boolean {

@@ -6,4 +6,8 @@ interface TokenManager {
     fun getRefreshToken(): String?
     fun clearTokens()
     fun hasTokens(): Boolean
+
+    fun saveSurveyId(id: String)
+    fun getSurveyId(): String?
+    fun clearSurveyId()
 }

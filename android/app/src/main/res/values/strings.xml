@@ -6,7 +6,7 @@
     <!-- Login -->
     <string name="login_title">Welcome Back</string>
     <string name="login_subtitle">Sign in to RUDA Survey</string>
-    <string name="hint_username">Username</string>
+    <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_surveyor1">Surveyor 1</string>
     <string name="hint_supervisor1">Supervisor 1</string>

@@ -3,7 +3,7 @@ package com.ruda.survey.domain.model
 import org.junit.Assert.*
 import org.junit.Test
 
-class UiStateTest {
+class ModelsTest {
 
     @Test
     fun `Loading is a UiState`() {
@@ -50,63 +50,68 @@ class UiStateTest {
     }
 
     @Test
-    fun `ParcelInfo stores all fields`() {
-        val info = ParcelInfo(
-            parcelCode = "RUDA-P14-R00005",
-            sourceNid = 5,
-            village = "Test Village",
-            tehsil = "Test Tehsil",
-            district = "Test District",
-            ownerNameCurrent = "Test Owner",
-            masterLineCount = 10,
-            revisionNo = 2,
-            source = "revision",
-            currentRevision = CurrentRevisionInfo(
-                revisionNo = 2,
-                fullPayload = mapOf("owner_name" to "Test Owner"),
-                changedFields = listOf("owner_name"),
-                status = "SUBMITTED"
-            )
-        )
-
-        assertEquals("RUDA-P14-R00005", info.parcelCode)
-        assertEquals(5, info.sourceNid)
-        assertEquals("Test Village", info.village)
-        assertEquals("revision", info.source)
-        assertNotNull(info.currentRevision)
-        assertEquals(2, info.currentRevision!!.revisionNo)
+    fun `SurveyItem defaults`() {
+        val item = SurveyItem()
+        assertEquals("", item.id)
+        assertEquals(0, item.srNo)
+        assertEquals("", item.parcelId)
+        assertEquals(0.0, item.lat, 0.001)
     }
 
     @Test
-    fun `ImageInfo stores all fields`() {
-        val img = ImageInfo(
-            imageType = "FRONT",
-            checksumSha256 = "abc123",
-            storageKey = "parcels/RUDA-P14-R00005/rev1/FRONT.jpg",
-            contentType = "image/jpeg",
-            fileSize = 1024L,
-            uploadedAt = "2024-01-01T00:00:00Z"
+    fun `SurveyItem stores all fields`() {
+        val item = SurveyItem(
+            id = "abc123",
+            srNo = 5,
+            parcelId = "P1",
+            rd = "5",
+            pkg = "1",
+            village = "Test",
+            status = "active",
+            structuralName = "House",
+            natureOfConstruction = "Pucca",
+            lat = 31.5,
+            lng = 74.3,
+            ownerName = "Ali",
+            fName = "Ahmed",
+            cnic = "12345-1234567-1",
+            khasraNo = "K1",
+            phone = "0300-1234567",
+            landOwnerDoc = "registry",
+            electricityConnectionName = "Yes",
+            landArea = "500",
+            length = "10",
+            width = "8",
+            area = "80"
         )
 
-        assertEquals("FRONT", img.imageType)
-        assertEquals("abc123", img.checksumSha256)
-        assertEquals(1024L, img.fileSize)
+        assertEquals("abc123", item.id)
+        assertEquals(5, item.srNo)
+        assertEquals("Ali", item.ownerName)
+        assertEquals("Ahmed", item.fName)
+        assertEquals(31.5, item.lat, 0.001)
     }
 
     @Test
-    fun `RevisionResult stores all fields`() {
-        val result = RevisionResult(
-            replayed = false,
-            revisionNo = 3,
-            status = "SUBMITTED",
-            diff = mapOf("owner_name" to mapOf("old" to "Ali", "new" to "Ahmed")),
-            fullPayload = mapOf("owner_name" to "Ahmed")
+    fun `SearchParcel stores fields`() {
+        val parcel = SearchParcel(
+            id = "abc",
+            srNo = 5,
+            village = "Test",
+            ownerName = "Ali",
+            structuralName = "House",
+            natureOfConstruction = "Pucca"
         )
+        assertEquals("abc", parcel.id)
+        assertEquals(5, parcel.srNo)
+        assertEquals("Ali", parcel.ownerName)
+    }
 
-        assertFalse(result.replayed)
-        assertEquals(3, result.revisionNo)
-        assertEquals("SUBMITTED", result.status)
-        assertEquals("Ali", result.diff["owner_name"]?.get("old"))
-        assertEquals("Ahmed", result.diff["owner_name"]?.get("new"))
+    @Test
+    fun `EditableDraft stores surveyItem and uuid`() {
+        val item = SurveyItem(srNo = 5)
+        val draft = EditableDraft(surveyItem = item, clientUuid = "uuid-123")
+        assertEquals(item, draft.surveyItem)
+        assertEquals("uuid-123", draft.clientUuid)
     }
 }

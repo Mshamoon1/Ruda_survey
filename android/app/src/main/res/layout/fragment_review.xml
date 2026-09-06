@@ -114,6 +114,52 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Pending Images Indicator -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_8">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Captured Images"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                        android:layout_marginBottom="@dimen/spacing_8" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/ivReviewImg1"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_weight="1"
+                            android:scaleType="centerCrop"
+                            android:layout_marginEnd="@dimen/spacing_4"
+                            android:background="?attr/colorSurfaceVariant" />
+
+                        <ImageView
+                            android:id="@+id/ivReviewImg2"
+                            android:layout_width="0dp"
+                            android:layout_height="120dp"
+                            android:layout_weight="1"
+                            android:scaleType="centerCrop"
+                            android:layout_marginStart="@dimen/spacing_4"
+                            android:background="?attr/colorSurfaceVariant" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvPendingImages"
                 android:layout_width="match_parent"

@@ -16,7 +16,7 @@ class SyncWorker(
         return try {
             val database = SurveyDatabase.getInstance(applicationContext)
             val repository = SyncRepository(
-                api = ApiClient.createApi(applicationContext),
+                api = ApiClient.createSurveyApi(applicationContext),
                 dao = database.syncDao(),
                 tokenManager = SecureTokenManager(applicationContext)
             )

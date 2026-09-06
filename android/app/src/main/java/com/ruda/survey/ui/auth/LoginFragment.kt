@@ -37,7 +37,7 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val repository: SurveyRepository = RepositoryFactory.create(requireContext().applicationContext)
+        val repository = RepositoryFactory.createAuthRepository(requireContext().applicationContext)
         viewModel = AuthViewModel(repository)
 
         // Screen entrance: stagger top-to-bottom
@@ -65,13 +65,13 @@ class LoginFragment : Fragment() {
 
         // Hint chips: fade-substitute text on tap
         binding.chipSurveyor.setOnClickListener {
-            binding.etUsername.setText("surveyor1")
+            binding.etEmail.setText("surveyor1@ruda.com")
             binding.etPassword.setText("")
             binding.etPassword.requestFocus()
         }
 
         binding.chipSupervisor.setOnClickListener {
-            binding.etUsername.setText("supervisor1")
+            binding.etEmail.setText("supervisor1@ruda.com")
             binding.etPassword.setText("")
             binding.etPassword.requestFocus()
         }
@@ -98,7 +98,7 @@ class LoginFragment : Fragment() {
                         binding.btnLogin.setIconResource(R.drawable.ic_login)
 
                         // Shake the fields + fade in error text
-                        binding.tilUsername.shake()
+                        binding.tilEmail.shake()
                         binding.tilPassword.shake()
                         binding.tvError.text = state.message
                         binding.tvError.alpha = 0f
@@ -119,9 +119,35 @@ class LoginFragment : Fragment() {
     }
 
     private fun performLogin() {
-        val username = binding.etUsername.text.toString().trim()
-        val password = binding.etPassword.text.toString().trim()
-        viewModel.login(username, password)
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString()
+
+        var isValid = true
+
+        if (email.isEmpty()) {
+            binding.tilEmail.error = "Email is required"
+            binding.tilEmail.shake()
+            isValid = false
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilEmail.error = "Invalid email format"
+            binding.tilEmail.shake()
+            isValid = false
+        } else {
+            binding.tilEmail.error = null
+        }
+
+        if (password.isEmpty()) {
+            binding.tilPassword.error = "Password is required"
+            binding.tilPassword.shake()
+            isValid = false
+        } else {
+            binding.tilPassword.error = null
+        }
+
+        if (isValid) {
+            android.util.Log.d("LoginFragment", "Performing login for email: [$email] with password length: ${password.length}")
+            viewModel.login(email, password)
+        }
     }
 
     private fun animateEntrance() {
@@ -130,7 +156,7 @@ class LoginFragment : Fragment() {
             binding.ivLogo,
             binding.tvTitle,
             binding.tvSubtitle,
-            binding.tilUsername,
+            binding.tilEmail,
             binding.tilPassword,
             binding.btnLogin
         )

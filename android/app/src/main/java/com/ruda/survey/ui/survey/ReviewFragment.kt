@@ -1,12 +1,10 @@
 package com.ruda.survey.ui.survey
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -38,39 +36,47 @@ class ReviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val repository: SurveyRepository = RepositoryFactory.create(requireContext().applicationContext)
-        val factory = SurveyViewModelFactory(repository, appContext = requireContext().applicationContext)
+        val factory = SurveyViewModelFactory(repository)
         viewModel = ViewModelProvider(requireActivity(), factory)[SurveyViewModel::class.java]
 
-        viewModel.resetSubmitState()
+        viewModel.resetUpdateState()
+        viewModel.resetCreateState()
 
-        val draft = viewModel.draftState.value
-        if (draft == null) {
+        val survey = viewModel.currentSurvey
+        if (survey == null) {
             findNavController().popBackStack()
             return
         }
 
-        binding.tvParcelCode.text = draft.parcelCode
-        binding.tvBaseRevision.text = "Base: Revision ${draft.baseRevisionNo}"
+        binding.tvParcelCode.text = survey.village.ifBlank { "New Survey" }
+        binding.tvBaseRevision.text = if (survey.id.isNotBlank()) "Edit: SR ${survey.srNo}" else "New: SR ${survey.srNo}"
 
-        val pendingImages = viewModel.pendingImages.value
-        if (pendingImages.isNotEmpty()) {
-            val names = pendingImages.joinToString(", ") { it.imageType }
-            binding.tvPendingImages.text = "${pendingImages.size} photo(s) will be uploaded: $names"
-            binding.tvPendingImages.visibility = View.VISIBLE
-        } else {
-            binding.tvPendingImages.visibility = View.GONE
-        }
+        displayFullSurvey(survey)
 
-        binding.etChangeReason.setText(draft.changeReason)
-
-        // Stagger card entrance
         animateEntrance()
 
         binding.btnSubmit.setOnClickListener {
+            val current = viewModel.currentSurvey
+            if (current == null) {
+                Snackbar.make(requireView(), "No survey data", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            var surveyToSubmit = current
+            if (surveyToSubmit.id.isBlank()) {
+                val savedId = viewModel.getSavedSurveyId()
+                if (!savedId.isNullOrBlank()) {
+                    surveyToSubmit = surveyToSubmit.copy(id = savedId)
+                }
+            }
+
+            val hasId = surveyToSubmit.id.isNotBlank()
             it.animateTapFeedback {
-                val reason = binding.etChangeReason.text.toString()
-                viewModel.setChangeReason(reason)
-                viewModel.submitRevision()
+                if (hasId) {
+                    viewModel.updateSurvey(surveyToSubmit)
+                } else {
+                    viewModel.createSurvey(surveyToSubmit)
+                }
             }
         }
 
@@ -79,50 +85,120 @@ class ReviewFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.submitState.collect { state ->
-                if (!isAdded) return@collect
-                when (state) {
-                    is UiState.Loading -> {
-                        binding.btnSubmit.isEnabled = false
-                        binding.btnSubmit.text = ""
-                        binding.btnSubmit.setIconResource(0)
-                        binding.submitProgressBar.visibility = View.VISIBLE
-                    }
-                    is UiState.Success -> {
-                        binding.submitProgressBar.visibility = View.GONE
-                        binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
-                        binding.btnSubmit.setIconResource(R.drawable.ic_check_circle)
-                        binding.btnSubmit.isEnabled = true
+            viewModel.createState.collect { state ->
+                handleState(state)
+            }
+        }
 
-                        val result = state.data
-                        if (result.replayed) {
-                            Snackbar.make(view, "Revision already submitted (replayed)", Snackbar.LENGTH_SHORT).show()
-                        } else {
-                            viewModel.flushPendingImages()
-                            animateCheckmark {
-                                if (isAdded) {
-                                    findNavController().navigate(R.id.action_review_to_sheet)
-                                }
-                            }
-                        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.updateState.collect { state ->
+                handleState(state)
+            }
+        }
+    }
+
+    private fun displayFullSurvey(survey: com.ruda.survey.domain.model.SurveyItem) {
+        val text = buildString {
+            appendLine("SR No: ${survey.srNo}")
+            if (survey.parcelId.isNotBlank()) appendLine("Parcel ID: ${survey.parcelId}")
+            appendLine("Village: ${survey.village}")
+            appendLine("Owner: ${survey.ownerName}")
+            appendLine("Father: ${survey.fName}")
+            if (survey.cnic.isNotBlank()) appendLine("CNIC: ${survey.cnic}")
+            if (survey.phone.isNotBlank()) appendLine("Phone: ${survey.phone}")
+            if (survey.landOwnerDoc.isNotBlank()) appendLine("Land Owner Doc: ${survey.landOwnerDoc}")
+            appendLine("")
+            appendLine("Location:")
+            if (survey.khasraNo.isNotBlank()) appendLine("  Khasra No: ${survey.khasraNo}")
+            if (survey.electricityConnectionName.isNotBlank()) appendLine("  Electricity: ${survey.electricityConnectionName}")
+            if (survey.landArea.isNotBlank()) appendLine("  Land Area: ${survey.landArea}")
+            if (survey.lat != 0.0 || survey.lng != 0.0) appendLine("  GPS: ${survey.lat}, ${survey.lng}")
+            appendLine("")
+            appendLine("Structure:")
+            appendLine("  Name: ${survey.structuralName}")
+            appendLine("  Status: ${survey.status}")
+            appendLine("  Construction: ${survey.natureOfConstruction}")
+            if (survey.rd.isNotBlank()) appendLine("  RD: ${survey.rd}")
+            if (survey.pkg.isNotBlank()) appendLine("  Package: ${survey.pkg}")
+            if (survey.length.isNotBlank()) appendLine("  Length: ${survey.length}")
+            if (survey.width.isNotBlank()) appendLine("  Width: ${survey.width}")
+            if (survey.area.isNotBlank()) appendLine("  Area: ${survey.area}")
+        }
+        binding.tvParcelCode.text = text
+
+        val pendingImages = viewModel.pendingImages.value
+        val img1 = pendingImages.find { it.imageType == "imgOne" }
+        val img2 = pendingImages.find { it.imageType == "imgTwo" }
+
+        val hasImg1 = img1 != null || survey.image1Bytes != null
+        val hasImg2 = img2 != null || survey.image2Bytes != null
+
+        if (hasImg1 || hasImg2) {
+            binding.cardImages.visibility = View.VISIBLE
+            img1?.stampedBytes?.let { bytes ->
+                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                binding.ivReviewImg1.setImageBitmap(bmp)
+            } ?: survey.image1Bytes?.let { bytes ->
+                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                binding.ivReviewImg1.setImageBitmap(bmp)
+            }
+
+            img2?.stampedBytes?.let { bytes ->
+                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                binding.ivReviewImg2.setImageBitmap(bmp)
+            } ?: survey.image2Bytes?.let { bytes ->
+                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                binding.ivReviewImg2.setImageBitmap(bmp)
+            }
+        }
+
+        val imagesText = buildString {
+            if (hasImg1) appendLine("Door Pic: captured")
+            if (hasImg2) appendLine("Front View: captured")
+            if (survey.imgOne.isNotBlank()) appendLine("Server Img1: ${survey.imgOne}")
+            if (survey.imgTwo.isNotBlank()) appendLine("Server Img2: ${survey.imgTwo}")
+        }
+
+        if (imagesText.isNotBlank()) {
+            binding.tvPendingImages.text = imagesText.trim()
+            binding.tvPendingImages.visibility = View.VISIBLE
+        } else {
+            binding.tvPendingImages.text = "No images captured"
+            binding.tvPendingImages.visibility = View.VISIBLE
+        }
+    }
+
+    private fun handleState(state: UiState<*>) {
+        if (!isAdded) return
+        when (state) {
+            is UiState.Loading -> {
+                binding.btnSubmit.isEnabled = false
+                binding.btnSubmit.text = ""
+                binding.submitProgressBar.visibility = View.VISIBLE
+            }
+            is UiState.Success -> {
+                binding.submitProgressBar.visibility = View.GONE
+                binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
+                binding.btnSubmit.isEnabled = true
+                animateCheckmark {
+                    if (isAdded) {
+                        findNavController().navigate(R.id.action_review_to_sheet)
                     }
-                    is UiState.Error -> {
-                        binding.submitProgressBar.visibility = View.GONE
-                        binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
-                        binding.btnSubmit.setIconResource(R.drawable.ic_check_circle)
-                        binding.btnSubmit.isEnabled = true
-                        Snackbar.make(view, state.message, Snackbar.LENGTH_LONG).show()
-                    }
-                    is UiState.Empty -> { }
                 }
             }
+            is UiState.Error -> {
+                binding.submitProgressBar.visibility = View.GONE
+                binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
+                binding.btnSubmit.isEnabled = true
+                Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
+            }
+            is UiState.Empty -> { }
         }
     }
 
     private fun animateEntrance() {
         val cards = listOf(
-            binding.tvParcelCode.parent?.parent as? View,
-            binding.etChangeReason.parent?.parent?.parent as? View
+            binding.tvParcelCode.parent?.parent as? View
         ).filterNotNull()
         cards.staggerFadeIn()
     }
@@ -134,7 +210,6 @@ class ReviewFragment : Fragment() {
             return
         }
 
-        // Circle outline draws, then check draws
         binding.btnSubmit.animate()
             .scaleX(1.05f).scaleY(1.05f)
             .setDuration(200)

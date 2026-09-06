@@ -83,7 +83,12 @@
         android:id="@+id/cameraFragment"
         android:name="com.ruda.survey.ui.camera.CameraFragment"
         android:label="Camera"
-        tools:layout="@layout/fragment_camera" />
+        tools:layout="@layout/fragment_camera">
+        <argument
+            android:name="imageType"
+            app:argType="string"
+            android:defaultValue="imgOne" />
+    </fragment>
 
     <fragment
         android:id="@+id/reviewFragment"

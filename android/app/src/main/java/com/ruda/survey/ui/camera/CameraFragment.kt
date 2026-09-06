@@ -24,10 +24,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
-import com.ruda.survey.data.remote.ApiClient
-import com.ruda.survey.data.remote.SecureTokenManager
-import com.ruda.survey.data.local.SurveyDatabase
-import com.ruda.survey.data.repository.SurveyRepositoryImpl
+import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.databinding.FragmentCameraBinding
 import com.ruda.survey.domain.model.PendingImage
 import com.ruda.survey.domain.repository.SurveyRepository
@@ -42,7 +39,7 @@ class CameraFragment : Fragment() {
     private var _binding: FragmentCameraBinding? = null
     private val binding get() = _binding!!
     private var imageCapture: ImageCapture? = null
-    private var imageType: String = "FRONT"
+    private var imageType: String = "imgOne"
     private lateinit var viewModel: SurveyViewModel
     private lateinit var locationHelper: LocationHelper
     private val handler = Handler(Looper.getMainLooper())
@@ -51,7 +48,7 @@ class CameraFragment : Fragment() {
     private var capturedStampData: ImageStampProcessor.StampData? = null
     private var isPreviewMode = false
 
-    private val imageTypes = listOf("FRONT", "SECOND", "POINT_1", "POINT_2")
+    private val imageTypes = listOf("imgOne", "imgTwo")
 
     private val requestPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -80,23 +77,20 @@ class CameraFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val tokenManager = SecureTokenManager(requireContext().applicationContext)
-        val api = ApiClient.createApi(requireContext().applicationContext)
-        val db = SurveyDatabase.getInstance(requireContext().applicationContext)
-        val repository: SurveyRepository = SurveyRepositoryImpl(api, db.surveyDao(), tokenManager)
-        val factory = SurveyViewModelFactory(repository, appContext = requireContext().applicationContext)
+        val repository: SurveyRepository = RepositoryFactory.create(requireContext().applicationContext)
+        val factory = SurveyViewModelFactory(repository)
         viewModel = ViewModelProvider(requireActivity(), factory)[SurveyViewModel::class.java]
 
         locationHelper = LocationHelper(requireContext())
 
+        val args = arguments
+        val imageTypeArg = args?.getString("imageType") ?: viewModel.selectedImageType
+        if (imageTypeArg in imageTypes) {
+            imageType = imageTypeArg
+        }
+
         setupImageTypeSpinner()
         setupPreviewControls()
-
-        val pendingType = viewModel.pendingImageType
-        if (pendingType in imageTypes) {
-            imageType = pendingType
-            binding.spinnerImageType.setText(pendingType, false)
-        }
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) ==
             PackageManager.PERMISSION_GRANTED) {
@@ -145,7 +139,7 @@ class CameraFragment : Fragment() {
             imageTypes
         )
         binding.spinnerImageType.setAdapter(adapter)
-        binding.spinnerImageType.setText("FRONT", false)
+        binding.spinnerImageType.setText("imgOne", false)
         binding.spinnerImageType.setOnItemClickListener { _, _, position, _ ->
             imageType = imageTypes[position]
         }
@@ -238,9 +232,9 @@ class CameraFragment : Fragment() {
                 if (lastLocation != null) {
                     processImageWithLocation(file, lastLocation)
                 } else {
-                    val draft = viewModel.draftState.value
-                    val formLat = draft?.fields?.get("latitude")?.toString()?.toDoubleOrNull()
-                    val formLng = draft?.fields?.get("longitude")?.toString()?.toDoubleOrNull()
+                    val survey = viewModel.currentSurvey
+                    val formLat = survey?.lat
+                    val formLng = survey?.lng
                     if (formLat != null && formLng != null && formLat != 0.0 && formLng != 0.0) {
                         val fallbackLocation = Location("form").apply {
                             latitude = formLat
@@ -272,7 +266,7 @@ class CameraFragment : Fragment() {
     private fun processImageWithLocation(file: File, location: Location) {
         val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
         executor.execute {
-            val originalBitmap = decodeSampledBitmap(file.absolutePath, 2048, 2048)
+            val originalBitmap = decodeSampledBitmap(file.absolutePath, 1280, 1280)
             if (originalBitmap == null) {
                 view?.post {
                     Snackbar.make(binding.root, "Failed to decode image", Snackbar.LENGTH_LONG).show()
@@ -308,14 +302,13 @@ class CameraFragment : Fragment() {
         val executor = java.util.concurrent.Executors.newSingleThreadExecutor()
         executor.execute {
             val evidenceId = UUID.randomUUID().toString()
-            val draft = viewModel.draftState.value
-            val parcelCode = draft?.parcelCode ?: "UNKNOWN"
-            val revisionNo = draft?.baseRevisionNo
+            val survey = viewModel.currentSurvey
+            val parcelCode = survey?.village ?: "UNKNOWN"
 
             val qrBitmap = QrCodeGenerator.generate(
                 evidenceId = evidenceId,
                 parcelCode = parcelCode,
-                revisionNo = revisionNo,
+                revisionNo = null,
                 pointId = imageType,
                 latitude = gpsLocation.latitude,
                 longitude = gpsLocation.longitude,
@@ -337,7 +330,7 @@ class CameraFragment : Fragment() {
 
             val stampedFile = File(requireContext().cacheDir, "STAMPED_${file.name}")
             stampedFile.outputStream().use { out ->
-                stampedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, out)
+                stampedBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, out)
             }
 
             view?.post {
@@ -378,16 +371,6 @@ class CameraFragment : Fragment() {
         val stampedFile = File(requireContext().cacheDir, "STAMPED_${file.name}")
         val stampedBytes = if (stampedFile.exists()) stampedFile.readBytes() else originalBytes
 
-        val qrPayload = QrCodeGenerator.buildPayload(
-            evidenceId = UUID.randomUUID().toString(),
-            parcelCode = stampData.parcelCode,
-            revisionNo = viewModel.draftState.value?.baseRevisionNo,
-            pointId = stampData.pointId,
-            latitude = stampData.latitude,
-            longitude = stampData.longitude,
-            capturedAt = stampData.capturedAt
-        )
-
         val pending = PendingImage(
             imageType = imageType,
             originalBytes = originalBytes,
@@ -398,8 +381,7 @@ class CameraFragment : Fragment() {
             accuracy = stampData.accuracy,
             areaName = stampData.areaName,
             capturedAt = stampData.capturedAt,
-            pointId = stampData.pointId,
-            qrPayload = qrPayload
+            pointId = stampData.pointId
         )
 
         viewModel.queueGpsImage(pending)

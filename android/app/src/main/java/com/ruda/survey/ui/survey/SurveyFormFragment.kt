@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -12,8 +13,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
 import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.databinding.FragmentSurveyFormBinding
-import com.ruda.survey.domain.model.UiState
+import com.ruda.survey.domain.model.SurveyItem
 import com.ruda.survey.domain.repository.SurveyRepository
+import com.ruda.survey.utils.LocationHelper
 import com.ruda.survey.utils.MotionConstants
 import com.ruda.survey.utils.animateTapFeedback
 import com.ruda.survey.utils.isReducedMotionEnabled
@@ -23,6 +25,7 @@ class SurveyFormFragment : Fragment() {
     private var _binding: FragmentSurveyFormBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: SurveyViewModel
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -34,83 +37,109 @@ class SurveyFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val repository: SurveyRepository = RepositoryFactory.create(requireContext().applicationContext)
-        val factory = SurveyViewModelFactory(repository, appContext = requireContext().applicationContext)
+        val factory = SurveyViewModelFactory(repository)
         viewModel = ViewModelProvider(requireActivity(), factory)[SurveyViewModel::class.java]
 
-        viewModel.loadOriginal()
-        viewModel.loadCurrent()
+        locationHelper = LocationHelper(requireContext())
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.originalState.collect { state ->
-                if (state is UiState.Success) {
-                    val fields = state.data.fields
-                    populateFields(fields)
-                    binding.tvParcelCode.text = state.data.parcelCode
-                    viewModel.startDraft(fields, state.data.revisionNo)
-                    animateSectionsIn()
-                }
-            }
+        val survey = viewModel.currentSurvey
+        if (survey != null) {
+            populateFields(survey)
+            animateSectionsIn()
+        } else {
+            binding.tvParcelCode.text = "New Survey"
         }
 
         setupClickListeners()
         observeImageStatus()
+        observeGpsLocation()
     }
 
-    private fun populateFields(fields: Map<String, Any?>) {
-        binding.etParcelCode.setText(fields["parcel_code"]?.toString() ?: "")
-        binding.etRdValue.setText(fields["rd_value"]?.toString() ?: "")
-        binding.etPackageNo.setText(fields["package_no"]?.toString() ?: "")
-        binding.etLatitude.setText(fields["latitude"]?.toString() ?: "")
-        binding.etLongitude.setText(fields["longitude"]?.toString() ?: "")
-        binding.etOwnerName.setText(fields["owner_name"]?.toString() ?: "")
-        binding.etFatherName.setText(fields["father_name"]?.toString() ?: "")
-        binding.etCnic.setText(fields["cnic_no"]?.toString() ?: "")
-        binding.etContact.setText(fields["contact_number"]?.toString() ?: "")
-        binding.etLandOwnerDoc.setText(fields["land_owner_doc"]?.toString() ?: "")
-        binding.etVillage.setText(fields["village"]?.toString() ?: "")
-        binding.etKhasraNumber.setText(fields["khasra_number"]?.toString() ?: "")
-        binding.etElectricityConnection.setText(fields["electricity_connection_name"]?.toString() ?: "")
-        binding.etLandArea.setText(fields["land_area"]?.toString() ?: "")
-        binding.etStructureStatus.setText(fields["structure_status"]?.toString() ?: "")
-        binding.etStructureName.setText(fields["structure_name"]?.toString() ?: "")
-        binding.etLengthFt.setText(fields["length_ft"]?.toString() ?: "")
-        binding.etWidthFt.setText(fields["width_ft"]?.toString() ?: "")
-        binding.etAreaSqft.setText(fields["area_sqft"]?.toString() ?: "")
-        binding.etConstructionNature.setText(fields["construction_nature"]?.toString() ?: "")
+    private fun populateFields(survey: SurveyItem) {
+        binding.tvParcelCode.text = if (survey.srNo > 0) "SR #${survey.srNo}" else survey.village.ifBlank { "New Survey" }
+        binding.etParcelCode.setText(survey.parcelId)
+        binding.etRdValue.setText(survey.rd)
+        binding.etPackageNo.setText(survey.pkg)
+        binding.etLatitude.setText(if (survey.lat != 0.0) survey.lat.toString() else "")
+        binding.etLongitude.setText(if (survey.lng != 0.0) survey.lng.toString() else "")
+        binding.etOwnerName.setText(survey.ownerName)
+        binding.etFatherName.setText(survey.fName)
+        binding.etCnic.setText(survey.cnic)
+        binding.etContact.setText(survey.phone)
+        binding.etLandOwnerDoc.setText(survey.landOwnerDoc)
+        binding.etVillage.setText(survey.village)
+        binding.etKhasraNumber.setText(survey.khasraNo)
+        binding.etElectricityConnection.setText(survey.electricityConnectionName)
+        binding.etLandArea.setText(survey.landArea)
+        binding.etStructureStatus.setText(survey.status)
+        binding.etStructureName.setText(survey.structuralName)
+        binding.etLengthFt.setText(survey.length)
+        binding.etWidthFt.setText(survey.width)
+        binding.etAreaSqft.setText(survey.area)
+        binding.etConstructionNature.setText(survey.natureOfConstruction)
+    }
+
+    private fun observeGpsLocation() {
+        val survey = viewModel.currentSurvey
+        val hasLocation = survey != null && survey.lat != 0.0 && survey.lng != 0.0
+        if (hasLocation) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            locationHelper.startUpdates { location ->
+                if (binding.etLatitude.text.isNullOrBlank() || binding.etLatitude.text.toString() == "0.0") {
+                    binding.etLatitude.setText(String.format(java.util.Locale.US, "%.6f", location.latitude))
+                }
+                if (binding.etLongitude.text.isNullOrBlank() || binding.etLongitude.text.toString() == "0.0") {
+                    binding.etLongitude.setText(String.format(java.util.Locale.US, "%.6f", location.longitude))
+                }
+            }
+        }
     }
 
     private fun setupClickListeners() {
         binding.btnSaveDraft.setOnClickListener {
             it.animateTapFeedback {
-                saveDraftFields()
-                Snackbar.make(binding.root, "Draft saved", Snackbar.LENGTH_SHORT).show()
+                saveCurrentFormState()
+                val survey = viewModel.currentSurvey ?: buildSurveyItem()
+                val existing = viewModel.currentSurvey
+                if (existing != null && existing.id.isNotBlank()) {
+                    viewModel.updateSurvey(survey.copy(id = existing.id))
+                } else {
+                    viewModel.createSurvey(survey)
+                }
+                Snackbar.make(binding.root, "Survey saved", Snackbar.LENGTH_SHORT).show()
             }
         }
 
         binding.btnPointImage1.setOnClickListener {
             it.animateTapFeedback {
-                saveDraftFields()
-                viewModel.pendingImageType = "POINT_1"
-                findNavController().navigate(R.id.action_form_to_camera)
+                saveCurrentFormState()
+                viewModel.selectedImageType = "imgOne"
+                findNavController().navigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgOne"))
             }
         }
 
         binding.btnPointImage2.setOnClickListener {
             it.animateTapFeedback {
-                saveDraftFields()
-                viewModel.pendingImageType = "POINT_2"
-                findNavController().navigate(R.id.action_form_to_camera)
+                saveCurrentFormState()
+                viewModel.selectedImageType = "imgTwo"
+                findNavController().navigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgTwo"))
             }
         }
 
         binding.btnReviewChanges.setOnClickListener {
+            saveCurrentFormState()
             it.animateTapFeedback {
-                saveDraftFields()
                 findNavController().navigate(R.id.action_form_to_review)
             }
         }
 
         updateImageButtonText()
+    }
+
+    private fun saveCurrentFormState() {
+        val survey = buildSurveyItem()
+        viewModel.saveFormState(survey)
     }
 
     private fun observeImageStatus() {
@@ -123,11 +152,47 @@ class SurveyFormFragment : Fragment() {
 
     private fun updateImageButtonText() {
         val pending = viewModel.pendingImages.value
-        val hasPoint1 = pending.any { it.imageType == "POINT_1" }
-        val hasPoint2 = pending.any { it.imageType == "POINT_2" }
+        val hasPoint1 = pending.any { it.imageType == "imgOne" }
+        val hasPoint2 = pending.any { it.imageType == "imgTwo" }
 
         binding.btnPointImage1.text = if (hasPoint1) "Door Pic (captured)" else "Door Pic"
         binding.btnPointImage2.text = if (hasPoint2) "Front View (captured)" else "Front View"
+    }
+
+    private fun buildSurveyItem(): SurveyItem {
+        val existing = viewModel.currentSurvey
+        val images = viewModel.pendingImages.value
+        val img1 = images.find { it.imageType == "imgOne" }
+        val img2 = images.find { it.imageType == "imgTwo" }
+
+        return SurveyItem(
+            id = existing?.id ?: "",
+            srNo = existing?.srNo ?: 0,
+            parcelId = binding.etParcelCode.text.toString().ifBlank { existing?.parcelId ?: "" },
+            rd = binding.etRdValue.text.toString(),
+            pkg = binding.etPackageNo.text.toString(),
+            lat = binding.etLatitude.text.toString().toDoubleOrNull() ?: existing?.lat ?: 0.0,
+            lng = binding.etLongitude.text.toString().toDoubleOrNull() ?: existing?.lng ?: 0.0,
+            ownerName = binding.etOwnerName.text.toString(),
+            fName = binding.etFatherName.text.toString(),
+            cnic = binding.etCnic.text.toString(),
+            phone = binding.etContact.text.toString(),
+            landOwnerDoc = binding.etLandOwnerDoc.text.toString(),
+            village = binding.etVillage.text.toString(),
+            khasraNo = binding.etKhasraNumber.text.toString(),
+            electricityConnectionName = binding.etElectricityConnection.text.toString(),
+            landArea = binding.etLandArea.text.toString(),
+            status = binding.etStructureStatus.text.toString(),
+            structuralName = binding.etStructureName.text.toString(),
+            length = binding.etLengthFt.text.toString(),
+            width = binding.etWidthFt.text.toString(),
+            area = binding.etAreaSqft.text.toString(),
+            natureOfConstruction = binding.etConstructionNature.text.toString(),
+            imgOne = existing?.imgOne ?: "",
+            imgTwo = existing?.imgTwo ?: "",
+            image1Bytes = img1?.stampedBytes ?: img1?.originalBytes ?: existing?.image1Bytes,
+            image2Bytes = img2?.stampedBytes ?: img2?.originalBytes ?: existing?.image2Bytes
+        )
     }
 
     private fun animateSectionsIn() {
@@ -141,11 +206,11 @@ class SurveyFormFragment : Fragment() {
             if (child is android.widget.ScrollView) {
                 val linearLayout = child.getChildAt(0) as? ViewGroup ?: continue
                 for (j in 0 until linearLayout.childCount) {
-                    val view = linearLayout.getChildAt(j)
-                    if (view is com.google.android.material.textview.MaterialTextView) {
-                        val text = view.text?.toString() ?: ""
+                    val v = linearLayout.getChildAt(j)
+                    if (v is com.google.android.material.textview.MaterialTextView) {
+                        val text = v.text?.toString() ?: ""
                         if (text in listOf("Parcel Information", "Coordinates", "Ownership", "Location", "Structure")) {
-                            sectionHeaders.add(view)
+                            sectionHeaders.add(v)
                         }
                     }
                 }
@@ -165,31 +230,9 @@ class SurveyFormFragment : Fragment() {
         }
     }
 
-    private fun saveDraftFields() {
-        viewModel.updateDraftField("parcel_code", binding.etParcelCode.text.toString().ifBlank { null })
-        viewModel.updateDraftField("rd_value", binding.etRdValue.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("package_no", binding.etPackageNo.text.toString().ifBlank { null })
-        viewModel.updateDraftField("latitude", binding.etLatitude.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("longitude", binding.etLongitude.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("owner_name", binding.etOwnerName.text.toString())
-        viewModel.updateDraftField("father_name", binding.etFatherName.text.toString().ifBlank { null })
-        viewModel.updateDraftField("cnic_no", binding.etCnic.text.toString().ifBlank { null })
-        viewModel.updateDraftField("contact_number", binding.etContact.text.toString().ifBlank { null })
-        viewModel.updateDraftField("land_owner_doc", binding.etLandOwnerDoc.text.toString().ifBlank { null })
-        viewModel.updateDraftField("village", binding.etVillage.text.toString().ifBlank { null })
-        viewModel.updateDraftField("khasra_number", binding.etKhasraNumber.text.toString().ifBlank { null })
-        viewModel.updateDraftField("electricity_connection_name", binding.etElectricityConnection.text.toString().ifBlank { null })
-        viewModel.updateDraftField("land_area", binding.etLandArea.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("structure_status", binding.etStructureStatus.text.toString().ifBlank { null })
-        viewModel.updateDraftField("structure_name", binding.etStructureName.text.toString().ifBlank { null })
-        viewModel.updateDraftField("length_ft", binding.etLengthFt.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("width_ft", binding.etWidthFt.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("area_sqft", binding.etAreaSqft.text.toString().toDoubleOrNull())
-        viewModel.updateDraftField("construction_nature", binding.etConstructionNature.text.toString().ifBlank { null })
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        locationHelper.stopUpdates()
         _binding = null
     }
 }
