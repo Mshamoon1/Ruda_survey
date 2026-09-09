@@ -34,6 +34,11 @@ class SurveyViewModel(
     private val _pendingImages = MutableStateFlow<List<PendingImage>>(emptyList())
     val pendingImages: StateFlow<List<PendingImage>> = _pendingImages.asStateFlow()
 
+    var pendingDocBytes: ByteArray? = null
+        private set
+    var pendingDocName: String? = null
+        private set
+
     private val _nextSrNoState = MutableStateFlow<Int?>(null)
     val nextSrNoState: StateFlow<Int?> = _nextSrNoState.asStateFlow()
 
@@ -161,12 +166,18 @@ class SurveyViewModel(
         current.removeAll { it.imageType == pending.imageType }
         current.add(pending)
         _pendingImages.value = current
+        android.util.Log.d("SurveyViewModel", "queueGpsImage type=${pending.imageType} total=${current.size} bytes=${pending.stampedBytes.size}")
     }
 
     fun getPendingImages(): List<PendingImage> = _pendingImages.value
 
     fun clearPendingImages() {
         _pendingImages.value = emptyList()
+    }
+
+    fun setPendingDoc(bytes: ByteArray?, name: String?) {
+        pendingDocBytes = bytes
+        pendingDocName = name
     }
 
     fun resetCreateState() {

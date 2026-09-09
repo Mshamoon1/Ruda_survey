@@ -171,7 +171,9 @@
     <string name="splash_title">RUDA</string>
     <string name="splash_subtitle">Survey Management System</string>
     <string name="splash_org_name">Ravi Urban Development Authority</string>
-    <string name="app_version_display">v1.0.0</string>
+    <string name="splash_tagline">Precision. Progress. Public Service.</string>
+    <string name="splash_initializing">Initializing Survey System...</string>
+    <string name="app_version_display">Version 1.0.0</string>
 
     <!-- Offline bar -->
     <string name="label_offline_status">Offline – changes will sync when connected</string>

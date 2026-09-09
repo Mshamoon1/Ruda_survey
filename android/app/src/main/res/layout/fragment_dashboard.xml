@@ -289,7 +289,7 @@
             android:layout_height="@dimen/button_height_large"
             android:layout_weight="1"
             android:layout_marginEnd="@dimen/spacing_4"
-            android:text="@string/btn_new_survey"
+            android:text="Update Survey"
             android:textAllCaps="false"
             android:textColor="@color/md_on_primary"
             app:backgroundTint="@color/md_primary"

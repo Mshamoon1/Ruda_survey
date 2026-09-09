@@ -194,7 +194,7 @@
                             android:layout_width="0dp"
                             android:layout_height="@dimen/button_height_medium"
                             android:layout_weight="1"
-                            android:text="Front View"
+                            android:text="FrontView"
                             android:textAllCaps="false"
                             app:icon="@drawable/ic_camera"
                             app:iconGravity="textStart"
@@ -455,7 +455,9 @@
                             android:id="@+id/etStructureStatus"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:textAllCaps="false"
+                            android:textIsSelectable="true" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -534,7 +536,9 @@
                             android:id="@+id/etConstructionNature"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none" />
+                            android:inputType="none"
+                            android:textAllCaps="false"
+                            android:textIsSelectable="true" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -572,7 +576,7 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/button_height_large"
             android:layout_weight="1"
-            android:text="@string/btn_review_changes"
+            android:text="View Changes"
             android:textAllCaps="false"
             style="@style/Widget.RudaSurvey.Button.Primary"
             android:layout_marginStart="@dimen/spacing_8" />

@@ -67,6 +67,8 @@ class ReviewFragment : Fragment() {
             // A survey is new ONLY if it has no server-side ID
             val isNewSurvey = current.id.isBlank() || current.id.startsWith("temp_")
             
+            android.util.Log.d("ReviewFragment", "Submit: id='${current.id}' isNew=$isNewSurvey img1=${current.image1Bytes?.size} img2=${current.image2Bytes?.size} doc=${current.landOwnerDocBytes?.size}")
+            
             it.animateTapFeedback {
                 if (isNewSurvey) {
                     viewModel.createSurvey(current.copy(id = ""))

@@ -67,17 +67,6 @@ class NewSurveyFragment : Fragment() {
             }
         }
 
-        binding.btnAdvancedSearch.setOnClickListener {
-            it.animateTapFeedback {
-                val srNo = binding.etSerialNumber.text.toString().trim()
-                if (srNo.isBlank()) {
-                    Snackbar.make(binding.root, "Enter a serial number", Snackbar.LENGTH_SHORT).show()
-                    return@animateTapFeedback
-                }
-                viewModel.lookupBySrNo(srNo)
-            }
-        }
-
         binding.btnViewOriginal.setOnClickListener {
             if (isAdded) findNavController().navigate(R.id.action_newSurvey_to_originalData)
         }
@@ -89,7 +78,7 @@ class NewSurveyFragment : Fragment() {
                 when (state) {
                     is UiState.Loading -> {
                         binding.progressBar.visibility = View.VISIBLE
-                        binding.tvResult.visibility = View.GONE
+                        binding.cardResult.visibility = View.GONE
                         binding.rvSearchResults.visibility = View.GONE
                         binding.btnSerialLookup.isEnabled = false
                         binding.btnViewOriginal.visibility = View.GONE
@@ -103,7 +92,7 @@ class NewSurveyFragment : Fragment() {
                     is UiState.Error -> {
                         binding.progressBar.visibility = View.GONE
                         binding.btnSerialLookup.isEnabled = true
-                        binding.tvResult.visibility = View.GONE
+                        binding.cardResult.visibility = View.GONE
                         binding.rvSearchResults.visibility = View.GONE
                         binding.btnViewOriginal.visibility = View.GONE
                         Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
@@ -115,14 +104,30 @@ class NewSurveyFragment : Fragment() {
     }
 
     private fun showSurveyResult(survey: SurveyItem) {
-        binding.tvResult.text = buildString {
+        binding.tvResultDetails.text = buildString {
             appendLine("SR No: ${survey.srNo}")
+            if (survey.parcelId.isNotBlank()) appendLine("Parcel ID: ${survey.parcelId}")
             appendLine("Village: ${survey.village}")
             appendLine("Owner: ${survey.ownerName}")
+            if (survey.fName.isNotBlank()) appendLine("Father: ${survey.fName}")
+            if (survey.cnic.isNotBlank()) appendLine("CNIC: ${survey.cnic}")
+            if (survey.phone.isNotBlank()) appendLine("Phone: ${survey.phone}")
+            appendLine("")
+            if (survey.khasraNo.isNotBlank()) appendLine("Khasra No: ${survey.khasraNo}")
+            if (survey.electricityConnectionName.isNotBlank()) appendLine("Electricity: ${survey.electricityConnectionName}")
+            if (survey.landArea.isNotBlank()) appendLine("Land Area: ${survey.landArea}")
+            if (survey.lat != 0.0 || survey.lng != 0.0) appendLine("GPS: ${survey.lat}, ${survey.lng}")
+            appendLine("")
             appendLine("Structure: ${survey.structuralName}")
+            appendLine("Status: ${survey.status}")
             appendLine("Construction: ${survey.natureOfConstruction}")
+            if (survey.rd.isNotBlank()) appendLine("RD: ${survey.rd}")
+            if (survey.pkg.isNotBlank()) appendLine("Package: ${survey.pkg}")
+            if (survey.length.isNotBlank()) appendLine("Length: ${survey.length}")
+            if (survey.width.isNotBlank()) appendLine("Width: ${survey.width}")
+            if (survey.area.isNotBlank()) appendLine("Area: ${survey.area}")
         }
-        binding.tvResult.visibility = View.VISIBLE
+        binding.cardResult.visibility = View.VISIBLE
         binding.btnViewOriginal.visibility = View.VISIBLE
     }
 

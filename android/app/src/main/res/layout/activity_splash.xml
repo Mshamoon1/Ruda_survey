@@ -1,86 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_splash_gradient">
+    android:layout_height="match_parent">
 
-    <!-- Top decorative arc -->
-    <View
-        android:id="@+id/topArc"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:background="@drawable/bg_splash_top_arc"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/img"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/app_name" />
 
-    <!-- Main content centered -->
+    <!-- Center branding -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_gravity="center">
 
-        <!-- Logo -->
-        <ImageView
-            android:id="@+id/ivLogo"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:src="@drawable/logo"
-            android:contentDescription="@string/app_name"
-            android:layout_marginBottom="24dp" />
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_logo_disc"
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp">
 
-        <!-- App Name -->
-        <com.google.android.material.textview.MaterialTextView
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:src="@drawable/logo"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/app_name" />
+
+        </FrameLayout>
+
+        <TextView
             android:id="@+id/tvAppName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/splash_title"
-            android:textSize="36sp"
-            android:fontFamily="@font/inter_semibold"
+            android:textSize="32sp"
             android:textColor="@android:color/white"
-            android:letterSpacing="0.15"
-            android:layout_marginBottom="4dp" />
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginBottom="6dp" />
 
-        <com.google.android.material.textview.MaterialTextView
+        <TextView
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/splash_subtitle"
             android:textSize="14sp"
-            android:fontFamily="@font/inter_regular"
-            android:textColor="#B3FFFFFF"
-            android:letterSpacing="0.05" />
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvOrgName"
+        <TextView
+            android:id="@+id/tvTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/splash_org_name"
-            android:textSize="11sp"
-            android:fontFamily="@font/inter_regular"
-            android:textColor="#80FFFFFF"
-            android:letterSpacing="0.03"
-            android:layout_marginTop="8dp" />
+            android:text="@string/splash_tagline"
+            android:textSize="12sp"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center" />
 
     </LinearLayout>
 
-    <!-- Bottom loading indicator -->
+    <!-- Bottom section: loader + powered by -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginBottom="60dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="48dp">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progressBar"
@@ -89,32 +87,30 @@
             android:indeterminate="true"
             app:indicatorSize="32dp"
             app:trackThickness="3dp"
-            app:indicatorColor="@android:color/white"
-            app:trackColor="#40FFFFFF"
-            android:layout_marginBottom="12dp" />
+            app:indicatorColor="#FFFFFF"
+            app:trackColor="#55FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp" />
 
-        <com.google.android.material.textview.MaterialTextView
+        <TextView
+            android:id="@+id/tvPoweredBy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/loading"
+            android:text="Powered by Nespak"
             android:textSize="12sp"
-            android:fontFamily="@font/inter_regular"
-            android:textColor="#B3FFFFFF" />
+            android:textColor="#CCFFFFFF"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/tvNespakLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="https://nespak.com.pk/"
+            android:textSize="10sp"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp" />
 
     </LinearLayout>
 
-    <!-- Version -->
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvVersion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_version_display"
-        android:textSize="11sp"
-        android:fontFamily="@font/inter_regular"
-        android:textColor="#80FFFFFF"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

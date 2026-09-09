@@ -91,7 +91,11 @@ class CameraFragment : Fragment() {
             imageType = imageTypeArg
         }
 
-        setupImageTypeSpinner()
+        if (args?.containsKey("imageType") == true) {
+            binding.tilImageType.visibility = View.GONE
+        } else {
+            setupImageTypeSpinner()
+        }
         setupPreviewControls()
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) ==
@@ -373,6 +377,8 @@ class CameraFragment : Fragment() {
             val originalBytes = file.readBytes()
             val stampedFile = File(requireContext().cacheDir, "STAMPED_${file.name}")
             val stampedBytes = if (stampedFile.exists()) stampedFile.readBytes() else originalBytes
+
+            android.util.Log.d("CameraFragment", "usePhoto imageType=$imageType originalBytes=${originalBytes.size} stampedBytes=${stampedBytes.size}")
 
             val pending = PendingImage(
                 imageType = imageType,

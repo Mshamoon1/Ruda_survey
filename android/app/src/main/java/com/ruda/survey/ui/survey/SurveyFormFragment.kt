@@ -1,6 +1,7 @@
 package com.ruda.survey.ui.survey
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,15 +30,15 @@ class SurveyFormFragment : Fragment() {
     private lateinit var viewModel: SurveyViewModel
     private lateinit var locationHelper: LocationHelper
 
-    private val pickDocument = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    private val pickDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { handleDocumentSelection(it) }
     }
 
-    private var selectedDocBytes: ByteArray? = null
-    private var selectedDocName: String? = null
+    private var selectedStatus: String = ""
+    private var selectedNature: String = ""
 
-    private val validStatuses = setOf("Residential", "Commercial", "Cattle Farm", "Agricultural", "Empty Plot", "Under Construction")
-    private val validConstructionNatures = setOf("Pacca", "Semi-Pacca", "Kacha")
+    private val validStatuses = setOf("residential", "commercial", "cattle farm", "agricultural", "empty plot", "under construction")
+    private val validConstructionNatures = setOf("pacca", "semi-pacca", "kacha")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,23 +55,24 @@ class SurveyFormFragment : Fragment() {
 
         locationHelper = LocationHelper(requireContext())
 
+        setupDropdowns()
+
         val survey = viewModel.currentSurvey
         if (survey != null && survey.id.isNotBlank()) {
             populateFields(survey)
             animateSectionsIn()
         } else {
             binding.tvParcelCode.text = "New Survey"
-            selectedDocBytes = null
-            selectedDocName = null
+            viewModel.setPendingDoc(null, null)
+            selectedStatus = ""
+            selectedNature = ""
             viewModel.fetchNextSrNo()
-            if (survey != null) populateFields(survey)
         }
 
         setupClickListeners()
         observeImageStatus()
         observeGpsLocation()
         observeNextSrNo()
-        setupDropdowns()
     }
 
     private fun setupDropdowns() {
@@ -78,11 +80,19 @@ class SurveyFormFragment : Fragment() {
         val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, statuses)
         binding.etStructureStatus.setAdapter(statusAdapter)
         binding.etStructureStatus.setText("", false)
+        binding.etStructureStatus.setOnItemClickListener { _, _, position, _ ->
+            selectedStatus = statusAdapter.getItem(position).toString()
+            Log.d("SurveyForm", "Status selected from adapter: '$selectedStatus'")
+        }
 
         val constructionNatures = validConstructionNatures.toTypedArray()
         val constructionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, constructionNatures)
         binding.etConstructionNature.setAdapter(constructionAdapter)
         binding.etConstructionNature.setText("", false)
+        binding.etConstructionNature.setOnItemClickListener { _, _, position, _ ->
+            selectedNature = constructionAdapter.getItem(position).toString()
+            Log.d("SurveyForm", "Nature selected from adapter: '$selectedNature'")
+        }
     }
 
     private fun observeNextSrNo() {
@@ -96,6 +106,7 @@ class SurveyFormFragment : Fragment() {
     }
 
     private fun populateFields(survey: SurveyItem) {
+        Log.d("SurveyForm", "populateFields status='${survey.status}' nature='${survey.natureOfConstruction}'")
         binding.tvParcelCode.text = if (survey.srNo > 0) "SR #${survey.srNo}" else survey.village.ifBlank { "New Survey" }
         binding.etSrNo.setText(if (survey.srNo > 0) survey.srNo.toString() else "")
         binding.etParcelCode.setText(survey.parcelId)
@@ -109,19 +120,27 @@ class SurveyFormFragment : Fragment() {
         binding.etContact.setText(survey.phone)
         binding.etLandOwnerDoc.setText(survey.landOwnerDoc)
         
-        binding.tvLandDocStatus.text = if (survey.landOwnerDocBytes != null) survey.landOwnerDocName ?: "File attached" else "No file selected"
-        selectedDocBytes = survey.landOwnerDocBytes
-        selectedDocName = survey.landOwnerDocName
+        if (viewModel.pendingDocBytes == null && survey.landOwnerDoc.isNotBlank()) {
+            binding.tvLandDocStatus.text = "File attached (Server)"
+        } else if (viewModel.pendingDocBytes != null) {
+            binding.tvLandDocStatus.text = viewModel.pendingDocName ?: "File attached"
+        } else {
+            binding.tvLandDocStatus.text = "No file selected"
+        }
 
         binding.etVillage.setText(survey.village)
         binding.etKhasraNumber.setText(survey.khasraNo)
         binding.etElectricityConnection.setText(survey.electricityConnectionName)
         binding.etLandArea.setText(survey.landArea)
         
-        if (survey.status in validStatuses) {
-            binding.etStructureStatus.setText(survey.status, false)
+        val matchedStatus = validStatuses.find { it.equals(survey.status, ignoreCase = true) }
+        Log.d("SurveyForm", "populateFields matchedStatus='$matchedStatus' for raw='${survey.status}'")
+        if (matchedStatus != null) {
+            binding.etStructureStatus.setText(matchedStatus, false)
+            selectedStatus = matchedStatus
         } else {
             binding.etStructureStatus.setText("", false)
+            selectedStatus = ""
         }
         
         binding.etStructureName.setText(survey.structuralName)
@@ -129,10 +148,14 @@ class SurveyFormFragment : Fragment() {
         binding.etWidthFt.setText(survey.width)
         binding.etAreaSqft.setText(survey.area)
         
-        if (survey.natureOfConstruction in validConstructionNatures) {
-            binding.etConstructionNature.setText(survey.natureOfConstruction, false)
+        val matchedNature = validConstructionNatures.find { it.equals(survey.natureOfConstruction, ignoreCase = true) }
+        Log.d("SurveyForm", "populateFields matchedNature='$matchedNature' for raw='${survey.natureOfConstruction}'")
+        if (matchedNature != null) {
+            binding.etConstructionNature.setText(matchedNature, false)
+            selectedNature = matchedNature
         } else {
             binding.etConstructionNature.setText("", false)
+            selectedNature = ""
         }
     }
 
@@ -193,7 +216,7 @@ class SurveyFormFragment : Fragment() {
 
         binding.btnUploadLandDoc.setOnClickListener {
             it.animateTapFeedback {
-                pickDocument.launch("*/*")
+                pickDocument.launch(arrayOf("application/pdf", "image/*"))
             }
         }
 
@@ -203,10 +226,13 @@ class SurveyFormFragment : Fragment() {
     private fun handleDocumentSelection(uri: android.net.Uri) {
         try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
-            selectedDocBytes = inputStream?.readBytes()
-            selectedDocName = getFileName(uri)
-            binding.tvLandDocStatus.text = selectedDocName ?: "File selected"
+            val bytes = inputStream?.readBytes()
+            val name = getFileName(uri)
+            viewModel.setPendingDoc(bytes, name)
+            binding.tvLandDocStatus.text = name ?: "File selected"
+            Log.d("SurveyForm", "Document selected: name='$name' bytes=${bytes?.size}")
         } catch (e: Exception) {
+            Log.e("SurveyForm", "Failed to read document", e)
             Snackbar.make(binding.root, "Failed to read file", Snackbar.LENGTH_SHORT).show()
         }
     }
@@ -258,11 +284,18 @@ class SurveyFormFragment : Fragment() {
         val img1 = images.find { it.imageType == "imgOne" }
         val img2 = images.find { it.imageType == "imgTwo" }
 
-        val statusText = binding.etStructureStatus.text.toString().trim()
-        val validatedStatus = if (statusText in validStatuses) statusText.lowercase() else ""
+        val rawStatusText = binding.etStructureStatus.text.toString().trim()
+        val validatedStatus = if (selectedStatus.isNotBlank()) selectedStatus else rawStatusText.lowercase()
 
-        val natureText = binding.etConstructionNature.text.toString().trim()
-        val validatedNature = if (natureText in validConstructionNatures) natureText.lowercase() else ""
+        val rawNatureText = binding.etConstructionNature.text.toString().trim()
+        val validatedNature = if (selectedNature.isNotBlank()) selectedNature else rawNatureText.lowercase()
+
+        Log.d("SurveyForm", "Status raw='$rawStatusText' adapter='$selectedStatus' validated='$validatedStatus'")
+        Log.d("SurveyForm", "Nature raw='$rawNatureText' adapter='$selectedNature' validated='$validatedNature'")
+        Log.d("SurveyForm", "Doc bytes=${viewModel.pendingDocBytes?.size} name='${viewModel.pendingDocName}'")
+        Log.d("SurveyForm", "pendingImages count=${images.size} img1=${img1 != null} img2=${img2 != null}")
+        if (img1 != null) Log.d("SurveyForm", "img1 original=${img1.originalBytes.size} stamped=${img1.stampedBytes.size}")
+        if (img2 != null) Log.d("SurveyForm", "img2 original=${img2.originalBytes.size} stamped=${img2.stampedBytes.size}")
 
         return SurveyItem(
             id = existing?.id ?: "",
@@ -277,8 +310,8 @@ class SurveyFormFragment : Fragment() {
             cnic = binding.etCnic.text.toString(),
             phone = binding.etContact.text.toString(),
             landOwnerDoc = binding.etLandOwnerDoc.text.toString(),
-            landOwnerDocBytes = selectedDocBytes,
-            landOwnerDocName = selectedDocName,
+            landOwnerDocBytes = viewModel.pendingDocBytes,
+            landOwnerDocName = viewModel.pendingDocName,
             village = binding.etVillage.text.toString(),
             khasraNo = binding.etKhasraNumber.text.toString(),
             electricityConnectionName = binding.etElectricityConnection.text.toString(),

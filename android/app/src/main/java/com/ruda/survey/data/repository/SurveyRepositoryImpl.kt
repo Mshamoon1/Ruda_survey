@@ -1,5 +1,6 @@
 package com.ruda.survey.data.repository
 
+import android.util.Log
 import com.ruda.survey.data.dto.*
 import com.ruda.survey.data.remote.SurveyApi
 import com.ruda.survey.domain.model.*
@@ -69,6 +70,7 @@ class SurveyRepositoryImpl(
 
     override suspend fun createSurvey(item: SurveyItem): Result<SurveyItem> {
         return try {
+            Log.d("SurveyRepo", "createSurvey status='${item.status}' nature='${item.natureOfConstruction}' img1=${item.image1Bytes != null} img2=${item.image2Bytes != null} doc=${item.landOwnerDocBytes != null} docUrl='${item.landOwnerDoc}'")
             val response = api.createSurvey(
                 srNo = item.srNo.toString().toTextBody(),
                 parcelId = item.parcelId.toTextBodyOrNull(),
@@ -91,7 +93,7 @@ class SurveyRepositoryImpl(
                 area = item.area.toTextBodyOrNull(),
                 natureOfConstruction = item.natureOfConstruction.toTextBodyOrNull(),
                 landOwnerDoc = item.landOwnerDocBytes?.toImagePart("land_owner_doc", item.landOwnerDocName ?: "doc.pdf")
-                    ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") }?.let { text ->
+                    ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") && !it.startsWith("https") }?.let { text ->
                         val body = text.toRequestBody(null)
                         MultipartBody.Part.createFormData("land_owner_doc", "doc.txt", body)
                     },
@@ -116,6 +118,15 @@ class SurveyRepositoryImpl(
 
     override suspend fun updateSurvey(item: SurveyItem): Result<SurveyItem> {
         return try {
+            Log.d("SurveyRepo", "updateSurvey status='${item.status}' nature='${item.natureOfConstruction}' img1Bytes=${item.image1Bytes?.size} img2Bytes=${item.image2Bytes?.size} docBytes=${item.landOwnerDocBytes?.size} docUrl='${item.landOwnerDoc}'")
+            val imgOnePart = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg")
+            val imgTwoPart = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
+            val docPart = item.landOwnerDocBytes?.toImagePart("land_owner_doc", item.landOwnerDocName ?: "doc.pdf")
+                ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") && !it.startsWith("https") }?.let { text ->
+                    val body = text.toRequestBody(null)
+                    MultipartBody.Part.createFormData("land_owner_doc", "doc.txt", body)
+                }
+            Log.d("SurveyRepo", "updateSurvey parts: imgOnePart=${imgOnePart != null} imgTwoPart=${imgTwoPart != null} docPart=${docPart != null}")
             val response = api.updateSurvey(
                 id = item.id,
                 srNo = item.srNo.toString().toTextBody(),
@@ -138,13 +149,9 @@ class SurveyRepositoryImpl(
                 length = item.length.toTextBodyOrNull(),
                 width = item.width.toTextBodyOrNull(),
                 area = item.area.toTextBodyOrNull(),
-                landOwnerDoc = item.landOwnerDocBytes?.toImagePart("land_owner_doc", item.landOwnerDocName ?: "doc.pdf")
-                    ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") }?.let { text ->
-                        val body = text.toRequestBody(null)
-                        MultipartBody.Part.createFormData("land_owner_doc", "doc.txt", body)
-                    },
-                imgOne = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg"),
-                imgTwo = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
+                landOwnerDoc = docPart,
+                imgOne = imgOnePart,
+                imgTwo = imgTwoPart
             )
             if (response.isSuccessful) {
                 val responseBody = response.body()!!
@@ -155,9 +162,11 @@ class SurveyRepositoryImpl(
                 }
             } else {
                 val errorBody = response.errorBody()?.string()
+                Log.e("SurveyRepo", "updateSurvey failed: code=${response.code()} body=$errorBody")
                 Result.failure(Exception(errorBody ?: "Update failed"))
             }
         } catch (e: Exception) {
+            Log.e("SurveyRepo", "updateSurvey exception", e)
             Result.failure(e)
         }
     }
@@ -211,6 +220,10 @@ class SurveyRepositoryImpl(
         val ident = data["identification"] as? Map<*, *> ?: emptyMap<String, Any>()
         val area = data["covered_area"] as? Map<*, *> ?: emptyMap<String, Any>()
 
+        val rawStatus = data["status"]?.toString() ?: ""
+        val rawNature = data["nature_of_construction"]?.toString() ?: ""
+        Log.d("SurveyRepo", "mapToSurveyItem raw status='$rawStatus' nature='$rawNature'")
+
         return SurveyItem(
             id = data["_id"]?.toString() ?: "",
             srNo = (data["sr_no"] as? Number)?.toInt() ?: 0,
@@ -218,9 +231,9 @@ class SurveyRepositoryImpl(
             rd = data["rd"]?.toString() ?: "",
             pkg = data["pkg"]?.toString() ?: "",
             village = data["village"]?.toString() ?: "",
-            status = data["status"]?.toString() ?: "",
+            status = rawStatus.lowercase(),
             structuralName = data["stractural_name"]?.toString() ?: "",
-            natureOfConstruction = data["nature_of_construction"]?.toString() ?: "",
+            natureOfConstruction = rawNature.lowercase(),
             imgOne = data["imgOne"]?.toString() ?: "",
             imgTwo = data["imgTwo"]?.toString() ?: "",
             lat = (coords["lat"] as? Number)?.toDouble() ?: 0.0,
@@ -241,6 +254,7 @@ class SurveyRepositoryImpl(
 }
 
 private fun SurveyItemDto.toDomain(): SurveyItem {
+    Log.d("SurveyRepo", "toDomain status='${status}' nature='${nature_of_construction}'")
     return SurveyItem(
         id = id,
         srNo = sr_no,
@@ -248,9 +262,9 @@ private fun SurveyItemDto.toDomain(): SurveyItem {
         rd = rd ?: "",
         pkg = pkg ?: "",
         village = village ?: "",
-        status = status ?: "",
+        status = (status ?: "").lowercase(),
         structuralName = structuralName ?: "",
-        natureOfConstruction = nature_of_construction ?: "",
+        natureOfConstruction = (nature_of_construction ?: "").lowercase(),
         imgOne = imgOne ?: "",
         imgTwo = imgTwo ?: "",
         lat = coordinates?.lat ?: 0.0,

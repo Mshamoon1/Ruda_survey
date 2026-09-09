@@ -113,4 +113,13 @@
     <color name="map_pin_primary">#0D3B66</color>
     <color name="map_pin_stroke">#FFFFFF</color>
     <color name="map_empty_text">#74818E</color>
+
+    <!-- New Splash Colors -->
+    <color name="splash_text_secondary">#CCE9F3F7</color>
+    <color name="splash_text_tertiary">#8CE9F3F7</color>
+    <color name="splash_accent_teal">#3DD6C4</color>
+    <color name="splash_overlay_navy">#800A1F38</color>
+    <color name="splash_bg_start">#0A1F38</color>
+    <color name="splash_bg_center">#0F3049</color>
+    <color name="splash_bg_end">#134559</color>
 </resources>
