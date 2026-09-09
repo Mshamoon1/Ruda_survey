@@ -63,19 +63,6 @@ class LoginFragment : Fragment() {
             }
         }
 
-        // Hint chips: fade-substitute text on tap
-        binding.chipSurveyor.setOnClickListener {
-            binding.etEmail.setText("surveyor1@ruda.com")
-            binding.etPassword.setText("")
-            binding.etPassword.requestFocus()
-        }
-
-        binding.chipSupervisor.setOnClickListener {
-            binding.etEmail.setText("supervisor1@ruda.com")
-            binding.etPassword.setText("")
-            binding.etPassword.requestFocus()
-        }
-
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
@@ -152,25 +139,49 @@ class LoginFragment : Fragment() {
 
     private fun animateEntrance() {
         val reduced = view?.isReducedMotionEnabled() ?: return
-        val views = listOf(
-            binding.ivLogo,
-            binding.tvTitle,
-            binding.tvSubtitle,
-            binding.tilEmail,
-            binding.tilPassword,
-            binding.btnLogin
-        )
-        views.forEachIndexed { index, view ->
+
+        // Logo: scale + fade in
+        binding.ivLogo.alpha = 0f
+        binding.ivLogo.scaleX = 0.7f
+        binding.ivLogo.scaleY = 0.7f
+        binding.ivLogo.animate()
+            .alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(if (reduced) MotionConstants.REDUCED_MOTION_DURATION else 500L)
+            .setInterpolator(MotionConstants.EASING_ENTRANCE)
+            .start()
+
+        // Title + subtitle: stagger fade + slide up
+        listOf(binding.tvTitle, binding.tvSubtitle).forEachIndexed { index, view ->
             view.alpha = 0f
-            view.translationY = if (reduced) 0f else 24f
+            view.translationY = if (reduced) 0f else 20f
             view.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(if (reduced) MotionConstants.REDUCED_MOTION_DURATION else 300L)
-                .setStartDelay(if (reduced) 0L else (index * 60L))
+                .alpha(1f).translationY(0f)
+                .setDuration(if (reduced) MotionConstants.REDUCED_MOTION_DURATION else 400L)
+                .setStartDelay(if (reduced) 0L else (200L + index * 100L))
                 .setInterpolator(MotionConstants.EASING_ENTRANCE)
                 .start()
         }
+
+        // Card: slide up + fade in
+        binding.cardLogin.alpha = 0f
+        binding.cardLogin.translationY = if (reduced) 0f else 40f
+        binding.cardLogin.animate()
+            .alpha(1f).translationY(0f)
+            .setDuration(if (reduced) MotionConstants.REDUCED_MOTION_DURATION else 500L)
+            .setStartDelay(if (reduced) 0L else 400L)
+            .setInterpolator(MotionConstants.EASING_ENTRANCE)
+            .start()
+
+        // Button: scale pop after card lands
+        binding.btnLogin.alpha = 0f
+        binding.btnLogin.scaleX = 0.9f
+        binding.btnLogin.scaleY = 0.9f
+        binding.btnLogin.animate()
+            .alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(if (reduced) MotionConstants.REDUCED_MOTION_DURATION else 350L)
+            .setStartDelay(if (reduced) 0L else 700L)
+            .setInterpolator(MotionConstants.EASING_ENTRANCE)
+            .start()
     }
 
     override fun onDestroyView() {

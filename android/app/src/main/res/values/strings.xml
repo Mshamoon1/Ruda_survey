@@ -5,7 +5,7 @@
 
     <!-- Login -->
     <string name="login_title">Welcome Back</string>
-    <string name="login_subtitle">Sign in to RUDA Survey</string>
+    <string name="login_subtitle">Sign in to Ruda Land Occupancy</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_surveyor1">Surveyor 1</string>
