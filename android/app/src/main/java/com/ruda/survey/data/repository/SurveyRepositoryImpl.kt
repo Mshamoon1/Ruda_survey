@@ -90,9 +90,11 @@ class SurveyRepositoryImpl(
                 width = item.width.toTextBodyOrNull(),
                 area = item.area.toTextBodyOrNull(),
                 natureOfConstruction = item.natureOfConstruction.toTextBodyOrNull(),
-                landOwnerDoc = item.landOwnerDoc.toTextBodyOrNull()?.let { body ->
-                    MultipartBody.Part.createFormData("land_owner_doc", item.landOwnerDoc, body)
-                },
+                landOwnerDoc = item.landOwnerDocBytes?.toImagePart("land_owner_doc", item.landOwnerDocName ?: "doc.pdf")
+                    ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") }?.let { text ->
+                        val body = text.toRequestBody(null)
+                        MultipartBody.Part.createFormData("land_owner_doc", "doc.txt", body)
+                    },
                 imgOne = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg"),
                 imgTwo = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
             )
@@ -136,9 +138,11 @@ class SurveyRepositoryImpl(
                 length = item.length.toTextBodyOrNull(),
                 width = item.width.toTextBodyOrNull(),
                 area = item.area.toTextBodyOrNull(),
-                landOwnerDoc = item.landOwnerDoc.toTextBodyOrNull()?.let { body ->
-                    MultipartBody.Part.createFormData("land_owner_doc", item.landOwnerDoc, body)
-                },
+                landOwnerDoc = item.landOwnerDocBytes?.toImagePart("land_owner_doc", item.landOwnerDocName ?: "doc.pdf")
+                    ?: item.landOwnerDoc.takeIf { it.isNotBlank() && !it.startsWith("http") }?.let { text ->
+                        val body = text.toRequestBody(null)
+                        MultipartBody.Part.createFormData("land_owner_doc", "doc.txt", body)
+                    },
                 imgOne = item.image1Bytes?.toImagePart("imgOne", "imgOne.jpg"),
                 imgTwo = item.image2Bytes?.toImagePart("imgTwo", "imgTwo.jpg")
             )
@@ -186,16 +190,16 @@ class SurveyRepositoryImpl(
     }
 
     private fun String?.toTextBody(): RequestBody =
-        (this ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
+        (this ?: "").toRequestBody(null)
 
     private fun String?.toTextBodyOrNull(): RequestBody? =
-        this?.toRequestBody("text/plain".toMediaTypeOrNull())
+        this?.toRequestBody(null)
 
     private fun ByteArray.toImagePart(fieldName: String, fileName: String): MultipartBody.Part {
-        val mediaType = if (fileName.endsWith(".png")) {
-            "image/png".toMediaTypeOrNull()
-        } else {
-            "image/jpeg".toMediaTypeOrNull()
+        val mediaType = when {
+            fileName.endsWith(".pdf", true) -> "application/pdf".toMediaTypeOrNull()
+            fileName.endsWith(".png", true) -> "image/png".toMediaTypeOrNull()
+            else -> "image/jpeg".toMediaTypeOrNull()
         }
         val body = this.toRequestBody(mediaType)
         return MultipartBody.Part.createFormData(fieldName, fileName, body)

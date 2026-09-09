@@ -263,7 +263,7 @@
                             android:layout_height="200dp"
                             android:scaleType="centerCrop"
                             android:visibility="gone"
-                            android:background="#F5F5F5" />
+                            android:background="?attr/colorSurfaceVariant" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/tvImage1Label"
@@ -290,7 +290,7 @@
                             android:layout_height="200dp"
                             android:scaleType="centerCrop"
                             android:visibility="gone"
-                            android:background="#F5F5F5" />
+                            android:background="?attr/colorSurfaceVariant" />
 
                         <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/tvImage2Label"

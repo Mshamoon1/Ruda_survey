@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +29,16 @@ class SurveyFormFragment : Fragment() {
     private lateinit var viewModel: SurveyViewModel
     private lateinit var locationHelper: LocationHelper
 
+    private val pickDocument = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { handleDocumentSelection(it) }
+    }
+
+    private var selectedDocBytes: ByteArray? = null
+    private var selectedDocName: String? = null
+
+    private val validStatuses = setOf("Residential", "Commercial", "Cattle Farm", "Agricultural", "Empty Plot", "Under Construction")
+    private val validConstructionNatures = setOf("Pacca", "Semi-Pacca", "Kacha")
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -43,20 +55,49 @@ class SurveyFormFragment : Fragment() {
         locationHelper = LocationHelper(requireContext())
 
         val survey = viewModel.currentSurvey
-        if (survey != null) {
+        if (survey != null && survey.id.isNotBlank()) {
             populateFields(survey)
             animateSectionsIn()
         } else {
             binding.tvParcelCode.text = "New Survey"
+            selectedDocBytes = null
+            selectedDocName = null
+            viewModel.fetchNextSrNo()
+            if (survey != null) populateFields(survey)
         }
 
         setupClickListeners()
         observeImageStatus()
         observeGpsLocation()
+        observeNextSrNo()
+        setupDropdowns()
+    }
+
+    private fun setupDropdowns() {
+        val statuses = validStatuses.toTypedArray()
+        val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, statuses)
+        binding.etStructureStatus.setAdapter(statusAdapter)
+        binding.etStructureStatus.setText("", false)
+
+        val constructionNatures = validConstructionNatures.toTypedArray()
+        val constructionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, constructionNatures)
+        binding.etConstructionNature.setAdapter(constructionAdapter)
+        binding.etConstructionNature.setText("", false)
+    }
+
+    private fun observeNextSrNo() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.nextSrNoState.collect { srNo ->
+                if (srNo != null && (binding.etSrNo.text.isNullOrBlank() || binding.etSrNo.text.toString() == "0")) {
+                    binding.etSrNo.setText(srNo.toString())
+                }
+            }
+        }
     }
 
     private fun populateFields(survey: SurveyItem) {
         binding.tvParcelCode.text = if (survey.srNo > 0) "SR #${survey.srNo}" else survey.village.ifBlank { "New Survey" }
+        binding.etSrNo.setText(if (survey.srNo > 0) survey.srNo.toString() else "")
         binding.etParcelCode.setText(survey.parcelId)
         binding.etRdValue.setText(survey.rd)
         binding.etPackageNo.setText(survey.pkg)
@@ -67,16 +108,32 @@ class SurveyFormFragment : Fragment() {
         binding.etCnic.setText(survey.cnic)
         binding.etContact.setText(survey.phone)
         binding.etLandOwnerDoc.setText(survey.landOwnerDoc)
+        
+        binding.tvLandDocStatus.text = if (survey.landOwnerDocBytes != null) survey.landOwnerDocName ?: "File attached" else "No file selected"
+        selectedDocBytes = survey.landOwnerDocBytes
+        selectedDocName = survey.landOwnerDocName
+
         binding.etVillage.setText(survey.village)
         binding.etKhasraNumber.setText(survey.khasraNo)
         binding.etElectricityConnection.setText(survey.electricityConnectionName)
         binding.etLandArea.setText(survey.landArea)
-        binding.etStructureStatus.setText(survey.status)
+        
+        if (survey.status in validStatuses) {
+            binding.etStructureStatus.setText(survey.status, false)
+        } else {
+            binding.etStructureStatus.setText("", false)
+        }
+        
         binding.etStructureName.setText(survey.structuralName)
         binding.etLengthFt.setText(survey.length)
         binding.etWidthFt.setText(survey.width)
         binding.etAreaSqft.setText(survey.area)
-        binding.etConstructionNature.setText(survey.natureOfConstruction)
+        
+        if (survey.natureOfConstruction in validConstructionNatures) {
+            binding.etConstructionNature.setText(survey.natureOfConstruction, false)
+        } else {
+            binding.etConstructionNature.setText("", false)
+        }
     }
 
     private fun observeGpsLocation() {
@@ -134,7 +191,43 @@ class SurveyFormFragment : Fragment() {
             }
         }
 
+        binding.btnUploadLandDoc.setOnClickListener {
+            it.animateTapFeedback {
+                pickDocument.launch("*/*")
+            }
+        }
+
         updateImageButtonText()
+    }
+
+    private fun handleDocumentSelection(uri: android.net.Uri) {
+        try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            selectedDocBytes = inputStream?.readBytes()
+            selectedDocName = getFileName(uri)
+            binding.tvLandDocStatus.text = selectedDocName ?: "File selected"
+        } catch (e: Exception) {
+            Snackbar.make(binding.root, "Failed to read file", Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun getFileName(uri: android.net.Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            val cursor = requireContext().contentResolver.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val index = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (index != -1) result = it.getString(index)
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result?.lastIndexOf('/') ?: -1
+            if (cut != -1) result = result?.substring(cut + 1)
+        }
+        return result
     }
 
     private fun saveCurrentFormState() {
@@ -165,9 +258,15 @@ class SurveyFormFragment : Fragment() {
         val img1 = images.find { it.imageType == "imgOne" }
         val img2 = images.find { it.imageType == "imgTwo" }
 
+        val statusText = binding.etStructureStatus.text.toString().trim()
+        val validatedStatus = if (statusText in validStatuses) statusText.lowercase() else ""
+
+        val natureText = binding.etConstructionNature.text.toString().trim()
+        val validatedNature = if (natureText in validConstructionNatures) natureText.lowercase() else ""
+
         return SurveyItem(
             id = existing?.id ?: "",
-            srNo = existing?.srNo ?: 0,
+            srNo = binding.etSrNo.text.toString().toIntOrNull() ?: existing?.srNo ?: 0,
             parcelId = binding.etParcelCode.text.toString().ifBlank { existing?.parcelId ?: "" },
             rd = binding.etRdValue.text.toString(),
             pkg = binding.etPackageNo.text.toString(),
@@ -178,16 +277,18 @@ class SurveyFormFragment : Fragment() {
             cnic = binding.etCnic.text.toString(),
             phone = binding.etContact.text.toString(),
             landOwnerDoc = binding.etLandOwnerDoc.text.toString(),
+            landOwnerDocBytes = selectedDocBytes,
+            landOwnerDocName = selectedDocName,
             village = binding.etVillage.text.toString(),
             khasraNo = binding.etKhasraNumber.text.toString(),
             electricityConnectionName = binding.etElectricityConnection.text.toString(),
             landArea = binding.etLandArea.text.toString(),
-            status = binding.etStructureStatus.text.toString(),
+            status = validatedStatus,
             structuralName = binding.etStructureName.text.toString(),
             length = binding.etLengthFt.text.toString(),
             width = binding.etWidthFt.text.toString(),
             area = binding.etAreaSqft.text.toString(),
-            natureOfConstruction = binding.etConstructionNature.text.toString(),
+            natureOfConstruction = validatedNature,
             imgOne = existing?.imgOne ?: "",
             imgTwo = existing?.imgTwo ?: "",
             image1Bytes = img1?.stampedBytes ?: img1?.originalBytes ?: existing?.image1Bytes,

@@ -21,7 +21,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
 import com.ruda.survey.data.remote.RepositoryFactory
@@ -367,32 +369,36 @@ class CameraFragment : Fragment() {
         val file = capturedOriginalFile ?: return
         val stampData = capturedStampData ?: return
 
-        val originalBytes = file.readBytes()
-        val stampedFile = File(requireContext().cacheDir, "STAMPED_${file.name}")
-        val stampedBytes = if (stampedFile.exists()) stampedFile.readBytes() else originalBytes
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val originalBytes = file.readBytes()
+            val stampedFile = File(requireContext().cacheDir, "STAMPED_${file.name}")
+            val stampedBytes = if (stampedFile.exists()) stampedFile.readBytes() else originalBytes
 
-        val pending = PendingImage(
-            imageType = imageType,
-            originalBytes = originalBytes,
-            stampedBytes = stampedBytes,
-            fileName = file.name,
-            latitude = stampData.latitude,
-            longitude = stampData.longitude,
-            accuracy = stampData.accuracy,
-            areaName = stampData.areaName,
-            capturedAt = stampData.capturedAt,
-            pointId = stampData.pointId
-        )
+            val pending = PendingImage(
+                imageType = imageType,
+                originalBytes = originalBytes,
+                stampedBytes = stampedBytes,
+                fileName = file.name,
+                latitude = stampData.latitude,
+                longitude = stampData.longitude,
+                accuracy = stampData.accuracy,
+                areaName = stampData.areaName,
+                capturedAt = stampData.capturedAt,
+                pointId = stampData.pointId
+            )
 
-        viewModel.queueGpsImage(pending)
+            withContext(Dispatchers.Main) {
+                viewModel.queueGpsImage(pending)
 
-        Snackbar.make(binding.root, "Photo saved ($imageType)", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, "Photo saved ($imageType)", Snackbar.LENGTH_SHORT).show()
 
-        handler.postDelayed({
-            if (isAdded) {
-                findNavController().popBackStack()
+                handler.postDelayed({
+                    if (isAdded) {
+                        findNavController().popBackStack()
+                    }
+                }, 500)
             }
-        }, 500)
+        }
     }
 
     override fun onDestroyView() {

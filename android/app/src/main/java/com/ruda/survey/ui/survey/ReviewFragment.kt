@@ -19,7 +19,9 @@ import com.ruda.survey.utils.MotionConstants
 import com.ruda.survey.utils.animateTapFeedback
 import com.ruda.survey.utils.isReducedMotionEnabled
 import com.ruda.survey.utils.staggerFadeIn
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ReviewFragment : Fragment() {
     private var _binding: FragmentReviewBinding? = null
@@ -62,20 +64,14 @@ class ReviewFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            var surveyToSubmit = current
-            if (surveyToSubmit.id.isBlank()) {
-                val savedId = viewModel.getSavedSurveyId()
-                if (!savedId.isNullOrBlank()) {
-                    surveyToSubmit = surveyToSubmit.copy(id = savedId)
-                }
-            }
-
-            val hasId = surveyToSubmit.id.isNotBlank()
+            // A survey is new ONLY if it has no server-side ID
+            val isNewSurvey = current.id.isBlank() || current.id.startsWith("temp_")
+            
             it.animateTapFeedback {
-                if (hasId) {
-                    viewModel.updateSurvey(surveyToSubmit)
+                if (isNewSurvey) {
+                    viewModel.createSurvey(current.copy(id = ""))
                 } else {
-                    viewModel.createSurvey(surveyToSubmit)
+                    viewModel.updateSurvey(current)
                 }
             }
         }
@@ -106,7 +102,10 @@ class ReviewFragment : Fragment() {
             appendLine("Father: ${survey.fName}")
             if (survey.cnic.isNotBlank()) appendLine("CNIC: ${survey.cnic}")
             if (survey.phone.isNotBlank()) appendLine("Phone: ${survey.phone}")
-            if (survey.landOwnerDoc.isNotBlank()) appendLine("Land Owner Doc: ${survey.landOwnerDoc}")
+            if (survey.landOwnerDoc.isNotBlank() || survey.landOwnerDocBytes != null) {
+                val status = if (survey.landOwnerDocBytes != null) "New Attachment (${survey.landOwnerDocName})" else "Attached (Server)"
+                appendLine("Land Owner Doc: $status")
+            }
             appendLine("")
             appendLine("Location:")
             if (survey.khasraNo.isNotBlank()) appendLine("  Khasra No: ${survey.khasraNo}")
@@ -135,20 +134,23 @@ class ReviewFragment : Fragment() {
 
         if (hasImg1 || hasImg2) {
             binding.cardImages.visibility = View.VISIBLE
-            img1?.stampedBytes?.let { bytes ->
-                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                binding.ivReviewImg1.setImageBitmap(bmp)
-            } ?: survey.image1Bytes?.let { bytes ->
-                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                binding.ivReviewImg1.setImageBitmap(bmp)
-            }
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val bmp1 = img1?.stampedBytes?.let { bytes ->
+                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                } ?: survey.image1Bytes?.let { bytes ->
+                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
 
-            img2?.stampedBytes?.let { bytes ->
-                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                binding.ivReviewImg2.setImageBitmap(bmp)
-            } ?: survey.image2Bytes?.let { bytes ->
-                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                binding.ivReviewImg2.setImageBitmap(bmp)
+                val bmp2 = img2?.stampedBytes?.let { bytes ->
+                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                } ?: survey.image2Bytes?.let { bytes ->
+                    android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+
+                withContext(Dispatchers.Main) {
+                    bmp1?.let { binding.ivReviewImg1.setImageBitmap(it) }
+                    bmp2?.let { binding.ivReviewImg2.setImageBitmap(it) }
+                }
             }
         }
 

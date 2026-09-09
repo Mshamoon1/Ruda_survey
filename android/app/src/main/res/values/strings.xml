@@ -10,6 +10,7 @@
     <string name="hint_password">Password</string>
     <string name="hint_surveyor1">Surveyor 1</string>
     <string name="hint_supervisor1">Supervisor 1</string>
+    <string name="label_quick_fill">Quick fill</string>
     <string name="btn_logout_confirm">Are you sure you want to log out?</string>
     <string name="btn_logout_cancel">Cancel</string>
     <string name="btn_logout_confirm_action">Log Out</string>
@@ -23,14 +24,20 @@
     <string name="dashboard_title">Dashboard</string>
     <string name="dashboard_welcome">Welcome, %1$s</string>
     <string name="dashboard_role">Role: %1$s</string>
-    <string name="btn_new_survey">New Survey</string>
+    <string name="btn_new_survey">Find Parcel</string>
+    <string name="btn_create_survey">Create Survey</string>
     <string name="btn_sync_now">Sync Now</string>
     <string name="label_sync_status">Sync Status</string>
     <string name="label_pending_sync">Pending Syncs</string>
+    <string name="label_pending_surveys">Pending surveys</string>
     <string name="label_last_sync">Last Sync</string>
     <string name="label_total_surveys">Total Surveys</string>
     <string name="label_completed">Completed</string>
     <string name="label_in_progress">In Progress</string>
+    <string name="label_quick_actions">Quick Actions</string>
+    <string name="label_survey_map">Survey Map</string>
+    <string name="label_map_empty">No surveys with location data yet</string>
+    <string name="label_survey_pin">Survey location</string>
     <string name="never">Never</string>
     <string name="sync_complete">Sync complete</string>
     <string name="sync_failed">Sync failed</string>
@@ -91,6 +98,7 @@
     <string name="label_width_ft">Width (ft)</string>
     <string name="label_area_sqft">Area (ft²)</string>
     <string name="label_construction_nature">Nature of Construction</string>
+    <string name="label_sr_no">Serial Number (Sr. No)</string>
     <string name="btn_save_draft">Save Draft</string>
     <string name="btn_take_photo">Take Photo</string>
     <string name="btn_review_changes">Review Changes</string>
@@ -105,6 +113,9 @@
     <string name="camera_title">Capture Photo</string>
     <string name="label_image_type">Image Type</string>
     <string name="btn_capture">Capture</string>
+    <string name="btn_retake">Retake</string>
+    <string name="btn_use_photo">Use Photo</string>
+    <string name="status_acquiring_location">Acquiring location…</string>
     <string name="photo_captured">Photo captured (%1$s)</string>
     <string name="capture_failed">Capture failed: %1$s</string>
     <string name="camera_start_failed">Camera start failed</string>
@@ -116,6 +127,7 @@
     <!-- Review -->
     <string name="review_title">Review &amp; Submit</string>
     <string name="label_changes_to_submit">Changes to Submit</string>
+    <string name="label_captured_images">Captured Images</string>
     <string name="label_base_revision">Base Revision: #%1$d</string>
     <string name="btn_confirm_submit">Confirm &amp; Submit</string>
     <string name="submitting">Submitting…</string>
@@ -154,4 +166,13 @@
     <string name="no">No</string>
     <string name="error_generic">An error occurred. Please try again.</string>
     <string name="label_not_available">N/A</string>
+
+    <!-- Splash -->
+    <string name="splash_title">RUDA</string>
+    <string name="splash_subtitle">Survey Management System</string>
+    <string name="splash_org_name">Ravi Urban Development Authority</string>
+    <string name="app_version_display">v1.0.0</string>
+
+    <!-- Offline bar -->
+    <string name="label_offline_status">Offline – changes will sync when connected</string>
 </resources>

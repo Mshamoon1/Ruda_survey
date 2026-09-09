@@ -108,4 +108,9 @@
     <color name="md_on_primary_container">#051E33</color>
     <color name="md_outline_variant">#C4CDD5</color>
     <color name="md_surface">#FFFFFF</color>
+
+    <!-- Map -->
+    <color name="map_pin_primary">#0D3B66</color>
+    <color name="map_pin_stroke">#FFFFFF</color>
+    <color name="map_empty_text">#74818E</color>
 </resources>

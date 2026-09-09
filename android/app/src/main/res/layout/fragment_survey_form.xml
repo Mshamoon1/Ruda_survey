@@ -56,6 +56,20 @@
                         android:layout_marginBottom="@dimen/field_spacing" />
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilSrNo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/label_sr_no"
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/field_spacing">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSrNo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilParcelCode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -272,18 +286,57 @@
                             android:inputType="phone" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_land_owner_doc"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginTop="@dimen/spacing_8"
+                        android:layout_marginBottom="@dimen/spacing_4" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilLandOwnerDoc"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/label_land_owner_doc"
+                        android:hint="Enter Doc Info"
                         app:startIconDrawable="@drawable/ic_document"
-                        style="@style/Widget.RudaSurvey.TextInput">
+                        style="@style/Widget.RudaSurvey.TextInput"
+                        android:layout_marginBottom="@dimen/spacing_8">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etLandOwnerDoc"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnUploadLandDoc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/button_height_medium"
+                            android:text="Upload Doc"
+                            android:textAllCaps="false"
+                            app:icon="@drawable/ic_upload"
+                            style="@style/Widget.RudaSurvey.Button.Secondary" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvLandDocStatus"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/spacing_12"
+                            android:text="No file selected"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -396,12 +449,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_structure_status"
-                        style="@style/Widget.RudaSurvey.TextInput"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_marginBottom="@dimen/field_spacing">
-                        <com.google.android.material.textfield.TextInputEditText
+                        <AutoCompleteTextView
                             android:id="@+id/etStructureStatus"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -475,11 +529,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_construction_nature"
-                        style="@style/Widget.RudaSurvey.TextInput">
-                        <com.google.android.material.textfield.TextInputEditText
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                        <AutoCompleteTextView
                             android:id="@+id/etConstructionNature"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:inputType="none" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -489,12 +544,6 @@
     </ScrollView>
 
     <!-- Sticky Bottom Action Bar -->
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:dividerColor="@color/md_theme_outlineVariant"
-        app:dividerThickness="1dp" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -504,7 +553,9 @@
         android:paddingTop="@dimen/field_spacing"
         android:paddingBottom="@dimen/field_spacing"
         android:gravity="center_vertical"
-        android:background="?attr/colorSurface">
+        android:background="?attr/colorSurface"
+        android:elevation="@dimen/elevation_8"
+        android:outlineProvider="bounds">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveDraft"
@@ -521,8 +572,7 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/button_height_large"
             android:layout_weight="1"
-            android:text="View Changes"
-
+            android:text="@string/btn_review_changes"
             android:textAllCaps="false"
             style="@style/Widget.RudaSurvey.Button.Primary"
             android:layout_marginStart="@dimen/spacing_8" />

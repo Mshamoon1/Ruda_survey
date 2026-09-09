@@ -130,7 +130,7 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Captured Images"
+                        android:text="@string/label_captured_images"
                         android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
                         android:layout_marginBottom="@dimen/spacing_8" />
 

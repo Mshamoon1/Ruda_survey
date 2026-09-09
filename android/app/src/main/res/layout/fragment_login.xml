@@ -177,7 +177,7 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Quick fill"
+                        android:text="@string/label_quick_fill"
                         android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
                         android:textColor="@color/md_theme_onSurfaceVariant"
                         android:layout_marginBottom="@dimen/spacing_8" />

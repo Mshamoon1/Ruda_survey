@@ -34,10 +34,24 @@ class SurveyViewModel(
     private val _pendingImages = MutableStateFlow<List<PendingImage>>(emptyList())
     val pendingImages: StateFlow<List<PendingImage>> = _pendingImages.asStateFlow()
 
+    private val _nextSrNoState = MutableStateFlow<Int?>(null)
+    val nextSrNoState: StateFlow<Int?> = _nextSrNoState.asStateFlow()
+
     var currentSurvey: SurveyItem? = null
         private set
 
     var selectedImageType: String = "imgOne"
+
+    fun fetchNextSrNo() {
+        _nextSrNoState.value = null
+        viewModelScope.launch {
+            val result = repository.getAllSurveys()
+            result.onSuccess { surveys ->
+                val maxSr = surveys.maxOfOrNull { it.srNo } ?: 0
+                _nextSrNoState.value = maxSr + 1
+            }
+        }
+    }
 
     fun lookupBySrNo(srNo: String) {
         val parsed = srNo.trim().toIntOrNull()

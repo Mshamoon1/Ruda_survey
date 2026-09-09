@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Offline - changes will sync when connected"
+        android:text="@string/label_offline_status"
         android:textSize="@dimen/text_size_body_small"
         android:textColor="@color/md_theme_onTertiaryContainer"
         android:fontFamily="@font/inter_medium" />

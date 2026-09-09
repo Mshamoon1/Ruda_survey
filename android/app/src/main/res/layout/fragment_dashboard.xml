@@ -10,33 +10,32 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="@dimen/toolbar_height_expanded"
         android:background="@color/md_toolbar_bg"
-        android:elevation="0dp"
-        app:contentInsetStart="20dp">
+        android:elevation="@dimen/elevation_0"
+        app:contentInsetStart="@dimen/screen_horizontal_margin">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvWelcome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="@color/md_on_toolbar"
-                android:textStyle="bold"
                 tools:text="Welcome, Ahmed" />
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvRole"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/spacing_4"
                 android:background="@drawable/bg_badge_pill"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp"
+                android:paddingHorizontal="@dimen/spacing_12"
+                android:paddingVertical="@dimen/spacing_2"
                 android:textAppearance="?attr/textAppearanceLabelSmall"
                 android:textColor="@color/md_on_toolbar"
                 tools:text="Surveyor" />
@@ -49,11 +48,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/spacing_12"
+            android:contentDescription="@string/btn_logout"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="12dp"
+            android:minWidth="@dimen/button_height_medium"
+            android:minHeight="@dimen/button_height_medium"
+            android:paddingHorizontal="@dimen/spacing_12"
             android:text=""
             app:icon="@drawable/ic_logout"
             app:iconGravity="textStart"
@@ -67,20 +68,83 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="24dp">
+        android:paddingBottom="@dimen/spacing_24">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="24dp">
+            android:paddingHorizontal="@dimen/screen_horizontal_margin"
+            android:paddingTop="@dimen/spacing_24">
 
-            <TextView
+            <!-- ===== Survey Map Card ===== -->
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Sync Status"
+                android:layout_marginBottom="@dimen/spacing_12"
+                android:text="@string/label_survey_map"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/md_on_background" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMap"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/map_card_height"
+                app:cardBackgroundColor="@color/md_surface"
+                app:cardCornerRadius="@dimen/corner_xl"
+                app:cardElevation="@dimen/elevation_0"
+                app:strokeWidth="0dp"
+                android:clipToOutline="true">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToOutline="true">
+
+                    <org.osmdroid.views.MapView
+                        android:id="@+id/mapView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Empty state overlay -->
+                    <LinearLayout
+                        android:id="@+id/layoutMapEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:background="@color/md_surface">
+
+                        <ImageView
+                            android:layout_width="@dimen/spacing_48"
+                            android:layout_height="@dimen/spacing_48"
+                            android:src="@drawable/ic_location"
+                            android:contentDescription="@string/label_survey_map"
+                            app:tint="@color/map_empty_text" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_8"
+                            android:text="@string/label_map_empty"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="@color/map_empty_text"
+                            android:textAlignment="center" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ===== Sync Status Section ===== -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_28"
+                android:layout_marginBottom="@dimen/spacing_12"
+                android:text="@string/label_sync_status"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@color/md_on_background" />
 
@@ -89,15 +153,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/md_primary_container"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
+                app:cardCornerRadius="@dimen/corner_xl"
+                app:cardElevation="@dimen/elevation_0"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/card_padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -106,35 +170,36 @@
                         android:orientation="horizontal">
 
                         <FrameLayout
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="@dimen/spacing_40"
+                            android:layout_height="@dimen/spacing_40"
                             android:background="@drawable/bg_icon_circle">
 
                             <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
+                                android:layout_width="@dimen/icon_size_medium"
+                                android:layout_height="@dimen/icon_size_medium"
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_sync"
+                                android:contentDescription="@string/label_sync_status"
                                 app:tint="@color/md_primary" />
                         </FrameLayout>
 
-                        <TextView
+                        <com.google.android.material.textview.MaterialTextView
                             android:id="@+id/tvSyncStatus"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="@dimen/spacing_12"
                             android:layout_weight="1"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="@color/md_on_primary_container"
                             tools:text="All synced" />
                     </LinearLayout>
 
-                    <TextView
+                    <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tvLastSync"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="52dp"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginStart="@dimen/spacing_52"
+                        android:layout_marginTop="@dimen/spacing_2"
                         android:alpha="0.75"
                         android:textAppearance="?attr/textAppearanceBodySmall"
                         android:textColor="@color/md_on_primary_container"
@@ -143,8 +208,8 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginTop="@dimen/spacing_16"
+                        android:layout_marginBottom="@dimen/spacing_16"
                         android:alpha="0.4"
                         android:background="@color/md_outline_variant" />
 
@@ -160,19 +225,18 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/tvPendingCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
                                 android:textColor="@color/md_on_primary_container"
-                                android:textStyle="bold"
                                 tools:text="4" />
 
-                            <TextView
+                            <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Pending surveys"
+                                android:text="@string/label_pending_surveys"
                                 android:textAppearance="?attr/textAppearanceBodySmall"
                                 android:textColor="@color/md_on_primary_container" />
                         </LinearLayout>
@@ -180,11 +244,12 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnSyncNow"
                             android:layout_width="wrap_content"
-                            android:layout_height="48dp"
-                            android:text="Sync Now"
+                            android:layout_height="@dimen/button_height_medium"
+                            android:text="@string/btn_sync_now"
+                            android:textAllCaps="false"
                             android:textColor="@color/md_on_primary"
                             app:backgroundTint="@color/md_primary"
-                            app:cornerRadius="12dp"
+                            app:cornerRadius="@dimen/corner_medium"
                             app:icon="@drawable/ic_sync"
                             app:iconTint="@color/md_on_primary" />
 
@@ -192,33 +257,66 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="12dp"
-                android:text="Quick Actions"
+                android:layout_marginTop="@dimen/spacing_28"
+                android:layout_marginBottom="@dimen/spacing_12"
+                android:text="@string/label_quick_actions"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@color/md_on_background" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnNewSurvey"
-                android:layout_width="match_parent"
-                android:layout_height="88dp"
-                android:paddingHorizontal="20dp"
-                android:text="New Survey"
-                android:textAlignment="viewStart"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/md_on_primary"
-                app:backgroundTint="@color/md_primary"
-                app:cornerRadius="20dp"
-                app:icon="@drawable/ic_note_add"
-                app:iconGravity="start"
-                app:iconPadding="16dp"
-                app:iconSize="28dp"
-                app:iconTint="@color/md_on_primary" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Sticky Bottom Action Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_horizontal_margin"
+        android:paddingEnd="@dimen/screen_horizontal_margin"
+        android:paddingTop="@dimen/spacing_8"
+        android:paddingBottom="@dimen/spacing_8"
+        android:gravity="center_vertical"
+        android:background="?attr/colorSurface"
+        android:elevation="@dimen/elevation_8"
+        android:outlineProvider="bounds">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNewSurvey"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/spacing_4"
+            android:text="@string/btn_new_survey"
+            android:textAllCaps="false"
+            android:textColor="@color/md_on_primary"
+            app:backgroundTint="@color/md_primary"
+            app:cornerRadius="@dimen/corner_medium"
+            app:icon="@drawable/ic_search"
+            app:iconGravity="textStart"
+            app:iconPadding="@dimen/spacing_8"
+            app:iconSize="@dimen/icon_size_medium"
+            app:iconTint="@color/md_on_primary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCreateSurvey"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/button_height_large"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_4"
+            android:text="@string/btn_create_survey"
+            android:textAllCaps="false"
+            android:textColor="@color/md_theme_onSecondaryContainer"
+            app:backgroundTint="@color/md_theme_secondaryContainer"
+            app:cornerRadius="@dimen/corner_medium"
+            app:icon="@drawable/ic_note_add"
+            app:iconGravity="textStart"
+            app:iconPadding="@dimen/spacing_8"
+            app:iconSize="@dimen/icon_size_medium"
+            app:iconTint="@color/md_theme_onSecondaryContainer" />
+
+    </LinearLayout>
 
 </LinearLayout>

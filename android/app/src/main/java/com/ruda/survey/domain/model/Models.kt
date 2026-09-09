@@ -39,7 +39,9 @@ data class SurveyItem(
     val width: String = "",
     val area: String = "",
     val image1Bytes: ByteArray? = null,
-    val image2Bytes: ByteArray? = null
+    val image2Bytes: ByteArray? = null,
+    val landOwnerDocBytes: ByteArray? = null,
+    val landOwnerDocName: String? = null
 ) {
     override fun equals(other: Any?): Boolean = this === other
     override fun hashCode(): Int = id.hashCode()
