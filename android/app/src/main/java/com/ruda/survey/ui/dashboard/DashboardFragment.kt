@@ -2,9 +2,9 @@ package com.ruda.survey.ui.dashboard
 
 import android.annotation.SuppressLint
 import android.animation.ValueAnimator
-import android.text.Html
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -20,12 +20,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
+import com.ruda.survey.data.local.SurveyDatabase
 import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.data.sync.ConnectivityObserver
 import com.ruda.survey.databinding.FragmentDashboardBinding
 import com.ruda.survey.domain.model.SurveyItem
 import com.ruda.survey.domain.model.UiState
+import com.ruda.survey.ui.map.SurveyInfoWindow
 import com.ruda.survey.ui.survey.SurveyViewModel
 import com.ruda.survey.ui.survey.SurveyViewModelFactory
 import com.ruda.survey.ui.sync.SyncViewModel
@@ -49,14 +53,12 @@ class DashboardFragment : Fragment() {
     private var mapView: MapView? = null
     private var syncViewModel: SyncViewModel? = null
     private var surveyViewModel: SurveyViewModel? = null
-    private var sharedInfoWindow: com.ruda.survey.ui.map.SurveyInfoWindow? = null
-    private var isPlacingPins = false
+    private var sharedInfoWindow: SurveyInfoWindow? = null
 
     private val lahoreCenter = GeoPoint(31.5204, 74.3587)
     private val defaultZoom = 13.0
 
     companion object {
-        private var cachedSurveys: List<SurveyItem>? = null
         private var cachedMarkerBitmap: Bitmap? = null
     }
 
@@ -185,8 +187,8 @@ class DashboardFragment : Fragment() {
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             controller.setZoom(defaultZoom)
             controller.setCenter(lahoreCenter)
-            
-            sharedInfoWindow = com.ruda.survey.ui.map.SurveyInfoWindow(this) { item ->
+
+            sharedInfoWindow = SurveyInfoWindow(this) { item ->
                 surveyViewModel?.saveFormState(item)
                 if (isAdded) findNavController().navigate(R.id.action_dashboard_to_surveyForm)
             }
@@ -294,7 +296,7 @@ class DashboardFragment : Fragment() {
                 }
 
                 val factory = SyncViewModelFactory(
-                    syncRepository, com.ruda.survey.data.local.SurveyDatabase.getInstance(context).syncDao(),
+                    syncRepository, SurveyDatabase.getInstance(context).syncDao(),
                     connectivityObserver, context
                 )
                 syncViewModel = ViewModelProvider(this@DashboardFragment, factory)[SyncViewModel::class.java]
@@ -378,15 +380,14 @@ class DashboardFragment : Fragment() {
                             is UiState.Success -> {
                                 binding.btnCreateSurvey.isEnabled = true
                                 if (isAdded) {
-                                    cachedSurveys = null
                                     findNavController().navigate(R.id.action_dashboard_to_surveyForm)
                                     surveyViewModel?.resetCreateState()
                                 }
                             }
                             is UiState.Error -> {
                                 binding.btnCreateSurvey.isEnabled = true
-                                com.google.android.material.snackbar.Snackbar.make(
-                                    binding.root, state.message, com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                                Snackbar.make(
+                                    binding.root, state.message, Snackbar.LENGTH_LONG
                                 ).show()
                                 surveyViewModel?.resetCreateState()
                             }
@@ -401,11 +402,10 @@ class DashboardFragment : Fragment() {
     }
 
     private fun showLogoutConfirmation() {
-        val builder = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+        val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(getString(R.string.btn_logout))
         builder.setMessage(getString(R.string.btn_logout_confirm))
         builder.setPositiveButton(getString(R.string.btn_logout_confirm_action)) { _, _ ->
-            cachedSurveys = null
             val ctx = requireContext().applicationContext
             val tm = RepositoryFactory.getTokenManager(ctx)
             tm.resetNewSurveyCount()
@@ -417,7 +417,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun animateEntrance() {
-        val cards = listOf<View>(
+        val cards = listOf(
             binding.cardKpiTotal,
             binding.cardKpiNew,
             binding.cardKpiPending,
