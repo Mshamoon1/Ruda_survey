@@ -22,17 +22,34 @@ class SurveyRepositoryImpl(
 
     private val gson = Gson()
 
-    override suspend fun getAllSurveys(): Result<List<SurveyItem>> {
+    @Volatile
+    private var cachedSurveys: List<SurveyItem>? = null
+
+    override suspend fun getAllSurveys(forceRefresh: Boolean): Result<List<SurveyItem>> {
+        val current = cachedSurveys
+        if (!forceRefresh && !current.isNullOrEmpty()) {
+            return Result.success(current)
+        }
         return try {
             val response = api.getAllSurveys()
             if (response.isSuccessful) {
                 val body = response.body()!!
-                Result.success(body.data.map { it.toDomain() })
+                val domainList = body.data.map { it.toDomain() }
+                cachedSurveys = domainList
+                Result.success(domainList)
             } else {
-                Result.failure(Exception("Failed to load surveys"))
+                if (!current.isNullOrEmpty()) {
+                    Result.success(current)
+                } else {
+                    Result.failure(Exception("Failed to load surveys"))
+                }
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            if (!current.isNullOrEmpty()) {
+                Result.success(current)
+            } else {
+                Result.failure(e)
+            }
         }
     }
 
@@ -111,6 +128,7 @@ class SurveyRepositoryImpl(
                 if (body.success && body.data != null) {
                     val createdItem = body.data.toDomain()
                     tokenManager.addUserSurveyId(createdItem.id)
+                    cachedSurveys = null
                     Result.success(createdItem)
                 } else {
                     Result.failure(Exception(body.message))
@@ -169,6 +187,7 @@ class SurveyRepositoryImpl(
                 if (responseBody.success && responseBody.data != null) {
                     val updatedItem = responseBody.data.toDomain()
                     tokenManager.addUserSurveyId(updatedItem.id)
+                    cachedSurveys = null
                     Result.success(updatedItem)
                 } else {
                     Result.failure(Exception(responseBody.message))
@@ -191,6 +210,7 @@ class SurveyRepositoryImpl(
         return try {
             val response = api.deleteSurvey(id)
             if (response.isSuccessful) {
+                cachedSurveys = null
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Delete failed"))

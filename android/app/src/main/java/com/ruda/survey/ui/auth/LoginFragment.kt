@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -17,6 +18,8 @@ import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.databinding.FragmentLoginBinding
 import com.ruda.survey.domain.model.UiState
 import com.ruda.survey.domain.repository.SurveyRepository
+import com.ruda.survey.ui.survey.SurveyViewModel
+import com.ruda.survey.ui.survey.SurveyViewModelFactory
 import com.ruda.survey.utils.MotionConstants
 import com.ruda.survey.utils.shake
 import com.ruda.survey.utils.isReducedMotionEnabled
@@ -76,7 +79,15 @@ class LoginFragment : Fragment() {
                     is UiState.Success -> {
                         binding.buttonProgressBar.visibility = View.GONE
                         binding.btnLogin.text = getString(R.string.btn_login)
-                        if (isAdded) findNavController().navigate(R.id.action_login_to_dashboard)
+                        if (isAdded) {
+                            try {
+                                val surveyRepo = RepositoryFactory.createSurveyRepository(requireContext().applicationContext)
+                                val surveyFactory = SurveyViewModelFactory(surveyRepo)
+                                val surveyViewModel = ViewModelProvider(requireActivity(), surveyFactory)[SurveyViewModel::class.java]
+                                surveyViewModel.loadAllSurveys(forceRefresh = true)
+                            } catch (_: Exception) {}
+                            findNavController().navigate(R.id.action_login_to_dashboard)
+                        }
                     }
                     is UiState.Error -> {
                         binding.btnLogin.isEnabled = true

@@ -24,7 +24,7 @@ class DemoDataRepository(
         )
     }
 
-    override suspend fun getAllSurveys(): Result<List<SurveyItem>> {
+    override suspend fun getAllSurveys(forceRefresh: Boolean): Result<List<SurveyItem>> {
         return Result.success(demoSurveys.toList())
     }
 

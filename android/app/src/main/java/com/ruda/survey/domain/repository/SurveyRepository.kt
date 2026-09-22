@@ -3,7 +3,7 @@ package com.ruda.survey.domain.repository
 import com.ruda.survey.domain.model.*
 
 interface SurveyRepository {
-    suspend fun getAllSurveys(): Result<List<SurveyItem>>
+    suspend fun getAllSurveys(forceRefresh: Boolean = false): Result<List<SurveyItem>>
     suspend fun getSurveyById(id: String): Result<SurveyItem>
     suspend fun getSurveyBySrNo(srNo: Int): Result<SurveyItem>
     suspend fun createSurvey(item: SurveyItem): Result<SurveyItem>
