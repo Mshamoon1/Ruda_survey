@@ -704,16 +704,16 @@
 
                         <!-- Icon area -->
                         <FrameLayout
-                            android:layout_width="48dp"
+                            android:layout_width="31dp"
                             android:layout_height="match_parent"
                             android:background="@drawable/bg_button_icon_area_outlined">
 
                             <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
+                                android:layout_width="31dp"
+                                android:layout_height="39dp"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_search"
                                 android:contentDescription="Search"
+                                android:src="@drawable/ic_search"
                                 android:tint="@color/md_theme_primary" />
                         </FrameLayout>
 
@@ -725,14 +725,14 @@
 
                         <!-- Text -->
                         <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="0dp"
+                            android:layout_width="110dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
+                            android:fontFamily="@font/inter_semibold"
                             android:gravity="center"
                             android:text="Update Survey"
                             android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
-                            android:textColor="@color/md_theme_primary"
-                            android:fontFamily="@font/inter_semibold" />
+                            android:textColor="@color/md_theme_primary" />
                     </LinearLayout>
                 </FrameLayout>
 
@@ -756,16 +756,16 @@
 
                         <!-- Icon area -->
                         <FrameLayout
-                            android:layout_width="48dp"
+                            android:layout_width="21dp"
                             android:layout_height="match_parent"
                             android:background="@drawable/bg_button_icon_area_filled">
 
                             <ImageView
                                 android:layout_width="20dp"
-                                android:layout_height="20dp"
+                                android:layout_height="48dp"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_note_add"
                                 android:contentDescription="Create"
+                                android:src="@drawable/ic_note_add"
                                 android:tint="@android:color/white" />
                         </FrameLayout>
 
