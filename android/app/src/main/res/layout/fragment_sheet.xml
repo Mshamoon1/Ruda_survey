@@ -331,6 +331,20 @@
                 android:visibility="gone"
                 android:padding="@dimen/screen_horizontal_margin" />
 
+            <!-- Done Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_done"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_check"
+                style="@style/Widget.RudaSurvey.Button.Primary"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_24"
+                android:layout_marginBottom="@dimen/spacing_16" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

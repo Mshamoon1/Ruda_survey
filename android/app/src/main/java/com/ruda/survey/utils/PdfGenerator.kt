@@ -86,7 +86,7 @@ object PdfGenerator {
         y += 20f
         canvas.drawText("Structure: ${survey.structuralName}", 40f, y, bodyPaint)
         y += 16f
-        canvas.drawText("Status: ${survey.status}", 40f, y, bodyPaint)
+        canvas.drawText("Status: ${survey.status.replace("_", " ").uppercase()}", 40f, y, bodyPaint)
         y += 16f
         canvas.drawText("Construction: ${survey.natureOfConstruction}", 40f, y, bodyPaint)
         y += 16f
@@ -107,19 +107,18 @@ object PdfGenerator {
 
         if (images.isNotEmpty()) {
             canvas.drawLine(40f, y, 555f, y, linePaint)
-            y += 20f
+            y += 15f
             canvas.drawText("Images", 40f, y, headerPaint)
-            y += 20f
+            y += 15f
 
             for ((label, imgBytes) in images) {
-                if (y + 160 > 842) break
                 val bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes!!.size)
                 if (bitmap != null) {
                     canvas.drawText("$label:", 40f, y, bodyPaint)
-                    y += 16f
-                    val scaled = Bitmap.createScaledBitmap(bitmap, 200, 120, true)
+                    y += 12f
+                    val scaled = Bitmap.createScaledBitmap(bitmap, 160, 100, true)
                     canvas.drawBitmap(scaled, 40f, y, null)
-                    y += 130f
+                    y += 108f
                 }
             }
         }

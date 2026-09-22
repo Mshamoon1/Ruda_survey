@@ -133,6 +133,7 @@ class LoginFragment : Fragment() {
 
         if (isValid) {
             android.util.Log.d("LoginFragment", "Performing login for email: [$email] with password length: ${password.length}")
+            RepositoryFactory.getTokenManager(requireContext().applicationContext).saveUserEmail(email)
             viewModel.login(email, password)
         }
     }

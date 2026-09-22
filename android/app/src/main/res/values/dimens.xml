@@ -3,7 +3,9 @@
     <!-- Spacing (4dp base unit) -->
     <dimen name="spacing_2">2dp</dimen>
     <dimen name="spacing_4">4dp</dimen>
+    <dimen name="spacing_6">6dp</dimen>
     <dimen name="spacing_8">8dp</dimen>
+    <dimen name="spacing_10">10dp</dimen>
     <dimen name="spacing_12">12dp</dimen>
     <dimen name="spacing_16">16dp</dimen>
     <dimen name="spacing_20">20dp</dimen>
@@ -15,6 +17,8 @@
     <dimen name="spacing_52">52dp</dimen>
     <dimen name="spacing_56">56dp</dimen>
     <dimen name="spacing_64">64dp</dimen>
+    <dimen name="spacing_14">14dp</dimen>
+    <dimen name="spacing_72">72dp</dimen>
 
     <!-- Corner Radius -->
     <dimen name="corner_extra_small">4dp</dimen>
@@ -49,6 +53,7 @@
 
     <!-- Text Sizes -->
     <dimen name="text_size_caption">11sp</dimen>
+    <dimen name="text_size_label_small">11sp</dimen>
     <dimen name="text_size_body_small">12sp</dimen>
     <dimen name="text_size_body">14sp</dimen>
     <dimen name="text_size_body_large">16sp</dimen>

@@ -1,6 +1,8 @@
 package com.ruda.survey.ui.survey
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,15 @@ class SurveyFormFragment : Fragment() {
     private lateinit var viewModel: SurveyViewModel
     private lateinit var locationHelper: LocationHelper
 
+    private lateinit var sectionViews: List<View>
+    private lateinit var progressCircles: List<View>
+    private lateinit var progressNumbers: List<View>
+    private lateinit var progressChecks: List<View>
+    private lateinit var progressConnectors: List<View>
+    private lateinit var progressLabels: List<View>
+    private var currentProgressStep = 0
+    private var scrollListener: android.view.ViewTreeObserver.OnScrollChangedListener? = null
+
     private val pickDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let { handleDocumentSelection(it) }
     }
@@ -37,8 +48,25 @@ class SurveyFormFragment : Fragment() {
     private var selectedStatus: String = ""
     private var selectedNature: String = ""
 
-    private val validStatuses = setOf("residential", "commercial", "cattle farm", "agricultural", "empty plot", "under construction")
-    private val validConstructionNatures = setOf("pacca", "semi-pacca", "kacha")
+    private val statusDisplayToValue = linkedMapOf(
+        "RESIDENTIAL" to "residential",
+        "COMMERCIAL" to "commercial",
+        "CATTLE FARM" to "cattle_farm",
+        "AGRICULTURAL" to "agricultural",
+        "EMPTY PLOT" to "empty_plot",
+        "UNDER CONSTRUCTION" to "under_construction",
+        "AGRI" to "agri",
+        "DERAS" to "deras",
+        "OTHER" to "other"
+    )
+    private val statusValueToDisplay = statusDisplayToValue.entries.associate { (k, v) -> v to k }
+
+    private val natureDisplayToValue = linkedMapOf(
+        "PACCA" to "pacca",
+        "SEMI-PACCA" to "semi-pacca",
+        "KACHA" to "kacha"
+    )
+    private val natureValueToDisplay = natureDisplayToValue.entries.associate { (k, v) -> v to k }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -73,25 +101,28 @@ class SurveyFormFragment : Fragment() {
         observeImageStatus()
         observeGpsLocation()
         observeNextSrNo()
+        setupProgressIndicator()
     }
 
     private fun setupDropdowns() {
-        val statuses = validStatuses.toTypedArray()
-        val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, statuses)
+        val statusDisplayNames = statusDisplayToValue.keys.toTypedArray()
+        val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, statusDisplayNames)
         binding.etStructureStatus.setAdapter(statusAdapter)
         binding.etStructureStatus.setText("", false)
         binding.etStructureStatus.setOnItemClickListener { _, _, position, _ ->
-            selectedStatus = statusAdapter.getItem(position).toString()
-            Log.d("SurveyForm", "Status selected from adapter: '$selectedStatus'")
+            val display = statusAdapter.getItem(position).toString()
+            selectedStatus = statusDisplayToValue[display] ?: ""
+            Log.d("SurveyForm", "Status selected: display='$display' backend='$selectedStatus'")
         }
 
-        val constructionNatures = validConstructionNatures.toTypedArray()
-        val constructionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, constructionNatures)
-        binding.etConstructionNature.setAdapter(constructionAdapter)
+        val natureDisplayNames = natureDisplayToValue.keys.toTypedArray()
+        val natureAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, natureDisplayNames)
+        binding.etConstructionNature.setAdapter(natureAdapter)
         binding.etConstructionNature.setText("", false)
         binding.etConstructionNature.setOnItemClickListener { _, _, position, _ ->
-            selectedNature = constructionAdapter.getItem(position).toString()
-            Log.d("SurveyForm", "Nature selected from adapter: '$selectedNature'")
+            val display = natureAdapter.getItem(position).toString()
+            selectedNature = natureDisplayToValue[display] ?: ""
+            Log.d("SurveyForm", "Nature selected: display='$display' backend='$selectedNature'")
         }
     }
 
@@ -133,11 +164,11 @@ class SurveyFormFragment : Fragment() {
         binding.etElectricityConnection.setText(survey.electricityConnectionName)
         binding.etLandArea.setText(survey.landArea)
         
-        val matchedStatus = validStatuses.find { it.equals(survey.status, ignoreCase = true) }
-        Log.d("SurveyForm", "populateFields matchedStatus='$matchedStatus' for raw='${survey.status}'")
-        if (matchedStatus != null) {
-            binding.etStructureStatus.setText(matchedStatus, false)
-            selectedStatus = matchedStatus
+        val matchedStatusDisplay = statusValueToDisplay[survey.status.lowercase()]
+        Log.d("SurveyForm", "populateFields matchedStatus='$matchedStatusDisplay' for raw='${survey.status}'")
+        if (matchedStatusDisplay != null) {
+            binding.etStructureStatus.setText(matchedStatusDisplay, false)
+            selectedStatus = survey.status.lowercase()
         } else {
             binding.etStructureStatus.setText("", false)
             selectedStatus = ""
@@ -148,11 +179,11 @@ class SurveyFormFragment : Fragment() {
         binding.etWidthFt.setText(survey.width)
         binding.etAreaSqft.setText(survey.area)
         
-        val matchedNature = validConstructionNatures.find { it.equals(survey.natureOfConstruction, ignoreCase = true) }
-        Log.d("SurveyForm", "populateFields matchedNature='$matchedNature' for raw='${survey.natureOfConstruction}'")
-        if (matchedNature != null) {
-            binding.etConstructionNature.setText(matchedNature, false)
-            selectedNature = matchedNature
+        val matchedNatureDisplay = natureValueToDisplay[survey.natureOfConstruction.lowercase()]
+        Log.d("SurveyForm", "populateFields matchedNature='$matchedNatureDisplay' for raw='${survey.natureOfConstruction}'")
+        if (matchedNatureDisplay != null) {
+            binding.etConstructionNature.setText(matchedNatureDisplay, false)
+            selectedNature = survey.natureOfConstruction.lowercase()
         } else {
             binding.etConstructionNature.setText("", false)
             selectedNature = ""
@@ -208,6 +239,7 @@ class SurveyFormFragment : Fragment() {
         }
 
         binding.btnReviewChanges.setOnClickListener {
+            if (!validateForm()) return@setOnClickListener
             saveCurrentFormState()
             it.animateTapFeedback {
                 findNavController().navigate(R.id.action_form_to_review)
@@ -221,6 +253,52 @@ class SurveyFormFragment : Fragment() {
         }
 
         updateImageButtonText()
+        setupAutoFormatting()
+    }
+
+    private fun setupAutoFormatting() {
+        binding.etCnic.addTextChangedListener(CnicDashFormatter())
+        binding.etContact.addTextChangedListener(PhoneDashFormatter())
+    }
+
+    private inner class CnicDashFormatter : TextWatcher {
+        private var isFormatting = false
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        override fun afterTextChanged(s: Editable?) {
+            if (isFormatting) return
+            isFormatting = true
+            val digits = s?.toString()?.filter { it.isDigit() } ?: ""
+            val formatted = when {
+                digits.length <= 5 -> digits
+                digits.length <= 12 -> "${digits.substring(0, 5)}-${digits.substring(5)}"
+                else -> "${digits.substring(0, 5)}-${digits.substring(5, 12)}-${digits.substring(12, minOf(13, digits.length))}"
+            }
+            if (s.toString() != formatted) {
+                s?.replace(0, s.length, formatted)
+            }
+            isFormatting = false
+        }
+    }
+
+    private inner class PhoneDashFormatter : TextWatcher {
+        private var isFormatting = false
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        override fun afterTextChanged(s: Editable?) {
+            if (isFormatting) return
+            isFormatting = true
+            val digits = s?.toString()?.filter { it.isDigit() } ?: ""
+            val formatted = when {
+                digits.length <= 4 -> digits
+                digits.length <= 7 -> "${digits.substring(0, 4)}-${digits.substring(4)}"
+                else -> "${digits.substring(0, 4)}-${digits.substring(4, 7)}-${digits.substring(7, minOf(10, digits.length))}"
+            }
+            if (s.toString() != formatted) {
+                s?.replace(0, s.length, formatted)
+            }
+            isFormatting = false
+        }
     }
 
     private fun handleDocumentSelection(uri: android.net.Uri) {
@@ -259,6 +337,97 @@ class SurveyFormFragment : Fragment() {
     private fun saveCurrentFormState() {
         val survey = buildSurveyItem()
         viewModel.saveFormState(survey)
+    }
+
+    private fun validateForm(): Boolean {
+        val errors = mutableListOf<String>()
+
+        // Clear previous errors
+        binding.tilParcelCode.error = null
+        binding.tilPackageNo.error = null
+        binding.tilOwnerName.error = null
+        binding.tilCnic.error = null
+        binding.tilContact.error = null
+        binding.tilVillage.error = null
+        binding.tilKhasraNumber.error = null
+        binding.etStructureStatus.error = null
+        binding.etConstructionNature.error = null
+
+        // Parcel ID
+        if (binding.etParcelCode.text.isNullOrBlank()) {
+            binding.tilParcelCode.error = "Required"
+            errors.add("Parcel ID")
+        }
+
+        // Package
+        if (binding.etPackageNo.text.isNullOrBlank()) {
+            binding.tilPackageNo.error = "Required"
+            errors.add("Package")
+        }
+
+        // Owner Name
+        if (binding.etOwnerName.text.isNullOrBlank()) {
+            binding.tilOwnerName.error = "Required"
+            errors.add("Owner Name")
+        }
+
+        // CNIC
+        val cnic = binding.etCnic.text.toString().replace("-", "")
+        if (cnic.isBlank()) {
+            binding.tilCnic.error = "Required"
+            errors.add("CNIC")
+        } else if (cnic.length != 13) {
+            binding.tilCnic.error = "CNIC must be 13 digits"
+            errors.add("CNIC")
+        }
+
+        // Contact
+        val contact = binding.etContact.text.toString().replace("-", "")
+        if (contact.isBlank()) {
+            binding.tilContact.error = "Required"
+            errors.add("Contact")
+        } else if (contact.length < 10) {
+            binding.tilContact.error = "Phone must be 10 digits"
+            errors.add("Contact")
+        }
+
+        // Village
+        if (binding.etVillage.text.isNullOrBlank()) {
+            binding.tilVillage.error = "Required"
+            errors.add("Village")
+        }
+
+        // Khasra
+        if (binding.etKhasraNumber.text.isNullOrBlank()) {
+            binding.tilKhasraNumber.error = "Required"
+            errors.add("Khasra No")
+        }
+
+        // Status
+        if (binding.etStructureStatus.text.isNullOrBlank()) {
+            binding.etStructureStatus.error = "Required"
+            errors.add("Status of Structure")
+        }
+
+        // Nature of Construction
+        if (binding.etConstructionNature.text.isNullOrBlank()) {
+            binding.etConstructionNature.error = "Required"
+            errors.add("Nature of Construction")
+        }
+
+        // Images compulsory (at least imgOne)
+        val images = viewModel.pendingImages.value
+        val hasImg1 = images.any { it.imageType == "imgOne" }
+        if (!hasImg1) {
+            errors.add("Door Pic (Image 1)")
+        }
+
+        if (errors.isNotEmpty()) {
+            val msg = "Required fields: ${errors.joinToString(", ")}"
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_LONG).show()
+            return false
+        }
+        return true
     }
 
     private fun observeImageStatus() {
@@ -364,8 +533,144 @@ class SurveyFormFragment : Fragment() {
         }
     }
 
+    private fun setupProgressIndicator() {
+        sectionViews = listOf(
+            binding.sectionParcel,
+            binding.sectionCoordinates,
+            binding.sectionOwner,
+            binding.sectionLand,
+            binding.sectionStructure
+        )
+
+        progressCircles = listOf(
+            binding.progressCircle1,
+            binding.progressCircle2,
+            binding.progressCircle3,
+            binding.progressCircle4,
+            binding.progressCircle5
+        )
+
+        progressNumbers = listOf(
+            binding.progressNumber1,
+            binding.progressNumber2,
+            binding.progressNumber3,
+            binding.progressNumber4,
+            binding.progressNumber5
+        )
+
+        progressChecks = listOf(
+            binding.progressCheck1,
+            binding.progressCheck2,
+            binding.progressCheck3,
+            binding.progressCheck4,
+            binding.progressCheck5
+        )
+
+        progressConnectors = listOf(
+            binding.progressConnector12,
+            binding.progressConnector23,
+            binding.progressConnector34,
+            binding.progressConnector45
+        )
+
+        progressLabels = listOf(
+            binding.progressLabel1,
+            binding.progressLabel2,
+            binding.progressLabel3,
+            binding.progressLabel4,
+            binding.progressLabel5
+        )
+
+        scrollListener = android.view.ViewTreeObserver.OnScrollChangedListener { detectActiveSection() }
+        binding.scrollView.viewTreeObserver.addOnScrollChangedListener(scrollListener)
+
+        updateProgressIndicator(0)
+    }
+
+    private fun detectActiveSection() {
+        val b = _binding ?: return
+        val scrollView = b.scrollView
+        val scrollY = scrollView.scrollY + 150
+
+        var activeIndex = 0
+        for (i in sectionViews.indices) {
+            if (sectionViews[i].top <= scrollY) {
+                activeIndex = i
+            }
+        }
+
+        if (activeIndex != currentProgressStep) {
+            currentProgressStep = activeIndex
+            updateProgressIndicator(activeIndex)
+        }
+    }
+
+    private fun updateProgressIndicator(activeIndex: Int) {
+        val reduced = view?.isReducedMotionEnabled() ?: true
+        val duration = if (reduced) 100L else 300L
+
+        val sectionNames = listOf("Parcel Details", "Coordinates", "Owner Information", "Land Details", "Structure Details")
+
+        binding.tvProgressStep.text = "Step ${activeIndex + 1} of 5"
+        binding.tvProgressSection.text = sectionNames[activeIndex]
+
+        for (i in 0 until 5) {
+            when {
+                i < activeIndex -> setStepCompleted(i, duration)
+                i == activeIndex -> setStepActive(i, duration)
+                else -> setStepUpcoming(i, duration)
+            }
+        }
+    }
+
+    private fun setStepCompleted(index: Int, duration: Long) {
+        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_completed)
+        progressNumbers[index].visibility = View.GONE
+        progressChecks[index].visibility = View.VISIBLE
+        progressLabels[index].alpha = 0.6f
+
+        if (index < progressConnectors.size) {
+            progressConnectors[index].setBackgroundResource(R.drawable.bg_progress_connector_active)
+        }
+    }
+
+    private fun setStepActive(index: Int, duration: Long) {
+        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_active)
+        progressNumbers[index].visibility = View.VISIBLE
+        (progressNumbers[index] as? android.widget.TextView)?.setTextColor(
+            resources.getColor(android.R.color.white, null)
+        )
+        progressChecks[index].visibility = View.GONE
+        progressLabels[index].alpha = 1f
+
+        if (!view!!.isReducedMotionEnabled()) {
+            progressCircles[index].animate()
+                .scaleX(1.15f).scaleY(1.15f)
+                .setDuration(duration)
+                .withEndAction {
+                    view?.animate()?.scaleX(1f)?.scaleY(1f)?.setDuration(150)?.start()
+                }
+                .start()
+        }
+    }
+
+    private fun setStepUpcoming(index: Int, duration: Long) {
+        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_upcoming)
+        progressNumbers[index].visibility = View.VISIBLE
+        (progressNumbers[index] as? android.widget.TextView)?.setTextColor(
+            resources.getColor(R.color.md_theme_outline, null)
+        )
+        progressChecks[index].visibility = View.GONE
+        progressLabels[index].alpha = 0.5f
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
+        val b = _binding
+        scrollListener?.let { listener ->
+            b?.scrollView?.viewTreeObserver?.removeOnScrollChangedListener(listener)
+        }
+        scrollListener = null
         locationHelper.stopUpdates()
         _binding = null
     }

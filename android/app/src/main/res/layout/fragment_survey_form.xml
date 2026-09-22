@@ -21,6 +21,354 @@
             android:paddingTop="@dimen/spacing_16"
             android:paddingBottom="@dimen/spacing_16">
 
+            <!-- ===== Survey Progress Indicator ===== -->
+            <LinearLayout
+                android:id="@+id/progressSurveyForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/screen_horizontal_margin"
+                android:paddingBottom="@dimen/spacing_16">
+
+                <!-- Steps row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <!-- Step 1: Parcel -->
+                    <LinearLayout
+                        android:id="@+id/progressStepParcel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:id="@+id/progressConnectorLeft1"
+                                android:layout_width="0dp"
+                                android:layout_height="3dp"
+                                android:layout_gravity="center_vertical|start"
+                                android:background="@drawable/bg_progress_connector_inactive" />
+
+                            <View
+                                android:id="@+id/progressCircle1"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/bg_progress_step_active" />
+
+                            <TextView
+                                android:id="@+id/progressNumber1"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="1"
+                                android:textColor="@android:color/white"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/progressCheck1"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_check"
+                                android:visibility="gone"
+                                android:contentDescription="Completed" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/progressLabel1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:text="Parcel"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <!-- Connector 1-2 -->
+                    <View
+                        android:id="@+id/progressConnector12"
+                        android:layout_width="0dp"
+                        android:layout_height="3dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_progress_connector_inactive" />
+
+                    <!-- Step 2: Coordinates -->
+                    <LinearLayout
+                        android:id="@+id/progressStepCoordinates"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:id="@+id/progressCircle2"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/bg_progress_step_upcoming" />
+
+                            <TextView
+                                android:id="@+id/progressNumber2"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="2"
+                                android:textColor="@color/md_theme_outline"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/progressCheck2"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_check"
+                                android:visibility="gone"
+                                android:contentDescription="Completed" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/progressLabel2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:text="Coordinates"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <!-- Connector 2-3 -->
+                    <View
+                        android:id="@+id/progressConnector23"
+                        android:layout_width="0dp"
+                        android:layout_height="3dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_progress_connector_inactive" />
+
+                    <!-- Step 3: Owner -->
+                    <LinearLayout
+                        android:id="@+id/progressStepOwner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:id="@+id/progressCircle3"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/bg_progress_step_upcoming" />
+
+                            <TextView
+                                android:id="@+id/progressNumber3"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="3"
+                                android:textColor="@color/md_theme_outline"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/progressCheck3"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_check"
+                                android:visibility="gone"
+                                android:contentDescription="Completed" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/progressLabel3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:text="Owner"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <!-- Connector 3-4 -->
+                    <View
+                        android:id="@+id/progressConnector34"
+                        android:layout_width="0dp"
+                        android:layout_height="3dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_progress_connector_inactive" />
+
+                    <!-- Step 4: Land -->
+                    <LinearLayout
+                        android:id="@+id/progressStepLand"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:id="@+id/progressCircle4"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/bg_progress_step_upcoming" />
+
+                            <TextView
+                                android:id="@+id/progressNumber4"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="4"
+                                android:textColor="@color/md_theme_outline"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/progressCheck4"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_check"
+                                android:visibility="gone"
+                                android:contentDescription="Completed" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/progressLabel4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:text="Land"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <!-- Connector 4-5 -->
+                    <View
+                        android:id="@+id/progressConnector45"
+                        android:layout_width="0dp"
+                        android:layout_height="3dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_progress_connector_inactive" />
+
+                    <!-- Step 5: Structure -->
+                    <LinearLayout
+                        android:id="@+id/progressStepStructure"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <FrameLayout
+                            android:layout_width="28dp"
+                            android:layout_height="28dp">
+
+                            <View
+                                android:id="@+id/progressCircle5"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/bg_progress_step_upcoming" />
+
+                            <TextView
+                                android:id="@+id/progressNumber5"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="5"
+                                android:textColor="@color/md_theme_outline"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/progressCheck5"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_check"
+                                android:visibility="gone"
+                                android:contentDescription="Completed" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/progressLabel5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:text="Structure"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Current step text -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/spacing_10">
+
+                    <TextView
+                        android:id="@+id/tvProgressStep"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Step 1 of 5"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tvProgressSection"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Parcel Details"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleSmall"
+                        android:textColor="@color/md_theme_onSurface" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_margin"
+                android:background="@color/md_theme_outlineVariant" />
+
             <!-- Parcel Header -->
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvParcelCode"
@@ -33,8 +381,9 @@
                 android:paddingEnd="@dimen/screen_horizontal_margin"
                 android:layout_marginBottom="@dimen/spacing_16" />
 
-            <!-- Section: Parcel Details -->
+            <!-- Section 01: Parcel Details -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sectionParcel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.RudaSurvey.Card">
@@ -44,22 +393,40 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
+                    <!-- Section Header with Number -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_parcel_info"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:drawableStart="@drawable/ic_document"
-                        android:drawablePadding="@dimen/spacing_8"
-                        android:drawableTint="?attr/colorPrimary"
-                        android:layout_marginBottom="@dimen/field_spacing" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/bg_section_number"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textColor="@color/section_number_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_01_parcel"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
+
+                    </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilSrNo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_sr_no"
+                        app:startIconDrawable="@drawable/ic_hash"
                         style="@style/Widget.RudaSurvey.TextInput"
                         android:layout_marginBottom="@dimen/field_spacing">
                         <com.google.android.material.textfield.TextInputEditText
@@ -74,6 +441,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_parcel_code"
+                        app:startIconDrawable="@drawable/ic_tag"
                         style="@style/Widget.RudaSurvey.TextInput"
                         android:layout_marginBottom="@dimen/field_spacing">
                         <com.google.android.material.textfield.TextInputEditText
@@ -95,6 +463,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/label_rd_value"
+                            app:startIconDrawable="@drawable/ic_description"
                             style="@style/Widget.RudaSurvey.TextInput"
                             android:layout_marginEnd="@dimen/spacing_8">
                             <com.google.android.material.textfield.TextInputEditText
@@ -110,6 +479,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/label_package_no"
+                            app:startIconDrawable="@drawable/ic_package"
                             style="@style/Widget.RudaSurvey.TextInput"
                             android:layout_marginStart="@dimen/spacing_8">
                             <com.google.android.material.textfield.TextInputEditText
@@ -121,15 +491,48 @@
 
                     </LinearLayout>
 
-                    <!-- Coordinates (side by side) -->
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Section 02: Coordinates -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sectionCoordinates"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RudaSurvey.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Section Header with Number -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_coordinates"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:layout_marginTop="@dimen/spacing_8"
-                        android:layout_marginBottom="@dimen/spacing_8" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/bg_section_number"
+                            android:gravity="center"
+                            android:text="2"
+                            android:textColor="@color/section_number_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_02_coordinates"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -170,6 +573,45 @@
 
                     </LinearLayout>
 
+                    <!-- GPS Status Component -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/bg_section_header"
+                        android:padding="@dimen/spacing_12"
+                        android:layout_marginTop="@dimen/spacing_8">
+
+                        <ImageView
+                            android:id="@+id/ivGpsIndicator"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_my_location"
+                            android:layout_marginEnd="@dimen/spacing_8"
+                            android:contentDescription="@string/gps_status"
+                            app:tint="@color/gps_acquiring" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvGpsStatus"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/gps_acquiring"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvGpsAccuracy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                            android:textColor="@color/md_theme_outline"
+                            android:visibility="gone"
+                            android:text="" />
+
+                    </LinearLayout>
+
                     <!-- Point Image Buttons (side by side) -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -184,7 +626,15 @@
                             android:layout_weight="1"
                             android:text="Door Pic"
                             android:textAllCaps="false"
+                            android:textSize="12sp"
+                            android:letterSpacing="0.02"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             app:icon="@drawable/ic_camera"
+                            app:iconSize="18dp"
+                            app:iconPadding="4dp"
                             app:iconGravity="textStart"
                             style="@style/Widget.RudaSurvey.Button.Secondary"
                             android:layout_marginEnd="@dimen/spacing_8" />
@@ -194,9 +644,17 @@
                             android:layout_width="0dp"
                             android:layout_height="@dimen/button_height_medium"
                             android:layout_weight="1"
-                            android:text="FrontView"
+                            android:text="Front View"
                             android:textAllCaps="false"
+                            android:textSize="12sp"
+                            android:letterSpacing="0.02"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             app:icon="@drawable/ic_camera"
+                            app:iconSize="18dp"
+                            app:iconPadding="4dp"
                             app:iconGravity="textStart"
                             style="@style/Widget.RudaSurvey.Button.Secondary"
                             android:layout_marginStart="@dimen/spacing_8" />
@@ -206,8 +664,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Owner Information -->
+            <!-- Section 03: Owner Information -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sectionOwner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.RudaSurvey.Card">
@@ -217,16 +676,33 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
+                    <!-- Section Header with Number -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_ownership"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:drawableStart="@drawable/ic_person"
-                        android:drawablePadding="@dimen/spacing_8"
-                        android:drawableTint="?attr/colorPrimary"
-                        android:layout_marginBottom="@dimen/field_spacing" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/bg_section_number"
+                            android:gravity="center"
+                            android:text="3"
+                            android:textColor="@color/section_number_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_03_ownership"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
+
+                    </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilOwnerName"
@@ -341,8 +817,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Land Details -->
+            <!-- Section 04: Land Details -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sectionLand"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.RudaSurvey.Card">
@@ -352,16 +829,33 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
+                    <!-- Section Header with Number -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_location"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:drawableStart="@drawable/ic_landscape"
-                        android:drawablePadding="@dimen/spacing_8"
-                        android:drawableTint="?attr/colorPrimary"
-                        android:layout_marginBottom="@dimen/field_spacing" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/bg_section_number"
+                            android:gravity="center"
+                            android:text="4"
+                            android:textColor="@color/section_number_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_04_location"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
+
+                    </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilVillage"
@@ -422,8 +916,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section: Structure Details -->
+            <!-- Section 05: Structure Details -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sectionStructure"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.RudaSurvey.Card">
@@ -433,22 +928,40 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
+                    <!-- Section Header with Number -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/section_structure"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:drawableStart="@drawable/ic_building"
-                        android:drawablePadding="@dimen/spacing_8"
-                        android:drawableTint="?attr/colorPrimary"
-                        android:layout_marginBottom="@dimen/field_spacing" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/field_spacing">
+
+                        <TextView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@drawable/bg_section_number"
+                            android:gravity="center"
+                            android:text="5"
+                            android:textColor="@color/section_number_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginEnd="@dimen/spacing_8" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_05_structure"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                            android:textColor="?attr/colorOnSurface" />
+
+                    </LinearLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilStructureStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_structure_status"
+                        app:startIconDrawable="@drawable/ic_building"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_marginBottom="@dimen/field_spacing">
                         <AutoCompleteTextView
@@ -465,6 +978,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_structure_name"
+                        app:startIconDrawable="@drawable/ic_apartment"
                         style="@style/Widget.RudaSurvey.TextInput"
                         android:layout_marginBottom="@dimen/field_spacing">
                         <com.google.android.material.textfield.TextInputEditText
@@ -485,6 +999,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/label_length_ft"
+                            app:startIconDrawable="@drawable/ic_ruler"
                             style="@style/Widget.RudaSurvey.TextInput"
                             android:layout_marginEnd="@dimen/spacing_8">
                             <com.google.android.material.textfield.TextInputEditText
@@ -500,6 +1015,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/label_width_ft"
+                            app:startIconDrawable="@drawable/ic_ruler"
                             style="@style/Widget.RudaSurvey.TextInput"
                             android:layout_marginStart="@dimen/spacing_8">
                             <com.google.android.material.textfield.TextInputEditText
@@ -516,6 +1032,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_area_sqft"
+                        app:startIconDrawable="@drawable/ic_square_foot2"
                         style="@style/Widget.RudaSurvey.TextInput"
                         android:layout_marginTop="@dimen/field_spacing"
                         android:layout_marginBottom="@dimen/field_spacing">
@@ -531,6 +1048,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/label_construction_nature"
+                        app:startIconDrawable="@drawable/ic_construction"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
                         <AutoCompleteTextView
                             android:id="@+id/etConstructionNature"
@@ -568,6 +1086,8 @@
             android:layout_weight="1"
             android:text="@string/btn_save_draft"
             android:textAllCaps="false"
+            app:icon="@drawable/ic_save"
+            app:iconGravity="textStart"
             style="@style/Widget.RudaSurvey.Button.Secondary"
             android:layout_marginEnd="@dimen/spacing_8" />
 
@@ -578,6 +1098,8 @@
             android:layout_weight="1"
             android:text="View Changes"
             android:textAllCaps="false"
+            app:icon="@drawable/ic_visibility"
+            app:iconGravity="textStart"
             style="@style/Widget.RudaSurvey.Button.Primary"
             android:layout_marginStart="@dimen/spacing_8" />
 

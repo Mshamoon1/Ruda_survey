@@ -42,10 +42,7 @@ data class SurveyItem(
     val image2Bytes: ByteArray? = null,
     val landOwnerDocBytes: ByteArray? = null,
     val landOwnerDocName: String? = null
-) {
-    override fun equals(other: Any?): Boolean = this === other
-    override fun hashCode(): Int = id.hashCode()
-}
+)
 
 data class EditableDraft(
     val surveyItem: SurveyItem,
@@ -72,7 +69,4 @@ data class PendingImage(
     val areaName: String?,
     val capturedAt: Long,
     val pointId: String?
-) {
-    override fun equals(other: Any?): Boolean = this === other
-    override fun hashCode(): Int = fileName.hashCode()
-}
+)

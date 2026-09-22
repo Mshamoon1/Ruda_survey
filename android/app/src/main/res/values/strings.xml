@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">RUDA Survey</string>
+    <string name="app_name">RUDA Occupancy</string>
 
     <!-- Login -->
     <string name="login_title">Welcome Back</string>
@@ -30,7 +30,7 @@
     <string name="label_sync_status">Sync Status</string>
     <string name="label_pending_sync">Pending Syncs</string>
     <string name="label_pending_surveys">Pending surveys</string>
-    <string name="label_last_sync">Last Sync</string>
+    <string name="label_last_sync">Last Sync: %1$s</string>
     <string name="label_total_surveys">Total Surveys</string>
     <string name="label_completed">Completed</string>
     <string name="label_in_progress">In Progress</string>
@@ -149,6 +149,7 @@
     <string name="error_load_failed">Failed to load: %1$s</string>
     <string name="error_nothing_to_share">Nothing to share</string>
     <string name="error_excel_not_available">Excel not available. Please try again.</string>
+    <string name="btn_done">Done</string>
 
     <!-- Search Result Item -->
     <string name="label_parcel">Parcel: %1$s</string>
@@ -177,4 +178,52 @@
 
     <!-- Offline bar -->
     <string name="label_offline_status">Offline – changes will sync when connected</string>
+
+    <!-- GPS Status -->
+    <string name="gps_status">GPS Status</string>
+    <string name="gps_acquired">GPS Acquired</string>
+    <string name="gps_acquiring">Acquiring GPS…</string>
+    <string name="gps_unavailable">GPS Unavailable</string>
+    <string name="gps_accuracy">Accuracy: %1$sm</string>
+
+    <!-- Sync Status -->
+    <string name="sync_status_online">Online</string>
+    <string name="sync_status_offline">Offline</string>
+    <string name="sync_status_syncing">Syncing…</string>
+    <string name="sync_status_pending">Pending</string>
+    <string name="sync_status_complete">Sync Complete</string>
+    <string name="sync_status_error">Sync Error</string>
+    <string name="sync_status_conflict">Conflict</string>
+
+    <!-- Section Labels -->
+    <string name="section_01_parcel">01 — Parcel Information</string>
+    <string name="section_02_coordinates">02 — Coordinates</string>
+    <string name="section_03_ownership">03 — Ownership</string>
+    <string name="section_04_location">04 — Location</string>
+    <string name="section_05_structure">05 — Structure</string>
+
+    <!-- Evidence -->
+    <string name="evidence_01">Evidence 01</string>
+    <string name="evidence_02">Evidence 02</string>
+    <string name="evidence_door_photo">Door / Structure Entry</string>
+    <string name="evidence_front_view">Front View / Overview</string>
+
+    <!-- Review -->
+    <string name="review_subtitle">Review all information before submission</string>
+    <string name="btn_edit_survey">Edit Survey</string>
+    <string name="btn_submit_survey">Submit Survey</string>
+
+    <!-- Sheet / Report -->
+    <string name="sheet_subtitle">Survey Record</string>
+    <string name="label_report_sections">Report Sections</string>
+
+    <!-- Dashboard -->
+    <string name="label_operational_status">Operational Status</string>
+    <string name="label_network_status">Network Status</string>
+
+    <!-- Survey List -->
+    <string name="my_surveys_title">My Surveys</string>
+    <string name="desc_no_surveys">No surveys</string>
+    <string name="label_no_surveys_yet">No surveys yet</string>
+    <string name="label_create_survey_hint">Create a survey from the dashboard to get started</string>
 </resources>

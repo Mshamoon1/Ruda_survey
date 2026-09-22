@@ -27,9 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text=""
-        android:textSize="@dimen/text_size_body_small"
-        android:textColor="@color/md_theme_onErrorContainer"
-        android:fontFamily="@font/inter_medium" />
+        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+        android:textColor="@color/md_theme_onErrorContainer" />
 
     <ImageView
         android:id="@+id/btnDismissError"

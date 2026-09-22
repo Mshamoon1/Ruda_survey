@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@drawable/bg_pill_dark"
+        android:background="@drawable/bg_gps_status"
         android:paddingHorizontal="14dp"
         android:paddingVertical="8dp"
         android:gravity="center_vertical"
@@ -72,7 +72,7 @@
             android:layout_marginEnd="6dp"
             android:src="@drawable/ic_my_location"
             android:visibility="gone"
-            app:tint="@color/md_theme_tertiary" />
+            app:tint="@color/gps_acquired" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvGpsStatus"
@@ -84,12 +84,12 @@
             android:fontFamily="@font/inter_medium" />
     </LinearLayout>
 
-    <!-- Top Overlay -->
+    <!-- Top Overlay with image type -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#80000000"
+        android:background="@drawable/bg_camera_top_bar"
         android:padding="@dimen/spacing_12"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
@@ -120,7 +120,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#CC0D1B24"
+        android:background="@color/camera_bottom_bar"
         android:padding="@dimen/spacing_20"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -135,13 +135,13 @@
             android:orientation="vertical"
             android:gravity="center">
 
-            <!-- Image Type Chips (horizontal) -->
+            <!-- Image Type Dropdown -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilImageType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/label_image_type"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                style="@style/Widget.RudaSurvey.TextInput.Dropdown"
                 app:boxStrokeColor="@android:color/white"
                 app:hintTextColor="@android:color/white"
                 android:layout_marginBottom="@dimen/field_spacing">
@@ -184,6 +184,16 @@
 
             </FrameLayout>
 
+            <!-- Capture guidance text -->
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ensure GPS lock before capturing"
+                android:textColor="@color/text_on_dark_guidance"
+                android:textSize="@dimen/text_size_body_small"
+                android:fontFamily="@font/inter_regular"
+                android:layout_marginTop="@dimen/spacing_4" />
+
         </LinearLayout>
 
         <!-- Preview mode controls -->
@@ -201,12 +211,10 @@
                 android:layout_height="@dimen/button_height_large"
                 android:layout_weight="1"
                 android:text="@string/btn_retake"
-                android:textAllCaps="false"
                 android:layout_marginEnd="@dimen/spacing_8"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.RudaSurvey.Button.Secondary"
                 app:strokeColor="@android:color/white"
-                android:textColor="@android:color/white"
-                android:fontFamily="@font/inter_medium" />
+                android:textColor="@android:color/white" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUsePhoto"
@@ -214,14 +222,12 @@
                 android:layout_height="@dimen/button_height_large"
                 android:layout_weight="1"
                 android:text="@string/btn_use_photo"
-                android:textAllCaps="false"
                 android:layout_marginStart="@dimen/spacing_8"
-                app:cornerRadius="@dimen/corner_medium"
                 android:backgroundTint="@color/md_theme_secondary"
                 android:textColor="@android:color/white"
-                android:fontFamily="@font/inter_medium"
                 app:icon="@drawable/ic_check_circle"
-                app:iconGravity="textStart" />
+                app:iconGravity="textStart"
+                style="@style/Widget.Material3.Button" />
         </LinearLayout>
     </LinearLayout>
 

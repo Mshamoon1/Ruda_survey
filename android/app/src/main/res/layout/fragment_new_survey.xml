@@ -2,14 +2,15 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/md_theme_background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@android:color/transparent"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -26,109 +27,110 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="@dimen/spacing_16"
+            android:paddingTop="@dimen/spacing_8"
             android:paddingBottom="@dimen/section_vertical_spacing">
 
-            <!-- Serial Number Lookup Card -->
+            <!-- Search Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.RudaSurvey.Card"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_2"
+                app:strokeWidth="0dp"
                 android:layout_marginStart="@dimen/screen_horizontal_margin"
                 android:layout_marginEnd="@dimen/screen_horizontal_margin"
-                android:layout_marginBottom="@dimen/field_spacing">
+                android:layout_marginBottom="@dimen/spacing_16">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Header -->
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_sr_no_lookup"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:layout_marginBottom="@dimen/spacing_4" />
+                    <!-- Header Banner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="149dp"
+                        android:background="@drawable/bg_new_survey"
+                        android:orientation="vertical"
+                        android:paddingStart="@dimen/spacing_20"
+                        android:paddingTop="@dimen/spacing_20"
+                        android:paddingEnd="@dimen/spacing_20"
+                        android:paddingBottom="@dimen/spacing_16">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_sr_no_lookup_hint"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:layout_marginBottom="@dimen/field_spacing" />
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginBottom="@dimen/spacing_8"
+                            android:contentDescription="@string/search_title"
+                            android:src="@drawable/ic_search"
+                            android:tint="@android:color/white" />
 
-                    <!-- Serial Number Input -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilSerialNumber"
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/spacing_4"
+                            android:text="@string/label_sr_no_lookup"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineMedium"
+                            android:textColor="@android:color/white" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_sr_no_lookup_hint"
+                            android:textColor="@color/text_on_dark_secondary"
+                            android:textSize="@dimen/text_size_body" />
+
+                    </LinearLayout>
+
+                    <!-- Search Input Section -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_serial_number"
-                        app:startIconDrawable="@drawable/ic_search"
-                        style="@style/Widget.RudaSurvey.TextInput"
-                        android:layout_marginBottom="@dimen/field_spacing">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etSerialNumber"
+                        android:orientation="vertical"
+                        android:padding="@dimen/card_padding">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilSerialNumber"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:textSize="@dimen/text_size_body"
-                            android:imeOptions="actionSearch" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:hint="@string/hint_serial_number"
+                            app:startIconDrawable="@drawable/ic_hash"
+                            app:startIconTint="@color/md_theme_primary"
+                            app:boxStrokeColor="@color/md_theme_primary"
+                            app:hintTextColor="@color/md_theme_primary"
+                            style="@style/Widget.RudaSurvey.TextInput"
+                            android:layout_marginBottom="@dimen/spacing_16">
 
-                    <!-- Lookup Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSerialLookup"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/button_height_medium"
-                        android:text="@string/btn_lookup"
-                        android:textAllCaps="false"
-                        app:icon="@drawable/ic_search"
-                        app:iconGravity="textStart"
-                        style="@style/Widget.RudaSurvey.Button.Primary" />
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etSerialNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textSize="@dimen/text_size_body_large"
+                                android:imeOptions="actionSearch"
+                                android:fontFamily="@font/inter_medium" />
 
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Result Details Card (hidden until search result) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardResult"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.RudaSurvey.Card"
-                android:layout_marginStart="@dimen/screen_horizontal_margin"
-                android:layout_marginEnd="@dimen/screen_horizontal_margin"
-                android:layout_marginBottom="@dimen/field_spacing"
-                android:visibility="gone">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSerialLookup"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/button_height_large"
+                            android:text="@string/btn_lookup"
+                            android:textAllCaps="false"
+                            app:icon="@drawable/ic_search"
+                            app:iconGravity="textStart"
+                            app:cornerRadius="@dimen/corner_medium"
+                            style="@style/Widget.RudaSurvey.Button.Primary" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Survey Details"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:layout_marginBottom="@dimen/field_spacing" />
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvResultDetails"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
-                        android:textColor="?attr/colorOnSurface"
-                        android:lineSpacingMultiplier="1.4" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -142,9 +144,11 @@
                 android:visibility="gone"
                 app:indicatorColor="@color/md_theme_primary"
                 app:trackColor="@color/md_theme_primaryContainer"
+                app:trackCornerRadius="2dp"
                 android:layout_marginStart="@dimen/screen_horizontal_margin"
                 android:layout_marginEnd="@dimen/screen_horizontal_margin"
-                android:layout_marginTop="@dimen/spacing_8" />
+                android:layout_marginTop="@dimen/spacing_4"
+                android:layout_marginBottom="@dimen/spacing_8" />
 
             <!-- Search Results -->
             <androidx.recyclerview.widget.RecyclerView
@@ -156,20 +160,142 @@
                 android:paddingTop="@dimen/spacing_4"
                 android:visibility="gone" />
 
-            <!-- View Original Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnViewOriginal"
+            <!-- Result Details Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardResult"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height_medium"
-                android:text="@string/btn_view_original"
-                android:textAllCaps="false"
-                app:icon="@drawable/ic_document"
-                app:iconGravity="textStart"
-                style="@style/Widget.RudaSurvey.Button.Text"
-                android:visibility="gone"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_2"
+                app:strokeWidth="0dp"
                 android:layout_marginStart="@dimen/screen_horizontal_margin"
                 android:layout_marginEnd="@dimen/screen_horizontal_margin"
-                android:layout_marginTop="@dimen/spacing_8" />
+                android:layout_marginBottom="@dimen/spacing_16"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Result Header Banner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/bg_result_header"
+                        android:paddingStart="@dimen/card_padding"
+                        android:paddingEnd="@dimen/card_padding"
+                        android:paddingTop="@dimen/spacing_16"
+                        android:paddingBottom="@dimen/spacing_16">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_check_circle"
+                            android:tint="@android:color/white"
+                            android:layout_marginEnd="@dimen/spacing_12"
+                            android:contentDescription="@string/ok" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Survey Found"
+                                android:textColor="@android:color/white"
+                                android:textSize="@dimen/text_size_title"
+                                android:fontFamily="@font/inter_semibold" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Details fetched from server"
+                                android:textColor="@color/text_on_dark_secondary"
+                                android:textSize="@dimen/text_size_body_small" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Details Content -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvResultDetails"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:lineSpacingMultiplier="1.5"
+                        android:padding="@dimen/card_padding"
+                        android:fontFamily="@font/inter_regular"
+                        android:textSize="@dimen/text_size_body" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- View Original Button -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnViewOriginal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="@dimen/corner_medium"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_theme_outlineVariant"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_8"
+                android:visibility="gone"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/spacing_16">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="View Original Data"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                            android:textColor="@color/md_theme_primary"
+                            android:textSize="@dimen/text_size_body_large" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Open full survey record"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:layout_marginTop="@dimen/spacing_2" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_right"
+                        android:tint="@color/md_theme_primary"
+                        android:contentDescription="@string/btn_view_edit" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

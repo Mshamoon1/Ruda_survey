@@ -18,7 +18,7 @@ class SyncWorker(
             val repository = SyncRepository(
                 api = ApiClient.createSurveyApi(applicationContext),
                 dao = database.syncDao(),
-                tokenManager = SecureTokenManager(applicationContext)
+                tokenManager = SecureTokenManager.getInstance(applicationContext)
             )
 
             val result = repository.processQueue()

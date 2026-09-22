@@ -8,10 +8,12 @@ import com.ruda.survey.data.sync.SyncRepository
 import com.ruda.survey.data.sync.SyncWorker
 import com.ruda.survey.domain.model.SyncOutcome
 import com.ruda.survey.domain.model.SyncState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SyncViewModel(
     private val syncRepository: SyncRepository,
@@ -34,16 +36,20 @@ class SyncViewModel(
 
     private fun observePendingCount() {
         viewModelScope.launch {
-            syncDao.getPendingCount().collect { count ->
-                _syncState.value = _syncState.value.copy(pendingCount = count)
+            withContext(Dispatchers.IO) {
+                syncDao.getPendingCount().collect { count ->
+                    _syncState.value = _syncState.value.copy(pendingCount = count)
+                }
             }
         }
     }
 
     private fun observeConflictCount() {
         viewModelScope.launch {
-            syncDao.getConflictCount().collect { count ->
-                _syncState.value = _syncState.value.copy(conflictCount = count)
+            withContext(Dispatchers.IO) {
+                syncDao.getConflictCount().collect { count ->
+                    _syncState.value = _syncState.value.copy(conflictCount = count)
+                }
             }
         }
     }
@@ -66,7 +72,9 @@ class SyncViewModel(
             _syncState.value = _syncState.value.copy(isSyncing = true, lastError = null)
 
             try {
-                val result = syncRepository.processQueue()
+                val result = withContext(Dispatchers.IO) {
+                    syncRepository.processQueue()
+                }
                 _syncState.value = _syncState.value.copy(
                     isSyncing = false,
                     lastSyncTime = System.currentTimeMillis()

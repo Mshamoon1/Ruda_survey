@@ -14,26 +14,41 @@ import java.util.concurrent.TimeUnit
 object ApiClient {
     private const val BASE_URL = BuildConfig.API_BASE_URL
 
+    @Volatile private var cachedAuthApi: AuthApi? = null
+    @Volatile private var cachedSurveyApi: SurveyApi? = null
+
     fun createAuthApi(context: Context): AuthApi {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(buildClient(context))
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(AuthApi::class.java)
+        cachedAuthApi?.let { return it }
+        synchronized(this) {
+            cachedAuthApi?.let { return it }
+            val api = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(buildClient(context))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(AuthApi::class.java)
+            cachedAuthApi = api
+            return api
+        }
     }
 
     fun createSurveyApi(context: Context): SurveyApi {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(buildClient(context))
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(SurveyApi::class.java)
+        cachedSurveyApi?.let { return it }
+        synchronized(this) {
+            cachedSurveyApi?.let { return it }
+            val api = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(buildClient(context))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(SurveyApi::class.java)
+            cachedSurveyApi = api
+            return api
+        }
     }
 
     private fun buildClient(context: Context): OkHttpClient {
-        val tokenManager = SecureTokenManager(context.applicationContext)
+        val tokenManager = SecureTokenManager.getInstance(context)
 
         val authInterceptor = Interceptor { chain ->
             val original = chain.request()

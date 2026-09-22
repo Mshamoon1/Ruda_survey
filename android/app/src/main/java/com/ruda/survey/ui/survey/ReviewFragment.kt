@@ -117,7 +117,7 @@ class ReviewFragment : Fragment() {
             appendLine("")
             appendLine("Structure:")
             appendLine("  Name: ${survey.structuralName}")
-            appendLine("  Status: ${survey.status}")
+            appendLine("  Status: ${survey.status.replace("_", " ").uppercase()}")
             appendLine("  Construction: ${survey.natureOfConstruction}")
             if (survey.rd.isNotBlank()) appendLine("  RD: ${survey.rd}")
             if (survey.pkg.isNotBlank()) appendLine("  Package: ${survey.pkg}")
@@ -184,6 +184,14 @@ class ReviewFragment : Fragment() {
                 binding.submitProgressBar.visibility = View.GONE
                 binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
                 binding.btnSubmit.isEnabled = true
+                val ctx = requireContext().applicationContext
+                val tm = RepositoryFactory.getTokenManager(ctx)
+                tm.incrementNewSurveyCount()
+                val surveyData = state.data as? com.ruda.survey.domain.model.SurveyItem
+                if (surveyData != null && surveyData.id.isNotBlank()) {
+                    tm.addUserSurveyId(surveyData.id)
+                }
+                viewModel.loadAllSurveys()
                 animateCheckmark {
                     if (isAdded) {
                         findNavController().navigate(R.id.action_review_to_sheet)
@@ -194,7 +202,14 @@ class ReviewFragment : Fragment() {
                 binding.submitProgressBar.visibility = View.GONE
                 binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
                 binding.btnSubmit.isEnabled = true
-                Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
+                val message = if (state.message?.contains("Unable to resolve host") == true ||
+                    state.message?.contains("timeout") == true ||
+                    state.message?.contains("ENETUNREACH") == true) {
+                    "No internet connection. Survey saved locally and will sync when online."
+                } else {
+                    state.message ?: "Submission failed"
+                }
+                Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show()
             }
             is UiState.Empty -> { }
         }

@@ -1,7 +1,10 @@
 package com.ruda.survey.data.repository
 
 import android.util.Log
+import com.google.gson.Gson
 import com.ruda.survey.data.dto.*
+import com.ruda.survey.data.local.SyncDao
+import com.ruda.survey.data.local.SyncQueueEntry
 import com.ruda.survey.data.remote.SurveyApi
 import com.ruda.survey.domain.model.*
 import com.ruda.survey.domain.repository.SurveyRepository
@@ -13,8 +16,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 class SurveyRepositoryImpl(
     private val api: SurveyApi,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val syncDao: SyncDao? = null
 ) : SurveyRepository {
+
+    private val gson = Gson()
 
     override suspend fun getAllSurveys(): Result<List<SurveyItem>> {
         return try {
@@ -103,7 +109,9 @@ class SurveyRepositoryImpl(
             if (response.isSuccessful) {
                 val body = response.body()!!
                 if (body.success && body.data != null) {
-                    Result.success(body.data.toDomain())
+                    val createdItem = body.data.toDomain()
+                    tokenManager.addUserSurveyId(createdItem.id)
+                    Result.success(createdItem)
                 } else {
                     Result.failure(Exception(body.message))
                 }
@@ -112,6 +120,9 @@ class SurveyRepositoryImpl(
                 Result.failure(Exception(errorBody ?: "Create failed"))
             }
         } catch (e: Exception) {
+            // Offline fallback: queue to sync_queue
+            Log.w("SurveyRepo", "Network error, queuing for offline sync", e)
+            queueOffline(item, SyncQueueEntry.OP_REVISION_CREATE)
             Result.failure(e)
         }
     }
@@ -156,7 +167,9 @@ class SurveyRepositoryImpl(
             if (response.isSuccessful) {
                 val responseBody = response.body()!!
                 if (responseBody.success && responseBody.data != null) {
-                    Result.success(responseBody.data.toDomain())
+                    val updatedItem = responseBody.data.toDomain()
+                    tokenManager.addUserSurveyId(updatedItem.id)
+                    Result.success(updatedItem)
                 } else {
                     Result.failure(Exception(responseBody.message))
                 }
@@ -167,6 +180,9 @@ class SurveyRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e("SurveyRepo", "updateSurvey exception", e)
+            // Offline fallback: queue to sync_queue
+            Log.w("SurveyRepo", "Network error on update, queuing for offline sync", e)
+            queueOffline(item, SyncQueueEntry.OP_REVISION_CREATE)
             Result.failure(e)
         }
     }
@@ -216,13 +232,17 @@ class SurveyRepositoryImpl(
 
     @Suppress("UNCHECKED_CAST")
     private fun mapToSurveyItem(data: Map<*, *>): SurveyItem {
-        val coords = data["coordinates"] as? Map<*, *> ?: emptyMap<String, Any>()
+        val coords = data["coordinates"]
+        val topLat = data["lat"] ?: data["latitude"]
+        val topLng = data["lng"] ?: data["longitude"]
+        val (parsedLat, parsedLng) = extractCoordinates(coords, topLat, topLng)
+
         val ident = data["identification"] as? Map<*, *> ?: emptyMap<String, Any>()
         val area = data["covered_area"] as? Map<*, *> ?: emptyMap<String, Any>()
 
         val rawStatus = data["status"]?.toString() ?: ""
         val rawNature = data["nature_of_construction"]?.toString() ?: ""
-        Log.d("SurveyRepo", "mapToSurveyItem raw status='$rawStatus' nature='$rawNature'")
+        safeLog("SurveyRepo", "mapToSurveyItem raw status='$rawStatus' nature='$rawNature'")
 
         return SurveyItem(
             id = data["_id"]?.toString() ?: "",
@@ -236,8 +256,8 @@ class SurveyRepositoryImpl(
             natureOfConstruction = rawNature.lowercase(),
             imgOne = data["imgOne"]?.toString() ?: "",
             imgTwo = data["imgTwo"]?.toString() ?: "",
-            lat = (coords["lat"] as? Number)?.toDouble() ?: 0.0,
-            lng = (coords["lng"] as? Number)?.toDouble() ?: 0.0,
+            lat = parsedLat,
+            lng = parsedLng,
             ownerName = ident["owner_name"]?.toString() ?: "",
             fName = ident["f_name"]?.toString() ?: "",
             cnic = ident["cnic"]?.toString() ?: "",
@@ -251,10 +271,111 @@ class SurveyRepositoryImpl(
             area = area["area"]?.toString() ?: ""
         )
     }
+
+    private suspend fun queueOffline(item: SurveyItem, operationType: String) {
+        val dao = syncDao ?: run {
+            Log.w("SurveyRepo", "No SyncDao available, cannot queue offline")
+            return
+        }
+
+        val data = mapOf(
+            "sr_no" to item.srNo,
+            "parcel_id" to item.parcelId,
+            "rd" to item.rd,
+            "pkg" to item.pkg,
+            "lat" to item.lat.toString(),
+            "lng" to item.lng.toString(),
+            "village" to item.village,
+            "owner_name" to item.ownerName,
+            "cnic" to item.cnic,
+            "f_name" to item.fName,
+            "khasra_no" to item.khasraNo,
+            "phone" to item.phone,
+            "electricity_connection_name" to item.electricityConnectionName,
+            "land_area" to item.landArea,
+            "status" to item.status,
+            "stractural_name" to item.structuralName,
+            "nature_of_construction" to item.natureOfConstruction,
+            "length" to item.length,
+            "width" to item.width,
+            "area" to item.area,
+            "client_uuid" to (item.id.ifEmpty { java.util.UUID.randomUUID().toString() })
+        )
+
+        val entry = SyncQueueEntry(
+            operationType = operationType,
+            parcelCode = item.parcelId,
+            clientUuid = data["client_uuid"] as String,
+            dataJson = gson.toJson(data),
+            status = SyncQueueEntry.STATUS_PENDING
+        )
+
+        val id = dao.insert(entry)
+        Log.d("SurveyRepo", "Queued offline: id=$id op=$operationType parcel=${item.parcelId}")
+    }
+}
+
+private fun extractCoordinates(coordinatesRaw: Any?, topLat: Any?, topLng: Any?): Pair<Double, Double> {
+    fun toDouble(v: Any?): Double? = when (v) {
+        is Number -> v.toDouble()
+        is String -> v.toDoubleOrNull()
+        else -> null
+    }
+
+    val tLat = toDouble(topLat)
+    val tLng = toDouble(topLng)
+    if (tLat != null && tLng != null && tLat != 0.0 && tLng != 0.0) {
+        return Pair(tLat, tLng)
+    }
+
+    if (coordinatesRaw != null) {
+        when (coordinatesRaw) {
+            is CoordinatesDto -> {
+                val cLat = coordinatesRaw.lat
+                val cLng = coordinatesRaw.lng
+                if (cLat != null && cLng != null && cLat != 0.0 && cLng != 0.0) {
+                    return Pair(cLat, cLng)
+                }
+            }
+            is Map<*, *> -> {
+                val cLat = toDouble(coordinatesRaw["lat"] ?: coordinatesRaw["latitude"])
+                val cLng = toDouble(coordinatesRaw["lng"] ?: coordinatesRaw["longitude"] ?: coordinatesRaw["long"])
+                if (cLat != null && cLng != null) {
+                    return Pair(cLat, cLng)
+                }
+                val geoCoords = coordinatesRaw["coordinates"]
+                if (geoCoords is List<*> && geoCoords.size >= 2) {
+                    val gLng = toDouble(geoCoords[0])
+                    val gLat = toDouble(geoCoords[1])
+                    if (gLat != null && gLng != null) {
+                        return Pair(gLat, gLng)
+                    }
+                }
+            }
+            is List<*> -> {
+                if (coordinatesRaw.size >= 2) {
+                    val first = toDouble(coordinatesRaw[0])
+                    val second = toDouble(coordinatesRaw[1])
+                    if (first != null && second != null) {
+                        return if (first > 50.0) Pair(second, first) else Pair(first, second)
+                    }
+                }
+            }
+        }
+    }
+
+    return Pair(tLat ?: 0.0, tLng ?: 0.0)
+}
+
+private fun safeLog(tag: String, msg: String) {
+    try {
+        Log.d(tag, msg)
+    } catch (_: Throwable) {}
 }
 
 private fun SurveyItemDto.toDomain(): SurveyItem {
-    Log.d("SurveyRepo", "toDomain status='${status}' nature='${nature_of_construction}'")
+    safeLog("SurveyRepo", "toDomain status='${status}' nature='${nature_of_construction}'")
+    val (parsedLat, parsedLng) = extractCoordinates(coordinates, lat, lng)
     return SurveyItem(
         id = id,
         srNo = sr_no,
@@ -267,8 +388,8 @@ private fun SurveyItemDto.toDomain(): SurveyItem {
         natureOfConstruction = (nature_of_construction ?: "").lowercase(),
         imgOne = imgOne ?: "",
         imgTwo = imgTwo ?: "",
-        lat = coordinates?.lat ?: 0.0,
-        lng = coordinates?.lng ?: 0.0,
+        lat = parsedLat,
+        lng = parsedLng,
         ownerName = identification?.owner_name ?: "",
         fName = identification?.f_name ?: "",
         cnic = identification?.cnic ?: "",

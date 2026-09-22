@@ -3,15 +3,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_surfaceVariant">
 
     <!-- Background Image -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/background"
+        android:src="@drawable/loginbg"
         android:scaleType="centerCrop"
         android:contentDescription="@string/app_name" />
+
+    <!-- Dark overlay for better contrast -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/scrim_overlay" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -25,7 +32,7 @@
             android:gravity="center_horizontal"
             android:paddingStart="@dimen/screen_horizontal_margin"
             android:paddingEnd="@dimen/screen_horizontal_margin"
-            android:paddingTop="80dp"
+            android:paddingTop="72dp"
             android:paddingBottom="@dimen/spacing_32">
 
             <!-- Logo with white circle background -->
@@ -34,7 +41,7 @@
                 android:layout_height="120dp"
                 android:background="@drawable/bg_logo_disc"
                 android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/spacing_20">
+                android:layout_marginBottom="@dimen/spacing_24">
 
                 <ImageView
                     android:id="@+id/ivLogo"
@@ -55,8 +62,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
                 android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineLarge"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="@dimen/spacing_4" />
+                android:textColor="#063355"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/spacing_6" />
 
             <!-- Subtitle -->
             <com.google.android.material.textview.MaterialTextView
@@ -65,8 +73,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/login_subtitle"
                 android:textAppearance="@style/TextAppearance.RudaSurvey.BodyLarge"
-                android:textColor="#B3FFFFFF"
-                android:layout_marginBottom="@dimen/spacing_40" />
+                android:textColor="?attr/colorOnSurface"
+                android:layout_marginBottom="@dimen/spacing_48" />
 
             <!-- Spacer -->
             <View
@@ -80,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/corner_xl"
-                app:cardElevation="@dimen/elevation_2"
+                app:cardElevation="@dimen/elevation_4"
                 app:strokeWidth="0dp"
                 android:layout_marginBottom="@dimen/spacing_16">
 
@@ -89,6 +97,23 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="@dimen/card_padding">
+
+                    <!-- Welcome header inside card -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sign in to your account"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="@dimen/spacing_4" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enter your credentials to continue"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="@dimen/spacing_20" />
 
                     <!-- Email -->
                     <com.google.android.material.textfield.TextInputLayout
@@ -141,26 +166,19 @@
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/button_height_large"
-                        android:layout_marginBottom="@dimen/spacing_16">
+                        android:layout_marginBottom="@dimen/spacing_8">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnLogin"
                             android:layout_width="match_parent"
-                            android:layout_height="56dp"
+                            android:layout_height="48dp"
                             android:text="@string/btn_login"
-                            android:textSize="16sp"
                             app:icon="@drawable/ic_login"
                             app:iconGravity="textStart"
-                            android:textAllCaps="false"
-                            android:letterSpacing="0.04"
-                            android:fontFamily="@font/inter_semibold"
-                            app:cornerRadius="28dp"
-                            app:backgroundTint="@color/md_theme_primary"
-                            android:textColor="@color/md_theme_onPrimary"
                             app:iconTint="@color/md_theme_onPrimary"
                             android:stateListAnimator="@null"
                             android:elevation="4dp"
-                            style="@style/Widget.Material3.Button" />
+                            style="@style/Widget.RudaSurvey.Button.Primary" />
 
                         <com.google.android.material.progressindicator.CircularProgressIndicator
                             android:id="@+id/buttonProgressBar"

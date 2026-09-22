@@ -15,6 +15,9 @@ interface SyncDao {
     @Query("SELECT COUNT(*) FROM sync_queue WHERE status IN ('PENDING', 'FAILED')")
     fun getPendingCount(): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM sync_queue WHERE operation_type = 'REVISION_CREATE' AND status IN ('PENDING', 'FAILED')")
+    fun getNewSurveysCount(): Flow<Int>
+
     @Query("SELECT COUNT(*) FROM sync_queue WHERE status = 'CONFLICT'")
     fun getConflictCount(): Flow<Int>
 

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SurveyViewModel(
     private val repository: SurveyRepository
@@ -50,7 +51,9 @@ class SurveyViewModel(
     fun fetchNextSrNo() {
         _nextSrNoState.value = null
         viewModelScope.launch {
-            val result = repository.getAllSurveys()
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.getAllSurveys()
+            }
             result.onSuccess { surveys ->
                 val maxSr = surveys.maxOfOrNull { it.srNo } ?: 0
                 _nextSrNoState.value = maxSr + 1
@@ -66,7 +69,9 @@ class SurveyViewModel(
         }
         _srNoLookupState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.getSurveyBySrNo(parsed)
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.getSurveyBySrNo(parsed)
+            }
             _srNoLookupState.value = result.fold(
                 onSuccess = {
                     currentSurvey = it
@@ -90,10 +95,15 @@ class SurveyViewModel(
         _srNoLookupState.value = UiState.Empty
     }
 
-    fun loadAllSurveys() {
+    fun loadAllSurveys(forceRefresh: Boolean = false) {
+        val current = _allSurveysState.value
+        if (!forceRefresh && current is UiState.Success) return
+        if (current is UiState.Loading) return
         _allSurveysState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.getAllSurveys()
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.getAllSurveys()
+            }
             _allSurveysState.value = result.fold(
                 onSuccess = { UiState.Success(it) },
                 onFailure = { UiState.Error("NETWORK_ERROR", it.message ?: "Failed to load surveys") }
@@ -104,7 +114,9 @@ class SurveyViewModel(
     fun loadSurvey(id: String) {
         _surveyState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.getSurveyById(id)
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.getSurveyById(id)
+            }
             _surveyState.value = result.fold(
                 onSuccess = {
                     currentSurvey = it
@@ -118,10 +130,13 @@ class SurveyViewModel(
     fun createSurvey(item: SurveyItem) {
         _createState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.createSurvey(item)
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.createSurvey(item)
+            }
             _createState.value = result.fold(
                 onSuccess = {
                     currentSurvey = it
+                    loadAllSurveys(forceRefresh = true)
                     UiState.Success(it)
                 },
                 onFailure = { UiState.Error("CREATE_FAILED", it.message ?: "Failed to create survey") }
@@ -132,10 +147,13 @@ class SurveyViewModel(
     fun updateSurvey(item: SurveyItem) {
         _updateState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.updateSurvey(item)
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.updateSurvey(item)
+            }
             _updateState.value = result.fold(
                 onSuccess = {
                     currentSurvey = it
+                    loadAllSurveys(forceRefresh = true)
                     UiState.Success(it)
                 },
                 onFailure = { UiState.Error("UPDATE_FAILED", it.message ?: "Failed to update survey") }
@@ -146,10 +164,13 @@ class SurveyViewModel(
     fun deleteSurvey(id: String) {
         _deleteState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.deleteSurvey(id)
+            val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                repository.deleteSurvey(id)
+            }
             _deleteState.value = result.fold(
                 onSuccess = {
                     currentSurvey = null
+                    loadAllSurveys(forceRefresh = true)
                     UiState.Success(Unit)
                 },
                 onFailure = { UiState.Error("DELETE_FAILED", it.message ?: "Failed to delete survey") }

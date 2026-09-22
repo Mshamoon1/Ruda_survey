@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.ruda.survey.domain.model.AuthState
 import com.ruda.survey.domain.model.UiState
 import com.ruda.survey.domain.repository.AuthRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
@@ -22,7 +24,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
         _uiState.value = UiState.Loading
         viewModelScope.launch {
-            val result = repository.login(email, password)
+            val result = withContext(Dispatchers.IO) {
+                repository.login(email, password)
+            }
             _uiState.value = result.fold(
                 onSuccess = { UiState.Success(it) },
                 onFailure = { UiState.Error("LOGIN_FAILED", it.message ?: "Login failed") }

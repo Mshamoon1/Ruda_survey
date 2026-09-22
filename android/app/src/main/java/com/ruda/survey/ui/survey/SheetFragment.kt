@@ -26,7 +26,10 @@ import com.ruda.survey.utils.animateTapFeedback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class SheetFragment : Fragment() {
     private var _binding: FragmentSheetBinding? = null
@@ -91,7 +94,7 @@ class SheetFragment : Fragment() {
             appendLine("")
             appendLine("Structure:")
             appendLine("  Name: ${survey.structuralName.ifBlank { "N/A" }}")
-            appendLine("  Status: ${survey.status.ifBlank { "N/A" }}")
+            appendLine("  Status: ${survey.status.replace("_", " ").uppercase().ifBlank { "N/A" }}")
             appendLine("  Construction: ${survey.natureOfConstruction.ifBlank { "N/A" }}")
             appendLine("  Length: ${survey.length.ifBlank { "N/A" }}")
             appendLine("  Width: ${survey.width.ifBlank { "N/A" }}")
@@ -121,29 +124,67 @@ class SheetFragment : Fragment() {
             ?: survey.image2Bytes
 
         if (img1Bytes != null) {
-            val bitmap = BitmapFactory.decodeByteArray(img1Bytes, 0, img1Bytes.size)
-            if (bitmap != null) {
-                binding.ivImage1.setImageBitmap(bitmap)
-                binding.ivImage1.visibility = View.VISIBLE
-                binding.tvImage1Label.visibility = View.VISIBLE
-                binding.tvImage1Label.text = "Door Pic"
+            viewLifecycleOwner.lifecycleScope.launch {
+                val bitmap = withContext(Dispatchers.IO) {
+                    BitmapFactory.decodeByteArray(img1Bytes, 0, img1Bytes.size)
+                }
+                if (bitmap != null) {
+                    binding.ivImage1.setImageBitmap(bitmap)
+                    binding.ivImage1.visibility = View.VISIBLE
+                    binding.tvImage1Label.visibility = View.VISIBLE
+                    binding.tvImage1Label.text = "Door Pic"
+                }
             }
         } else if (survey.imgOne.isNotBlank()) {
-            binding.tvImage1Label.text = "Door Pic (server): ${survey.imgOne}"
-            binding.tvImage1Label.visibility = View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                val bytes = withContext(Dispatchers.IO) { downloadImage(survey.imgOne) }
+                if (bytes != null) {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    if (bitmap != null) {
+                        binding.ivImage1.setImageBitmap(bitmap)
+                        binding.ivImage1.visibility = View.VISIBLE
+                        binding.tvImage1Label.visibility = View.VISIBLE
+                        binding.tvImage1Label.text = "Door Pic"
+                    }
+                } else {
+                    binding.tvImage1Label.text = "Door Pic (server)"
+                    binding.tvImage1Label.visibility = View.VISIBLE
+                }
+            }
         }
 
         if (img2Bytes != null) {
-            val bitmap = BitmapFactory.decodeByteArray(img2Bytes, 0, img2Bytes.size)
-            if (bitmap != null) {
-                binding.ivImage2.setImageBitmap(bitmap)
-                binding.ivImage2.visibility = View.VISIBLE
-                binding.tvImage2Label.visibility = View.VISIBLE
-                binding.tvImage2Label.text = "Front View"
+            viewLifecycleOwner.lifecycleScope.launch {
+                val bitmap = withContext(Dispatchers.IO) {
+                    BitmapFactory.decodeByteArray(img2Bytes, 0, img2Bytes.size)
+                }
+                if (bitmap != null) {
+                    binding.ivImage2.setImageBitmap(bitmap)
+                    binding.ivImage2.visibility = View.VISIBLE
+                    binding.tvImage2Label.visibility = View.VISIBLE
+                    binding.tvImage2Label.text = "Front View"
+                }
             }
         } else if (survey.imgTwo.isNotBlank()) {
-            binding.tvImage2Label.text = "Front View (server): ${survey.imgTwo}"
-            binding.tvImage2Label.visibility = View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                val bytes = withContext(Dispatchers.IO) { downloadImage(survey.imgTwo) }
+                if (bytes != null) {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    if (bitmap != null) {
+                        binding.ivImage2.setImageBitmap(bitmap)
+                        binding.ivImage2.visibility = View.VISIBLE
+                        binding.tvImage2Label.visibility = View.VISIBLE
+                        binding.tvImage2Label.text = "Front View"
+                    }
+                } else {
+                    binding.tvImage2Label.text = "Front View (server)"
+                    binding.tvImage2Label.visibility = View.VISIBLE
+                }
+            }
         }
 
         val hasAny = img1Bytes != null || img2Bytes != null || survey.imgOne.isNotBlank() || survey.imgTwo.isNotBlank()
@@ -170,6 +211,17 @@ class SheetFragment : Fragment() {
                 generateAndSaveExcel(survey)
             }
         }
+
+        binding.btnDone.setOnClickListener {
+            it.animateTapFeedback {
+                if (isAdded) {
+                    val popped = findNavController().popBackStack(R.id.dashboardFragment, false)
+                    if (!popped) {
+                        findNavController().navigate(R.id.action_sheet_to_dashboard)
+                    }
+                }
+            }
+        }
     }
 
     private fun generateAndSavePdf(survey: SurveyItem) {
@@ -181,7 +233,8 @@ class SheetFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val pdfBytes = withContext(Dispatchers.IO) {
-                    com.ruda.survey.utils.PdfGenerator.generate(survey)
+                    val resolved = resolveImages(survey)
+                    com.ruda.survey.utils.PdfGenerator.generate(resolved)
                 }
                 val fileName = "survey_${survey.srNo}.pdf"
                 val uri = saveToDownloads(fileName, "application/pdf", pdfBytes)
@@ -211,7 +264,8 @@ class SheetFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val pdfBytes = withContext(Dispatchers.IO) {
-                    com.ruda.survey.utils.PdfGenerator.generate(survey)
+                    val resolved = resolveImages(survey)
+                    com.ruda.survey.utils.PdfGenerator.generate(resolved)
                 }
                 val pdfsDir = File(requireContext().cacheDir, "pdfs")
                 pdfsDir.mkdirs()
@@ -265,6 +319,46 @@ class SheetFragment : Fragment() {
                 binding.btnExportExcel.isEnabled = true
                 Snackbar.make(binding.root, "Excel error: ${e.message}", Snackbar.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun resolveImages(survey: SurveyItem): SurveyItem {
+        android.util.Log.d("SheetFragment", "resolveImages: img1Bytes=${survey.image1Bytes != null} img2Bytes=${survey.image2Bytes != null} imgOne='${survey.imgOne}' imgTwo='${survey.imgTwo}'")
+        val pendingImages = viewModel.pendingImages.value
+        val img1 = survey.image1Bytes
+            ?: pendingImages.find { it.imageType == "imgOne" }?.stampedBytes
+            ?: pendingImages.find { it.imageType == "imgOne" }?.originalBytes
+            ?: downloadImage(survey.imgOne)
+        val img2 = survey.image2Bytes
+            ?: pendingImages.find { it.imageType == "imgTwo" }?.stampedBytes
+            ?: pendingImages.find { it.imageType == "imgTwo" }?.originalBytes
+            ?: downloadImage(survey.imgTwo)
+        android.util.Log.d("SheetFragment", "resolveImages result: img1=${img1?.size} img2=${img2?.size}")
+        return survey.copy(image1Bytes = img1, image2Bytes = img2)
+    }
+
+    private fun downloadImage(url: String): ByteArray? {
+        if (url.isBlank()) return null
+        return try {
+            val fullUrl = if (url.startsWith("http")) url else "https://api.ruda-surv.nespakprogresscenter.com/$url"
+            val tokenManager = RepositoryFactory.getTokenManager(requireContext().applicationContext)
+            val token = tokenManager.getAccessToken()
+            val client = OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .build()
+            val builder = Request.Builder().url(fullUrl)
+            if (!token.isNullOrBlank()) {
+                builder.addHeader("Authorization", "Bearer $token")
+            }
+            val request = builder.build()
+            android.util.Log.d("SheetFragment", "Downloading image: $fullUrl")
+            val response = client.newCall(request).execute()
+            android.util.Log.d("SheetFragment", "Image response: code=${response.code} contentLength=${response.body?.contentLength()}")
+            if (response.isSuccessful) response.body?.bytes() else null
+        } catch (e: Exception) {
+            android.util.Log.e("SheetFragment", "Failed to download image: $url", e)
+            null
         }
     }
 

@@ -5,95 +5,364 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/md_background">
+    android:background="@color/md_theme_surfaceVariant">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_height_expanded"
-        android:background="@color/md_toolbar_bg"
-        android:elevation="@dimen/elevation_0"
-        app:contentInsetStart="@dimen/screen_horizontal_margin">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceTitleLarge"
-                android:textColor="@color/md_on_toolbar"
-                tools:text="Welcome, Ahmed" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tvRole"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_4"
-                android:background="@drawable/bg_badge_pill"
-                android:paddingHorizontal="@dimen/spacing_12"
-                android:paddingVertical="@dimen/spacing_2"
-                android:textAppearance="?attr/textAppearanceLabelSmall"
-                android:textColor="@color/md_on_toolbar"
-                tools:text="Surveyor" />
-
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="@dimen/spacing_12"
-            android:contentDescription="@string/btn_logout"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:minWidth="@dimen/button_height_medium"
-            android:minHeight="@dimen/button_height_medium"
-            android:paddingHorizontal="@dimen/spacing_12"
-            android:text=""
-            app:icon="@drawable/ic_logout"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconTint="@color/md_on_toolbar" />
-
-    </com.google.android.material.appbar.MaterialToolbar>
-
+    <!-- ===== Scrollable Content ===== -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/spacing_24">
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="@dimen/screen_horizontal_margin"
-            android:paddingTop="@dimen/spacing_24">
+            android:orientation="vertical">
 
-            <!-- ===== Survey Map Card ===== -->
+            <!-- ===== Hero Header Section ===== -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+
+                <!-- Background Image -->
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/background"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/app_name" />
+
+                <!-- Dark gradient scrim -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_hero_scrim" />
+
+                <!-- Top bar: Logo left, Logout right -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="@dimen/screen_horizontal_margin"
+                    android:paddingEnd="@dimen/spacing_12"
+                    android:paddingTop="36dp"
+                    android:paddingBottom="@dimen/spacing_8">
+
+                    <!-- Circular logo -->
+                    <FrameLayout
+                        android:layout_width="70dp"
+                        android:layout_height="60dp"
+                        android:background="@drawable/bg_logo_ring">
+
+                        <ImageView
+                            android:layout_width="77dp"
+                            android:layout_height="60dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/app_name"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/logo" />
+
+                    </FrameLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Logout button -->
+                    <FrameLayout
+                        android:id="@+id/btnLogout"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/bg_circle_semi_transparent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackgroundBorderless"
+                        android:padding="@dimen/spacing_10"
+                        android:contentDescription="@string/btn_logout">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_logout"
+                            android:tint="@android:color/white"
+                            android:contentDescription="@string/btn_logout" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <!-- Welcome text block -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="94dp"
+                    android:layout_gravity="bottom"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/screen_horizontal_margin"
+                    android:paddingEnd="@dimen/screen_horizontal_margin"
+                    android:paddingBottom="@dimen/spacing_20">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvWelcome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_semibold"
+                        android:letterSpacing="0.01"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/text_size_title"
+                        tools:text="Welcome, Surveyor" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvRole"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_2"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
+                        android:textColor="@color/text_on_dark_secondary"
+                        tools:text="Role: Field Surveyor" />
+
+                </LinearLayout>
+
+                <!-- Rounded bottom overlay for content below -->
+
+
+            </FrameLayout>
+
+            <!-- ===== KPI Cards Row ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/spacing_4"
+                android:paddingHorizontal="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_20">
+
+                <!-- Total Surveys KPI -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardKpiTotal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_4"
+                    app:cardCornerRadius="@dimen/corner_medium"
+                    app:cardElevation="@dimen/elevation_2"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/md_theme_outlineVariant"
+                    app:cardBackgroundColor="@color/md_theme_surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Left accent bar -->
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/md_theme_primary" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_12">
+
+                            <FrameLayout
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_marginBottom="@dimen/spacing_6"
+                                android:background="@drawable/bg_kpi_icon_blue">
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_chart"
+                                    android:tint="@android:color/white" />
+
+                            </FrameLayout>
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvKpiTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/md_theme_onSurface"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineSmall"
+                                tools:text="128" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="TOTAL SURVEYS"
+                                android:textColor="@color/md_theme_onSurfaceVariant"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                                android:layout_marginTop="@dimen/spacing_2"
+                                android:letterSpacing="0.05" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- New Surveys KPI -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardKpiNew"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_4"
+                    android:layout_marginEnd="@dimen/spacing_4"
+                    app:cardCornerRadius="@dimen/corner_medium"
+                    app:cardElevation="@dimen/elevation_2"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/md_theme_outlineVariant"
+                    app:cardBackgroundColor="@color/md_theme_surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/status_success" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_12">
+
+                            <FrameLayout
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_marginBottom="@dimen/spacing_6"
+                                android:background="@drawable/bg_kpi_icon_green">
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_note_add"
+                                    android:tint="@android:color/white" />
+
+                            </FrameLayout>
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvKpiNew"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/md_theme_onSurface"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineSmall"
+                                tools:text="12" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="NEW SURVEYS"
+                                android:textColor="@color/md_theme_onSurfaceVariant"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                                android:layout_marginTop="@dimen/spacing_2"
+                                android:letterSpacing="0.05" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Pending Sync KPI -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardKpiPending"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_4"
+                    app:cardCornerRadius="@dimen/corner_medium"
+                    app:cardElevation="@dimen/elevation_2"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/md_theme_outlineVariant"
+                    app:cardBackgroundColor="@color/md_theme_surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:layout_width="3dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/status_warning" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="@dimen/spacing_12">
+
+                            <FrameLayout
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_marginBottom="@dimen/spacing_6"
+                                android:background="@drawable/bg_kpi_icon_amber">
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_sync"
+                                    android:tint="@android:color/white" />
+
+                            </FrameLayout>
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvKpiPending"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/md_theme_onSurface"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineSmall"
+                                tools:text="3" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="PENDING SYNC"
+                                android:textColor="@color/md_theme_onSurfaceVariant"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                                android:layout_marginTop="@dimen/spacing_2"
+                                android:letterSpacing="0.05" />
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- ===== Survey Map Section ===== -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
                 android:layout_marginBottom="@dimen/spacing_12"
                 android:text="@string/label_survey_map"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/md_on_background" />
+                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                android:textColor="@color/md_theme_onSurface" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMap"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/map_card_height"
-                app:cardBackgroundColor="@color/md_surface"
-                app:cardCornerRadius="@dimen/corner_xl"
-                app:cardElevation="@dimen/elevation_0"
-                app:strokeWidth="0dp"
+                android:layout_height="220dp"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_margin"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_2"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_theme_outlineVariant"
                 android:clipToOutline="true">
 
                 <FrameLayout
@@ -104,7 +373,18 @@
                     <org.osmdroid.views.MapView
                         android:id="@+id/mapView"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent" >
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_4"
+                            android:alpha="0.8"
+                            android:fontStyle="italic"
+                            android:text="@string/app_name"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                            android:textColor="@color/text_on_dark_secondary" />
+                    </org.osmdroid.views.MapView>
 
                     <!-- Empty state overlay -->
                     <LinearLayout
@@ -114,7 +394,7 @@
                         android:orientation="vertical"
                         android:gravity="center"
                         android:visibility="gone"
-                        android:background="@color/md_surface">
+                        android:background="@color/md_theme_surface">
 
                         <ImageView
                             android:layout_width="@dimen/spacing_48"
@@ -128,9 +408,63 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_8"
                             android:text="@string/label_map_empty"
-                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
                             android:textColor="@color/map_empty_text"
                             android:textAlignment="center" />
+
+                    </LinearLayout>
+
+                    <!-- Floating map buttons (right edge, stacked) -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="@dimen/spacing_8"
+                        android:orientation="vertical">
+
+                        <!-- Expand to full map -->
+                        <ImageButton
+                            android:id="@+id/btnExpandMap"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginBottom="@dimen/spacing_6"
+                            android:background="@drawable/bg_map_fab"
+                            android:src="@drawable/ic_fullscreen_24"
+                            android:contentDescription="Open full map"
+                            android:padding="8dp"
+                            android:elevation="4dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:tint="@color/md_theme_onSurface" />
+
+                        <!-- My Location -->
+                        <ImageButton
+                            android:id="@+id/btnMyLocation"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginBottom="@dimen/spacing_6"
+                            android:background="@drawable/bg_map_fab"
+                            android:src="@drawable/ic_my_location_24"
+                            android:contentDescription="My Location"
+                            android:padding="8dp"
+                            android:elevation="4dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:tint="@color/md_theme_onSurface" />
+
+                        <!-- Layers (stub) -->
+                        <ImageButton
+                            android:id="@+id/btnMapLayers"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_map_fab"
+                            android:src="@drawable/ic_layers_24"
+                            android:contentDescription="Map Layers"
+                            android:padding="8dp"
+                            android:elevation="4dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            app:tint="@color/md_theme_onSurface" />
 
                     </LinearLayout>
 
@@ -138,24 +472,76 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Legend row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_8"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_legend_dot_green"
+                    android:layout_marginEnd="@dimen/spacing_4" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Completed"
+                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    android:layout_marginEnd="@dimen/spacing_12" />
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_legend_dot_navy"
+                    android:layout_marginEnd="@dimen/spacing_4" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="In Progress"
+                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    android:layout_marginEnd="@dimen/spacing_12" />
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_legend_dot_gray"
+                    android:layout_marginEnd="@dimen/spacing_4" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Not Started"
+                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                    android:textColor="@color/md_theme_onSurfaceVariant" />
+
+            </LinearLayout>
+
             <!-- ===== Sync Status Section ===== -->
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_28"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_20"
                 android:layout_marginBottom="@dimen/spacing_12"
                 android:text="@string/label_sync_status"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/md_on_background" />
+                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                android:textColor="@color/md_theme_onSurface" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSyncStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/md_primary_container"
-                app:cardCornerRadius="@dimen/corner_xl"
-                app:cardElevation="@dimen/elevation_0"
-                app:strokeWidth="0dp">
+                android:layout_marginHorizontal="@dimen/screen_horizontal_margin"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/md_theme_outlineVariant">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -163,6 +549,7 @@
                     android:orientation="vertical"
                     android:padding="@dimen/card_padding">
 
+                    <!-- Row 1: Status icon + text + Sync Now button -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -178,47 +565,64 @@
                                 android:layout_width="@dimen/icon_size_medium"
                                 android:layout_height="@dimen/icon_size_medium"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_sync"
+                                android:src="@drawable/ic_check_circle"
                                 android:contentDescription="@string/label_sync_status"
-                                app:tint="@color/md_primary" />
+                                app:tint="@color/status_success" />
                         </FrameLayout>
 
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/tvSyncStatus"
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/spacing_12"
                             android:layout_weight="1"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/md_on_primary_container"
-                            tools:text="All synced" />
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_12">
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvSyncStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
+                                android:textColor="@color/md_theme_onSurface"
+                                tools:text="All synced" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvLastSync"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_2"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                                android:textColor="@color/md_theme_onSurfaceVariant"
+                                tools:text="Last synced 5 min ago" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSyncNow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/button_height_medium"
+                            android:text="@string/btn_sync_now"
+                            android:visibility="gone"
+                            style="@style/Widget.RudaSurvey.Button.Secondary"
+                            app:icon="@drawable/ic_sync"
+                            app:iconTint="@color/md_theme_primary" />
+
                     </LinearLayout>
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvLastSync"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_52"
-                        android:layout_marginTop="@dimen/spacing_2"
-                        android:alpha="0.75"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="@color/md_on_primary_container"
-                        tools:text="Last synced 5 min ago" />
-
+                    <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginTop="@dimen/spacing_16"
-                        android:layout_marginBottom="@dimen/spacing_16"
-                        android:alpha="0.4"
-                        android:background="@color/md_outline_variant" />
+                        android:layout_marginVertical="@dimen/spacing_16"
+                        android:background="@color/md_theme_outlineVariant" />
 
+                    <!-- Row 2: Pending count + Status message -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
+                        <!-- Pending count -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -229,94 +633,177 @@
                                 android:id="@+id/tvPendingCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                                android:textColor="@color/md_on_primary_container"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.HeadlineSmall"
+                                android:textColor="@color/md_theme_onSurface"
                                 tools:text="4" />
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/label_pending_surveys"
-                                android:textAppearance="?attr/textAppearanceBodySmall"
-                                android:textColor="@color/md_on_primary_container" />
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                                android:textColor="@color/md_theme_onSurfaceVariant" />
+
                         </LinearLayout>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnSyncNow"
+                        <!-- Up to date indicator -->
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="@dimen/button_height_medium"
-                            android:text="@string/btn_sync_now"
-                            android:textAllCaps="false"
-                            android:textColor="@color/md_on_primary"
-                            app:backgroundTint="@color/md_primary"
-                            app:cornerRadius="@dimen/corner_medium"
-                            app:icon="@drawable/ic_sync"
-                            app:iconTint="@color/md_on_primary" />
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_marginEnd="@dimen/spacing_6"
+                                android:src="@drawable/ic_check_circle"
+                                app:tint="@color/status_success"
+                                android:contentDescription="Up to date" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Up to Date"
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                                android:textColor="@color/status_success" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
+            <!-- ===== Action Buttons ===== -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_28"
-                android:layout_marginBottom="@dimen/spacing_12"
-                android:text="@string/label_quick_actions"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/md_on_background" />
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/screen_horizontal_margin"
+                android:paddingTop="@dimen/spacing_20"
+                android:paddingBottom="@dimen/spacing_16">
+
+                <!-- Update Survey Button -->
+                <FrameLayout
+                    android:id="@+id/btnNewSurvey"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height_large"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_6"
+                    android:background="@drawable/bg_button_secondary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <!-- Icon area -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_button_icon_area_outlined">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_search"
+                                android:contentDescription="Search"
+                                android:tint="@color/md_theme_primary" />
+                        </FrameLayout>
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="24dp"
+                            android:background="@color/md_theme_primary" />
+
+                        <!-- Text -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Update Survey"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                            android:textColor="@color/md_theme_primary"
+                            android:fontFamily="@font/inter_semibold" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <!-- Create Survey Button -->
+                <FrameLayout
+                    android:id="@+id/btnCreateSurvey"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height_large"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_6"
+                    android:background="@drawable/bg_button_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <!-- Icon area -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_button_icon_area_filled">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_note_add"
+                                android:contentDescription="Create"
+                                android:tint="@android:color/white" />
+                        </FrameLayout>
+
+                        <!-- Divider -->
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="24dp"
+                            android:background="#55FFFFFF" />
+
+                        <!-- Text -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Create Survey"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                            android:textColor="@android:color/white"
+                            android:fontFamily="@font/inter_semibold" />
+                    </LinearLayout>
+                </FrameLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Sticky Bottom Action Bar -->
-    <LinearLayout
+    <!-- ===== Bottom Navigation ===== -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/screen_horizontal_margin"
-        android:paddingEnd="@dimen/screen_horizontal_margin"
-        android:paddingTop="@dimen/spacing_8"
-        android:paddingBottom="@dimen/spacing_8"
-        android:gravity="center_vertical"
         android:background="?attr/colorSurface"
         android:elevation="@dimen/elevation_8"
-        android:outlineProvider="bounds">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNewSurvey"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/button_height_large"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/spacing_4"
-            android:text="Update Survey"
-            android:textAllCaps="false"
-            android:textColor="@color/md_on_primary"
-            app:backgroundTint="@color/md_primary"
-            app:cornerRadius="@dimen/corner_medium"
-            app:icon="@drawable/ic_search"
-            app:iconGravity="textStart"
-            app:iconPadding="@dimen/spacing_8"
-            app:iconSize="@dimen/icon_size_medium"
-            app:iconTint="@color/md_on_primary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCreateSurvey"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/button_height_large"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/spacing_4"
-            android:text="@string/btn_create_survey"
-            android:textAllCaps="false"
-            android:textColor="@color/md_theme_onSecondaryContainer"
-            app:backgroundTint="@color/md_theme_secondaryContainer"
-            app:cornerRadius="@dimen/corner_medium"
-            app:icon="@drawable/ic_note_add"
-            app:iconGravity="textStart"
-            app:iconPadding="@dimen/spacing_8"
-            app:iconSize="@dimen/icon_size_medium"
-            app:iconTint="@color/md_theme_onSecondaryContainer" />
-
-    </LinearLayout>
+        app:itemIconTint="@color/bottom_nav_icon_tint"
+        app:itemTextColor="@color/bottom_nav_text_tint"
+        app:itemActiveIndicatorStyle="@null"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
 
 </LinearLayout>

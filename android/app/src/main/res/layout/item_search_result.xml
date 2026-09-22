@@ -7,7 +7,7 @@
     android:layout_marginStart="@dimen/screen_horizontal_margin"
     android:layout_marginEnd="@dimen/screen_horizontal_margin"
     android:layout_marginBottom="@dimen/spacing_8"
-    app:cardCornerRadius="@dimen/corner_xl"
+    app:cardCornerRadius="@dimen/corner_large"
     app:cardElevation="@dimen/elevation_0"
     app:strokeWidth="1dp"
     app:strokeColor="@color/md_theme_outlineVariant"

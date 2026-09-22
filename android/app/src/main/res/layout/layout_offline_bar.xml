@@ -3,13 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/offlineBar"
     android:layout_width="match_parent"
-    android:layout_height="36dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center"
     android:background="@drawable/bg_offline_bar"
     android:visibility="gone"
     android:paddingStart="@dimen/spacing_12"
-    android:paddingEnd="@dimen/spacing_12">
+    android:paddingEnd="@dimen/spacing_12"
+    android:paddingTop="@dimen/spacing_10"
+    android:paddingBottom="@dimen/spacing_10">
 
     <ImageView
         android:layout_width="16dp"
@@ -25,9 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/label_offline_status"
-        android:textSize="@dimen/text_size_body_small"
-        android:textColor="@color/md_theme_onTertiaryContainer"
-        android:fontFamily="@font/inter_medium" />
+        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+        android:textColor="@color/md_theme_onTertiaryContainer" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/offlineProgress"

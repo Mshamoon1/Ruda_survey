@@ -1,12 +1,19 @@
 package com.ruda.survey.ui.dashboard
 
-import android.content.res.Configuration
+import android.annotation.SuppressLint
+import android.animation.ValueAnimator
+import android.text.Html
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -14,10 +21,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.ruda.survey.R
-import com.ruda.survey.data.local.SyncDao
 import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.data.sync.ConnectivityObserver
-import com.ruda.survey.data.sync.SyncRepository
 import com.ruda.survey.databinding.FragmentDashboardBinding
 import com.ruda.survey.domain.model.SurveyItem
 import com.ruda.survey.domain.model.UiState
@@ -26,8 +31,10 @@ import com.ruda.survey.ui.survey.SurveyViewModelFactory
 import com.ruda.survey.ui.sync.SyncViewModel
 import com.ruda.survey.utils.animateTapFeedback
 import com.ruda.survey.utils.staggerFadeIn
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -40,13 +47,18 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var mapView: MapView? = null
-    private var pendingSurveys: List<SurveyItem> = emptyList()
+    private var syncViewModel: SyncViewModel? = null
+    private var surveyViewModel: SurveyViewModel? = null
+    private var sharedInfoWindow: com.ruda.survey.ui.map.SurveyInfoWindow? = null
+    private var isPlacingPins = false
 
     private val lahoreCenter = GeoPoint(31.5204, 74.3587)
     private val defaultZoom = 13.0
 
-    private var syncViewModel: SyncViewModel? = null
-    private var surveyViewModel: SurveyViewModel? = null
+    companion object {
+        private var cachedSurveys: List<SurveyItem>? = null
+        private var cachedMarkerBitmap: Bitmap? = null
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -57,17 +69,22 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupUI()
         setupMapView()
         setupSyncViewModel()
         setupSurveyViewModel()
+
         animateEntrance()
+        loadDashboardData()
     }
 
     private fun setupUI() {
-        binding.tvWelcome.text = getString(R.string.dashboard_welcome, "Surveyor")
+        val welcomeHtml = "Welcome, <font color='#1B7F4C'><b>Surveyor</b></font>"
+        binding.tvWelcome.text = Html.fromHtml(welcomeHtml, Html.FROM_HTML_MODE_LEGACY)
         binding.tvRole.text = getString(R.string.dashboard_role, "Field Surveyor")
+
+        binding.cardKpiTotal.isClickable = false
+        binding.cardKpiTotal.isFocusable = false
 
         binding.btnNewSurvey.setOnClickListener {
             it.animateTapFeedback {
@@ -84,13 +101,82 @@ class DashboardFragment : Fragment() {
             }
         }
 
+        binding.btnExpandMap.setOnClickListener {
+            it.animateTapFeedback {
+                if (isAdded) findNavController().navigate(R.id.action_dashboard_to_maps)
+            }
+        }
+
+        binding.btnMyLocation.setOnClickListener {
+            it.animateTapFeedback {
+                mapView?.controller?.animateTo(lahoreCenter, 16.0, 300L)
+            }
+        }
+
+        binding.btnMapLayers.setOnClickListener {
+            it.animateTapFeedback {
+                // Stub — no layer toggle logic exists yet
+            }
+        }
+
         binding.btnLogout.setOnClickListener {
             it.animateTapFeedback {
                 showLogoutConfirmation()
             }
         }
+
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> true
+                R.id.nav_map -> {
+                    if (isAdded) findNavController().navigate(R.id.action_dashboard_to_maps)
+                    true
+                }
+                R.id.nav_surveys -> {
+                    if (isAdded) findNavController().navigate(R.id.action_dashboard_to_surveyList)
+                    true
+                }
+                R.id.nav_profile -> {
+                    if (isAdded) findNavController().navigate(R.id.action_dashboard_to_profile)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
+    private fun loadDashboardData() {
+        surveyViewModel?.loadAllSurveys()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val tokenManager = RepositoryFactory.getTokenManager(requireContext().applicationContext)
+                binding.tvKpiNew.text = tokenManager.getNewSurveyCount().toString()
+            } catch (_: Exception) {
+                binding.tvKpiNew.text = "0"
+            }
+        }
+    }
+
+    private fun populateKpis(surveys: List<SurveyItem>) {
+        animateNumber(binding.tvKpiTotal, surveys.size)
+    }
+
+    private fun animateNumber(textView: TextView, targetValue: Int) {
+        if (targetValue <= 0) {
+            textView.text = "0"
+            return
+        }
+        val animator = ValueAnimator.ofInt(0, targetValue)
+        animator.duration = 1500
+        animator.interpolator = android.view.animation.DecelerateInterpolator()
+        animator.addUpdateListener { animation ->
+            textView.text = animation.animatedValue.toString()
+        }
+        animator.start()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupMapView() {
         mapView = binding.mapView
         mapView?.apply {
@@ -100,7 +186,11 @@ class DashboardFragment : Fragment() {
             controller.setZoom(defaultZoom)
             controller.setCenter(lahoreCenter)
             
-            // Handle touch to prevent scrollview from intercepting
+            sharedInfoWindow = com.ruda.survey.ui.map.SurveyInfoWindow(this) { item ->
+                surveyViewModel?.saveFormState(item)
+                if (isAdded) findNavController().navigate(R.id.action_dashboard_to_surveyForm)
+            }
+
             setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -113,67 +203,75 @@ class DashboardFragment : Fragment() {
                 false
             }
         }
-        loadSurveysAndPin()
     }
 
-    private fun loadSurveysAndPin() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val context = requireContext().applicationContext
-                val repository = RepositoryFactory.createSurveyRepository(context)
-                val result = repository.getAllSurveys()
-                if (result.isSuccess) {
-                    pendingSurveys = result.getOrDefault(emptyList())
-                    placePins(pendingSurveys)
-                } else {
-                    showMapEmpty()
-                }
-            } catch (_: Exception) {
-                showMapEmpty()
-            }
+    private fun getMarkerBitmap(): Bitmap {
+        cachedMarkerBitmap?.let { return it }
+        val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_map_marker_green) ?: return createBitmap(24, 24)
+        val bmp = createBitmap(
+            drawable.intrinsicWidth.coerceAtLeast(24),
+            drawable.intrinsicHeight.coerceAtLeast(24)
+        )
+        bmp.applyCanvas {
+            drawable.setBounds(0, 0, width, height)
+            drawable.draw(this)
         }
+        cachedMarkerBitmap = bmp
+        return bmp
     }
 
     private fun placePins(surveys: List<SurveyItem>) {
         val map = mapView ?: return
-        map.overlays.clear()
 
-        val validSurveys = surveys.filter { item ->
-            item.lat != 0.0 && item.lng != 0.0
-        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val (markers, avgPoint) = withContext(Dispatchers.Default) {
+                val validSurveys = surveys.filter { it.lat != 0.0 && it.lng != 0.0 }
+                if (validSurveys.isEmpty()) return@withContext Pair(emptyList<Marker>(), null)
 
-        if (validSurveys.isEmpty()) {
-            showMapEmpty()
-            return
-        }
+                val bitmap = getMarkerBitmap()
+                val markerDrawable = bitmap.toDrawable(resources)
 
-        hideMapEmpty()
+                val avgLat = validSurveys.map { it.lat }.average()
+                val avgLng = validSurveys.map { it.lng }.average()
 
-        validSurveys.forEach { item ->
-            val position = GeoPoint(item.lat, item.lng)
-            val marker = Marker(map)
-            marker.position = position
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            marker.title = item.parcelId.ifEmpty { item.village }
-            marker.snippet = item.ownerName.ifEmpty { getString(R.string.label_survey_pin) }
-            
-            // Custom icon if needed, otherwise default is used
-            // marker.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_location)
-            
-            marker.setOnMarkerClickListener { m, _ ->
-                m.showInfoWindow()
-                true
+                val markerList = validSurveys.map { item ->
+                    val marker = Marker(map)
+                    marker.position = GeoPoint(item.lat, item.lng)
+                    marker.relatedObject = item
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    marker.title = item.parcelId.ifEmpty { item.village }
+                    marker.snippet = item.ownerName.ifEmpty { getString(R.string.label_survey_pin) }
+                    marker.subDescription = item.village
+                    marker.icon = markerDrawable
+                    marker.infoWindow = sharedInfoWindow
+                    marker.setOnMarkerClickListener { m, _ ->
+                        m.showInfoWindow()
+                        map.controller.animateTo(m.position, 16.0, 300L)
+                        true
+                    }
+                    marker
+                }
+                Pair(markerList, GeoPoint(avgLat, avgLng))
             }
-            map.overlays.add(marker)
-        }
 
-        if (validSurveys.isNotEmpty()) {
-            // Zoom to first marker or center
-            val first = validSurveys.first()
-            map.controller.animateTo(GeoPoint(first.lat, first.lng))
-        }
+            if (!isAdded || mapView == null) return@launch
 
-        map.invalidate()
+            if (markers.isEmpty()) {
+                showMapEmpty()
+                return@launch
+            }
+
+            hideMapEmpty()
+            map.overlays.clear()
+            map.overlays.addAll(markers)
+            if (avgPoint != null) {
+                map.controller.setCenter(avgPoint)
+            } else {
+                map.controller.setCenter(lahoreCenter)
+            }
+            map.controller.setZoom(defaultZoom)
+            map.invalidate()
+        }
     }
 
     private fun showMapEmpty() {
@@ -185,25 +283,27 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupSyncViewModel() {
-        try {
-            val context = requireContext().applicationContext
-            val db = com.ruda.survey.data.local.SurveyDatabase.getInstance(context)
-            val syncDao: SyncDao = db.syncDao()
-            val api = com.ruda.survey.data.remote.ApiClient.createSurveyApi(context)
-            val tokenManager = com.ruda.survey.data.remote.SecureTokenManager(context)
-            val syncRepository = SyncRepository(api, syncDao, tokenManager)
-            val connectivityObserver = ConnectivityObserver(context)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val context = requireContext().applicationContext
+                val syncRepository = withContext(Dispatchers.IO) {
+                    RepositoryFactory.createSyncRepository(context)
+                }
+                val connectivityObserver = withContext(Dispatchers.IO) {
+                    ConnectivityObserver(context)
+                }
 
-            val factory = SyncViewModelFactory(
-                syncRepository, syncDao, connectivityObserver, context
-            )
-            syncViewModel = ViewModelProvider(this, factory)[SyncViewModel::class.java]
+                val factory = SyncViewModelFactory(
+                    syncRepository, com.ruda.survey.data.local.SurveyDatabase.getInstance(context).syncDao(),
+                    connectivityObserver, context
+                )
+                syncViewModel = ViewModelProvider(this@DashboardFragment, factory)[SyncViewModel::class.java]
 
-            viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     syncViewModel?.syncState?.collectLatest { state ->
                         binding.cardSyncStatus.visibility = View.VISIBLE
                         binding.tvPendingCount.text = state.pendingCount.toString()
+                        binding.tvKpiPending.text = state.pendingCount.toString()
 
                         val syncTime = state.lastSyncTime ?: 0L
                         val lastSyncText = if (syncTime > 0) {
@@ -217,9 +317,7 @@ class DashboardFragment : Fragment() {
                         } else {
                             getString(R.string.never)
                         }
-                        binding.tvLastSync.text = getString(
-                            R.string.label_last_sync
-                        ) + ": " + lastSyncText
+                        binding.tvLastSync.text = getString(R.string.label_last_sync, lastSyncText)
 
                         binding.tvSyncStatus.text = when {
                             state.isSyncing -> "Syncing\u2026"
@@ -235,15 +333,15 @@ class DashboardFragment : Fragment() {
                         }
                     }
                 }
-            }
 
-            binding.btnSyncNow.setOnClickListener {
-                it.animateTapFeedback {
-                    syncViewModel?.triggerSync()
+                binding.btnSyncNow.setOnClickListener {
+                    it.animateTapFeedback {
+                        syncViewModel?.triggerSync()
+                    }
                 }
+            } catch (_: Exception) {
+                binding.cardSyncStatus.visibility = View.GONE
             }
-        } catch (_: Exception) {
-            binding.cardSyncStatus.visibility = View.GONE
         }
     }
 
@@ -254,27 +352,47 @@ class DashboardFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                surveyViewModel?.createState?.collect { state ->
-                    when (state) {
-                        is UiState.Loading -> {
-                            binding.btnCreateSurvey.isEnabled = false
+                launch {
+                    surveyViewModel?.allSurveysState?.collect { state ->
+                        when (state) {
+                            is UiState.Success -> {
+                                val surveys = state.data
+                                populateKpis(surveys)
+                                placePins(surveys)
+                            }
+                            is UiState.Error -> {
+                                populateKpis(emptyList())
+                                showMapEmpty()
+                            }
+                            else -> {}
                         }
-                        is UiState.Success -> {
-                            binding.btnCreateSurvey.isEnabled = true
-                            if (isAdded) {
-                                findNavController().navigate(R.id.action_dashboard_to_surveyForm)
+                    }
+                }
+
+                launch {
+                    surveyViewModel?.createState?.collect { state ->
+                        when (state) {
+                            is UiState.Loading -> {
+                                binding.btnCreateSurvey.isEnabled = false
+                            }
+                            is UiState.Success -> {
+                                binding.btnCreateSurvey.isEnabled = true
+                                if (isAdded) {
+                                    cachedSurveys = null
+                                    findNavController().navigate(R.id.action_dashboard_to_surveyForm)
+                                    surveyViewModel?.resetCreateState()
+                                }
+                            }
+                            is UiState.Error -> {
+                                binding.btnCreateSurvey.isEnabled = true
+                                com.google.android.material.snackbar.Snackbar.make(
+                                    binding.root, state.message, com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                                ).show()
                                 surveyViewModel?.resetCreateState()
                             }
-                        }
-                        is UiState.Error -> {
-                            binding.btnCreateSurvey.isEnabled = true
-                            com.google.android.material.snackbar.Snackbar.make(
-                                binding.root, state.message, com.google.android.material.snackbar.Snackbar.LENGTH_LONG
-                            ).show()
-                            surveyViewModel?.resetCreateState()
-                        }
-                        else -> {
-                            binding.btnCreateSurvey.isEnabled = true
+                            else -> {
+                                binding.btnCreateSurvey.isEnabled = true
+                            }
                         }
                     }
                 }
@@ -287,6 +405,11 @@ class DashboardFragment : Fragment() {
         builder.setTitle(getString(R.string.btn_logout))
         builder.setMessage(getString(R.string.btn_logout_confirm))
         builder.setPositiveButton(getString(R.string.btn_logout_confirm_action)) { _, _ ->
+            cachedSurveys = null
+            val ctx = requireContext().applicationContext
+            val tm = RepositoryFactory.getTokenManager(ctx)
+            tm.resetNewSurveyCount()
+            tm.clearUserSurveyIds()
             if (isAdded) findNavController().navigate(R.id.action_dashboard_to_login)
         }
         builder.setNegativeButton(getString(R.string.btn_logout_cancel), null)
@@ -295,6 +418,9 @@ class DashboardFragment : Fragment() {
 
     private fun animateEntrance() {
         val cards = listOf<View>(
+            binding.cardKpiTotal,
+            binding.cardKpiNew,
+            binding.cardKpiPending,
             binding.cardMap,
             binding.cardSyncStatus,
             binding.btnNewSurvey,
@@ -306,7 +432,10 @@ class DashboardFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mapView?.onResume()
-        loadSurveysAndPin()
+        try {
+            val tokenManager = RepositoryFactory.getTokenManager(requireContext().applicationContext)
+            binding.tvKpiNew.text = tokenManager.getNewSurveyCount().toString()
+        } catch (_: Exception) {}
     }
 
     override fun onPause() {

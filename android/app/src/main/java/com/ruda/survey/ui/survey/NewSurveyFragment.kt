@@ -119,7 +119,7 @@ class NewSurveyFragment : Fragment() {
             if (survey.lat != 0.0 || survey.lng != 0.0) appendLine("GPS: ${survey.lat}, ${survey.lng}")
             appendLine("")
             appendLine("Structure: ${survey.structuralName}")
-            appendLine("Status: ${survey.status}")
+            appendLine("Status: ${survey.status.replace("_", " ").uppercase()}")
             appendLine("Construction: ${survey.natureOfConstruction}")
             if (survey.rd.isNotBlank()) appendLine("RD: ${survey.rd}")
             if (survey.pkg.isNotBlank()) appendLine("Package: ${survey.pkg}")
