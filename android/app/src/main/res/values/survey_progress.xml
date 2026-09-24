@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="survey_progress_title">Survey Progress</string>
+    <string name="survey_progress_percentage">%1$d%%</string>
+    <string name="survey_progress_percentage_description">%1$d percent of required survey inputs completed</string>
+    <string name="survey_progress_section">Section %1$d of %2$d</string>
+    <plurals name="survey_progress_completed">
+        <item quantity="one">%1$d of %2$d sections completed</item>
+        <item quantity="other">%1$d of %2$d sections completed</item>
+    </plurals>
+    <string name="survey_progress_all_complete">All survey sections completed</string>
+    <string name="survey_progress_ready">Ready to submit</string>
+    <string name="survey_progress_step_description">%1$s, %2$s</string>
+    <string name="survey_progress_state_complete">Completed</string>
+    <string name="survey_progress_state_current">Current section</string>
+    <string name="survey_progress_state_complete_current">Completed, current section</string>
+    <string name="survey_progress_state_pending">Pending</string>
+    <string name="survey_progress_parcel">Parcel</string>
+    <string name="survey_progress_gps">GPS</string>
+    <string name="survey_progress_owner">Owner</string>
+    <string name="survey_progress_land">Land</string>
+    <string name="survey_progress_structure">Structure</string>
+</resources>

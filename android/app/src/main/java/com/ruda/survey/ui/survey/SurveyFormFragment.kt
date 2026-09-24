@@ -1,5 +1,6 @@
 package com.ruda.survey.ui.survey
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,9 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -38,6 +39,11 @@ class SurveyFormFragment : Fragment() {
     private lateinit var progressChecks: List<View>
     private lateinit var progressConnectors: List<View>
     private lateinit var progressLabels: List<View>
+    private lateinit var progressSteps: List<View>
+    private var progressAnimator: ValueAnimator? = null
+    private var displayedPercentage = -1
+    private var progressInitialized = false
+    private var focusListener: android.view.ViewTreeObserver.OnGlobalFocusChangeListener? = null
     private var currentProgressStep = 0
     private var scrollListener: android.view.ViewTreeObserver.OnScrollChangedListener? = null
 
@@ -104,9 +110,18 @@ class SurveyFormFragment : Fragment() {
         setupProgressIndicator()
     }
 
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        // Android restores the visible selections after onViewCreated. Keep their backend
+        // values in sync without repopulating the form or overwriting any user edits.
+        val statusText = binding.etStructureStatus.text.toString()
+        val natureText = binding.etConstructionNature.text.toString()
+        selectedStatus = statusDisplayToValue[statusText] ?: statusText
+        selectedNature = natureDisplayToValue[natureText] ?: natureText
+    }
     private fun setupDropdowns() {
-        val statusDisplayNames = statusDisplayToValue.keys.toTypedArray()
-        val statusAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, statusDisplayNames)
+        val statusDisplayNames = statusDisplayToValue.keys.toList()
+        val statusAdapter = SurveyOptionsAdapter(requireContext(), statusDisplayNames)
         binding.etStructureStatus.setAdapter(statusAdapter)
         binding.etStructureStatus.setText("", false)
         binding.etStructureStatus.setOnItemClickListener { _, _, position, _ ->
@@ -115,8 +130,8 @@ class SurveyFormFragment : Fragment() {
             Log.d("SurveyForm", "Status selected: display='$display' backend='$selectedStatus'")
         }
 
-        val natureDisplayNames = natureDisplayToValue.keys.toTypedArray()
-        val natureAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, natureDisplayNames)
+        val natureDisplayNames = natureDisplayToValue.keys.toList()
+        val natureAdapter = SurveyOptionsAdapter(requireContext(), natureDisplayNames)
         binding.etConstructionNature.setAdapter(natureAdapter)
         binding.etConstructionNature.setText("", false)
         binding.etConstructionNature.setOnItemClickListener { _, _, position, _ ->
@@ -170,8 +185,8 @@ class SurveyFormFragment : Fragment() {
             binding.etStructureStatus.setText(matchedStatusDisplay, false)
             selectedStatus = survey.status.lowercase()
         } else {
-            binding.etStructureStatus.setText("", false)
-            selectedStatus = ""
+            binding.etStructureStatus.setText(survey.status, false)
+            selectedStatus = survey.status
         }
         
         binding.etStructureName.setText(survey.structuralName)
@@ -185,8 +200,8 @@ class SurveyFormFragment : Fragment() {
             binding.etConstructionNature.setText(matchedNatureDisplay, false)
             selectedNature = survey.natureOfConstruction.lowercase()
         } else {
-            binding.etConstructionNature.setText("", false)
-            selectedNature = ""
+            binding.etConstructionNature.setText(survey.natureOfConstruction, false)
+            selectedNature = survey.natureOfConstruction
         }
     }
 
@@ -434,6 +449,7 @@ class SurveyFormFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.pendingImages.collect {
                 updateImageButtonText()
+                updateProgressIndicator(currentProgressStep)
             }
         }
     }
@@ -584,13 +600,33 @@ class SurveyFormFragment : Fragment() {
         scrollListener = android.view.ViewTreeObserver.OnScrollChangedListener { detectActiveSection() }
         binding.scrollView.viewTreeObserver.addOnScrollChangedListener(scrollListener)
 
+        progressSteps = listOf(binding.progressStepParcel, binding.progressStepCoordinates,
+            binding.progressStepOwner, binding.progressStepLand, binding.progressStepStructure)
+        currentProgressStep = 0
+        displayedPercentage = -1
+        listOf(binding.etParcelCode, binding.etPackageNo, binding.etOwnerName, binding.etCnic,
+            binding.etContact, binding.etVillage, binding.etKhasraNumber,
+            binding.etStructureStatus, binding.etConstructionNature).forEach { field ->
+            field.doAfterTextChanged { updateProgressIndicator(currentProgressStep) }
+        }
+        // Observe focus without replacing any field's existing focus listener.
+        focusListener = android.view.ViewTreeObserver.OnGlobalFocusChangeListener { _, focused ->
+            val activeIndex = sectionViews.indexOfFirst { section -> isWithinSection(focused, section) }
+            if (activeIndex >= 0) {
+                currentProgressStep = activeIndex
+                updateProgressIndicator(activeIndex)
+            }
+        }
+        binding.root.viewTreeObserver.addOnGlobalFocusChangeListener(focusListener)
+        progressInitialized = true
         updateProgressIndicator(0)
+        binding.scrollView.post { if (_binding != null) detectActiveSection() }
     }
 
     private fun detectActiveSection() {
         val b = _binding ?: return
         val scrollView = b.scrollView
-        val scrollY = scrollView.scrollY + 150
+        val scrollY = scrollView.scrollY + (150 * resources.displayMetrics.density).toInt()
 
         var activeIndex = 0
         for (i in sectionViews.indices) {
@@ -605,63 +641,87 @@ class SurveyFormFragment : Fragment() {
         }
     }
 
+    private fun isWithinSection(view: View?, section: View): Boolean {
+        var candidate = view
+        while (candidate != null) {
+            if (candidate === section) return true
+            candidate = candidate.parent as? View
+        }
+        return false
+    }
+
     private fun updateProgressIndicator(activeIndex: Int) {
-        val reduced = view?.isReducedMotionEnabled() ?: true
-        val duration = if (reduced) 100L else 300L
+        if (!progressInitialized) return
+        val b = _binding ?: return
+        val progress = SurveyFormProgress(
+            parcelId = b.etParcelCode.text.toString(), packageNo = b.etPackageNo.text.toString(),
+            hasDoorPhoto = viewModel.pendingImages.value.any { it.imageType == "imgOne" },
+            ownerName = b.etOwnerName.text.toString(), cnic = b.etCnic.text.toString(),
+            contact = b.etContact.text.toString(), village = b.etVillage.text.toString(),
+            khasraNo = b.etKhasraNumber.text.toString(), status = b.etStructureStatus.text.toString(),
+            construction = b.etConstructionNature.text.toString()
+        )
+        val sectionNames = listOf(R.string.section_01_parcel, R.string.section_02_coordinates,
+            R.string.section_03_ownership, R.string.section_04_location, R.string.section_05_structure)
+            .map { getString(it).substringAfter('\u2014').trim() }
+        b.tvProgressStep.text = getString(R.string.survey_progress_section, activeIndex + 1, sectionNames.size)
+        b.tvProgressSection.text = sectionNames[activeIndex]
+        b.tvProgressPercentage.text = getString(R.string.survey_progress_percentage, progress.percentage)
+        b.tvProgressPercentage.contentDescription = getString(
+            R.string.survey_progress_percentage_description, progress.percentage)
+        b.tvProgressCompleted.text = if (progress.percentage == 100) {
+            getString(R.string.survey_progress_all_complete)
+        } else {
+            resources.getQuantityString(R.plurals.survey_progress_completed,
+                progress.completedCount, progress.completedCount, sectionNames.size)
+        }
+        b.tvProgressReady.visibility = if (progress.percentage == 100) View.VISIBLE else View.GONE
 
-        val sectionNames = listOf("Parcel Details", "Coordinates", "Owner Information", "Land Details", "Structure Details")
-
-        binding.tvProgressStep.text = "Step ${activeIndex + 1} of 5"
-        binding.tvProgressSection.text = sectionNames[activeIndex]
-
-        for (i in 0 until 5) {
-            when {
-                i < activeIndex -> setStepCompleted(i, duration)
-                i == activeIndex -> setStepActive(i, duration)
-                else -> setStepUpcoming(i, duration)
+        if (displayedPercentage != progress.percentage) {
+            progressAnimator?.cancel()
+            val animate = displayedPercentage >= 0 && !b.root.isReducedMotionEnabled()
+            displayedPercentage = progress.percentage
+            if (animate) {
+                progressAnimator = ValueAnimator.ofInt(b.surveyCompletionProgress.progress, progress.percentage).apply {
+                    duration = 300L
+                    addUpdateListener { b.surveyCompletionProgress.setProgressCompat(it.animatedValue as Int, false) }
+                    start()
+                }
+            } else {
+                b.surveyCompletionProgress.setProgressCompat(progress.percentage, false)
             }
         }
-    }
 
-    private fun setStepCompleted(index: Int, duration: Long) {
-        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_completed)
-        progressNumbers[index].visibility = View.GONE
-        progressChecks[index].visibility = View.VISIBLE
-        progressLabels[index].alpha = 0.6f
-
-        if (index < progressConnectors.size) {
-            progressConnectors[index].setBackgroundResource(R.drawable.bg_progress_connector_active)
+        progress.completedSections.forEachIndexed { index, completed ->
+            val active = index == activeIndex
+            progressCircles[index].setBackgroundResource(when {
+                completed -> R.drawable.bg_progress_step_completed
+                active -> R.drawable.bg_progress_step_active
+                else -> R.drawable.bg_progress_step_upcoming
+            })
+            progressNumbers[index].visibility = if (completed) View.GONE else View.VISIBLE
+            progressChecks[index].visibility = if (completed) View.VISIBLE else View.GONE
+            (progressNumbers[index] as android.widget.TextView).setTextColor(resources.getColor(
+                if (active) R.color.md_theme_onPrimary else R.color.md_theme_onSurfaceVariant, null))
+            (progressLabels[index] as android.widget.TextView).apply {
+                setTextColor(resources.getColor(if (active) R.color.md_theme_primary else R.color.md_theme_onSurfaceVariant, null))
+                // Underlining keeps the current section distinct even when it has a completed check.
+                paintFlags = if (active) paintFlags or android.graphics.Paint.UNDERLINE_TEXT_FLAG
+                    else paintFlags and android.graphics.Paint.UNDERLINE_TEXT_FLAG.inv()
+            }
+            val state = when {
+                completed && active -> R.string.survey_progress_state_complete_current
+                completed -> R.string.survey_progress_state_complete
+                active -> R.string.survey_progress_state_current
+                else -> R.string.survey_progress_state_pending
+            }
+            progressSteps[index].contentDescription = getString(
+                R.string.survey_progress_step_description, sectionNames[index], getString(state))
         }
-    }
-
-    private fun setStepActive(index: Int, duration: Long) {
-        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_active)
-        progressNumbers[index].visibility = View.VISIBLE
-        (progressNumbers[index] as? android.widget.TextView)?.setTextColor(
-            resources.getColor(android.R.color.white, null)
-        )
-        progressChecks[index].visibility = View.GONE
-        progressLabels[index].alpha = 1f
-
-        if (!view!!.isReducedMotionEnabled()) {
-            progressCircles[index].animate()
-                .scaleX(1.15f).scaleY(1.15f)
-                .setDuration(duration)
-                .withEndAction {
-                    view?.animate()?.scaleX(1f)?.scaleY(1f)?.setDuration(150)?.start()
-                }
-                .start()
+        progressConnectors.forEachIndexed { index, connector ->
+            connector.setBackgroundResource(if (progress.completedSections[index] && progress.completedSections[index + 1])
+                R.drawable.bg_progress_connector_active else R.drawable.bg_progress_connector_inactive)
         }
-    }
-
-    private fun setStepUpcoming(index: Int, duration: Long) {
-        progressCircles[index].setBackgroundResource(R.drawable.bg_progress_step_upcoming)
-        progressNumbers[index].visibility = View.VISIBLE
-        (progressNumbers[index] as? android.widget.TextView)?.setTextColor(
-            resources.getColor(R.color.md_theme_outline, null)
-        )
-        progressChecks[index].visibility = View.GONE
-        progressLabels[index].alpha = 0.5f
     }
 
     override fun onDestroyView() {
@@ -671,6 +731,11 @@ class SurveyFormFragment : Fragment() {
             b?.scrollView?.viewTreeObserver?.removeOnScrollChangedListener(listener)
         }
         scrollListener = null
+        focusListener?.let { b?.root?.viewTreeObserver?.removeOnGlobalFocusChangeListener(it) }
+        focusListener = null
+        progressAnimator?.cancel()
+        progressAnimator = null
+        progressInitialized = false
         locationHelper.stopUpdates()
         _binding = null
     }

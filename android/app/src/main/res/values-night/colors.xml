@@ -112,6 +112,11 @@
     <color name="map_pin_stroke">#121619</color>
     <color name="map_empty_text">#3A444A</color>
 
+    <!-- Survey Sheet (dark) -->
+    <color name="status_success_container">#0C3A26</color>
+    <color name="sheet_action_stroke">#2E4E63</color>
+    <color name="sheet_action_bg">#151E28</color>
+
     <!-- Semantic text on overlays (dark) -->
     <color name="text_on_dark_primary">#FFFFFF</color>
     <color name="text_on_dark_secondary">#B3FFFFFF</color>

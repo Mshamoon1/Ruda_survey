@@ -139,6 +139,11 @@
     <color name="splash_bg_center">#0F3049</color>
     <color name="splash_bg_end">#134559</color>
 
+    <!-- Survey Sheet -->
+    <color name="status_success_container">#E3F5EA</color>
+    <color name="sheet_action_stroke">#BBD7EA</color>
+    <color name="sheet_action_bg">#F7FAFC</color>
+
     <!-- Semantic text on overlays -->
     <color name="text_on_dark_primary">#FFFFFF</color>
     <color name="text_on_dark_secondary">#B3FFFFFF</color>

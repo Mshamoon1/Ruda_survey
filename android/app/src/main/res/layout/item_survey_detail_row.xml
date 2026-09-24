@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="top"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvDetailLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.38"
+        android:paddingEnd="8dp"
+        android:gravity="start"
+        android:textAlignment="viewStart"
+        android:fontFamily="@font/inter_regular"
+        android:textColor="@color/md_theme_onSurfaceVariant"
+        android:textSize="@dimen/text_size_body" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvDetailValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.62"
+        android:gravity="end"
+        android:textAlignment="viewEnd"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:fontFamily="@font/inter_medium"
+        android:textColor="@color/md_theme_onSurface"
+        android:textSize="@dimen/text_size_body" />
+
+</LinearLayout>

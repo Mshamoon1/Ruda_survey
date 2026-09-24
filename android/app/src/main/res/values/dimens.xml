@@ -28,6 +28,7 @@
     <dimen name="corner_xl">20dp</dimen>
     <dimen name="corner_extra_large">28dp</dimen>
     <dimen name="corner_full">999dp</dimen>
+    <dimen name="corner_action_tile">10dp</dimen>
 
     <!-- Elevation -->
     <dimen name="elevation_0">0dp</dimen>

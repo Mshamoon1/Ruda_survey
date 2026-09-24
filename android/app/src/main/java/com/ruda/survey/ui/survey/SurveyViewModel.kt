@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 
 class SurveyViewModel(
@@ -28,6 +29,7 @@ class SurveyViewModel(
 
     private val _srNoLookupState = MutableStateFlow<UiState<SurveyItem>>(UiState.Empty)
     val srNoLookupState: StateFlow<UiState<SurveyItem>> = _srNoLookupState.asStateFlow()
+    private var lookupJob: Job? = null
 
     private val _allSurveysState = MutableStateFlow<UiState<List<SurveyItem>>>(UiState.Empty)
     val allSurveysState: StateFlow<UiState<List<SurveyItem>>> = _allSurveysState.asStateFlow()
@@ -62,13 +64,15 @@ class SurveyViewModel(
     }
 
     fun lookupBySrNo(srNo: String) {
+        resetSrNoLookup()
+        currentSurvey = null
         val parsed = srNo.trim().toIntOrNull()
         if (parsed == null || parsed <= 0) {
             _srNoLookupState.value = UiState.Error("VALIDATION_ERROR", "Enter a valid serial number")
             return
         }
         _srNoLookupState.value = UiState.Loading
-        viewModelScope.launch {
+        lookupJob = viewModelScope.launch {
             val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
                 repository.getSurveyBySrNo(parsed)
             }
@@ -92,7 +96,19 @@ class SurveyViewModel(
     }
 
     fun resetSrNoLookup() {
+        lookupJob?.cancel()
+        lookupJob = null
         _srNoLookupState.value = UiState.Empty
+    }
+
+    // Only called at the Dashboard entry point, never on view recreation or edit navigation.
+    fun startUpdateSession() {
+        resetSrNoLookup()
+        currentSurvey = null
+        _surveyState.value = UiState.Empty
+        resetUpdateState()
+        clearPendingImages()
+        setPendingDoc(null, null)
     }
 
     fun loadAllSurveys(forceRefresh: Boolean = false) {
@@ -152,6 +168,8 @@ class SurveyViewModel(
             }
             _updateState.value = result.fold(
                 onSuccess = {
+                    // Keep the updated item for the receipt/PDF, but retire the lookup result.
+                    resetSrNoLookup()
                     currentSurvey = it
                     loadAllSurveys(forceRefresh = true)
                     UiState.Success(it)

@@ -35,119 +35,183 @@
             android:orientation="vertical"
             android:paddingBottom="@dimen/section_vertical_spacing">
 
-            <!-- Header Info Card -->
+            <!-- 1. Survey Summary Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.RudaSurvey.Card.Tonal"
-                android:layout_marginTop="@dimen/spacing_16">
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginTop="@dimen/spacing_12"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_10"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeColor="@color/md_theme_outlineVariant"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_16">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvParcelCode"
+                    <ImageView
+                        android:id="@+id/ivSummaryIcon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_sheet_summary_icon"
+                        android:importantForAccessibility="no"
+                        android:padding="9dp"
+                        android:src="@drawable/ic_location"
+                        app:tint="@color/md_theme_onPrimary" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_12"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummaryVillage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_semibold"
+                            android:textColor="@color/md_theme_primary"
+                            android:textSize="@dimen/text_size_body" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummarySrNo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_2"
+                            android:fontFamily="@font/inter_regular"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_caption" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummaryOwner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_2"
+                            android:fontFamily="@font/inter_regular"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_caption" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummaryStructure"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_2"
+                            android:fontFamily="@font/inter_regular"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_caption" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleLarge"
-                        android:textColor="@color/md_theme_onPrimaryContainer" />
+                        android:layout_marginStart="@dimen/spacing_8"
+                        android:gravity="end"
+                        android:orientation="vertical">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvSource"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
-                        android:alpha="0.8"
-                        android:layout_marginTop="@dimen/spacing_4" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvStatusPill"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_sheet_status_pill"
+                            android:fontFamily="@font/inter_semibold"
+                            android:paddingStart="@dimen/spacing_10"
+                            android:paddingTop="@dimen/spacing_2"
+                            android:paddingEnd="@dimen/spacing_10"
+                            android:paddingBottom="@dimen/spacing_2"
+                            android:text="@string/label_status_submitted"
+                            android:textColor="@color/status_success"
+                            android:textSize="@dimen/text_size_caption" />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvSurveyor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
-                        android:alpha="0.7"
-                        android:layout_marginTop="@dimen/spacing_2" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummaryDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_6"
+                            android:fontFamily="@font/inter_regular"
+                            android:gravity="end"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_caption" />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvChangedAt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
-                        android:alpha="0.7"
-                        android:layout_marginTop="@dimen/spacing_2" />
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvSummaryTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_2"
+                            android:fontFamily="@font/inter_regular"
+                            android:gravity="end"
+                            android:textColor="@color/md_theme_onSurfaceVariant"
+                            android:textSize="@dimen/text_size_caption" />
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvKhasraMauza"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
-                        android:textColor="@color/md_theme_onPrimaryContainer"
-                        android:layout_marginTop="@dimen/spacing_4" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Export Actions (segmented row) -->
-            <LinearLayout
+            <!-- 2. Action Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="@dimen/screen_horizontal_margin"
-                android:paddingEnd="@dimen/screen_horizontal_margin"
-                android:layout_marginTop="@dimen/spacing_8"
-                android:layout_marginBottom="@dimen/spacing_8">
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_10"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeColor="@color/md_theme_outlineVariant"
+                app:strokeWidth="1dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDownloadPdf"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btn_download_pdf"
-                    android:textAllCaps="false"
-                    app:icon="@drawable/ic_download"
-                    app:iconGravity="top"
-                    style="@style/Widget.RudaSurvey.Button.Secondary"
-                    android:layout_marginEnd="@dimen/spacing_4"
-                    app:iconSize="20dp" />
+                    android:orientation="horizontal"
+                    android:padding="@dimen/spacing_10">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSharePdf"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btn_share_pdf"
-                    android:textAllCaps="false"
-                    app:icon="@drawable/ic_share"
-                    app:iconGravity="top"
-                    style="@style/Widget.RudaSurvey.Button.Secondary"
-                    android:layout_marginStart="@dimen/spacing_4"
-                    android:layout_marginEnd="@dimen/spacing_4"
-                    app:iconSize="20dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDownloadPdf"
+                        style="@style/Widget.RudaSurvey.Button.SheetAction"
+                        android:layout_width="0dp"
+                        android:layout_height="76dp"
+                        android:layout_marginStart="@dimen/spacing_4"
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExportExcel"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btn_export_excel"
-                    android:textAllCaps="false"
-                    app:icon="@drawable/ic_upload"
-                    app:iconGravity="top"
-                    style="@style/Widget.RudaSurvey.Button.Secondary"
-                    android:layout_marginStart="@dimen/spacing_4"
-                    app:iconSize="20dp" />
+                        android:layout_marginEnd="@dimen/spacing_4"
+                        android:layout_weight="1"
+                        android:text="@string/btn_download_pdf"
+                        app:icon="@drawable/ic_download" />
 
-            </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSharePdf"
+                        style="@style/Widget.RudaSurvey.Button.SheetAction"
+                        android:layout_width="0dp"
+                        android:layout_height="76dp"
+                        android:layout_marginStart="@dimen/spacing_4"
+                        android:layout_marginEnd="@dimen/spacing_4"
+                        android:layout_weight="1"
+                        android:text="@string/btn_share_pdf"
+                        app:icon="@drawable/ic_share" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnExportExcel"
+                        style="@style/Widget.RudaSurvey.Button.SheetAction"
+                        android:layout_width="0dp"
+                        android:layout_height="76dp"
+                        android:layout_marginEnd="@dimen/spacing_4"
+
+                        android:layout_marginStart="@dimen/spacing_4"
+                        android:layout_weight="1"
+                        android:text="@string/btn_export_excel"
+                        app:icon="@drawable/ic_upload" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- PDF Progress -->
             <com.google.android.material.card.MaterialCardView
@@ -191,120 +255,189 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Survey Data Section -->
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_survey_data"
-                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                android:textColor="?attr/colorOnSurface"
-                android:paddingStart="@dimen/screen_horizontal_margin"
-                android:paddingTop="@dimen/spacing_16"
-                android:paddingBottom="@dimen/spacing_8" />
-
+            <!-- 3. Survey Data Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.RudaSurvey.Card.Outlined">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/tvFields"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:fontFamily="monospace"
-                    android:textSize="@dimen/text_size_body_small"
-                    android:textColor="?attr/colorOnSurface"
-                    android:lineSpacingExtra="4dp" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Images Section -->
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_images"
-                android:textAppearance="@style/TextAppearance.RudaSurvey.TitleMedium"
-                android:textColor="?attr/colorOnSurface"
-                android:paddingStart="@dimen/screen_horizontal_margin"
-                android:paddingTop="@dimen/spacing_16"
-                android:paddingBottom="@dimen/spacing_8" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.RudaSurvey.Card.Outlined">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/tvImages"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_no_images"
-                    android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_10"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeColor="@color/md_theme_outlineVariant"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/spacing_8">
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:layout_marginEnd="@dimen/spacing_4">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/spacing_16"
+                        android:paddingTop="@dimen/spacing_14"
+                        android:paddingEnd="@dimen/spacing_16"
+                        android:paddingBottom="@dimen/spacing_2">
 
                         <ImageView
-                            android:id="@+id/ivImage1"
-                            android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:scaleType="centerCrop"
-                            android:visibility="gone"
-                            android:background="?attr/colorSurfaceVariant" />
+                            android:id="@+id/ivSurveyDataIcon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_document"
+                            app:tint="@color/md_theme_primary" />
 
                         <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/tvImage1Label"
+                            android:id="@+id/tvSurveyDataTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:visibility="gone"
-                            android:layout_marginTop="@dimen/spacing_4" />
+                            android:layout_marginStart="@dimen/spacing_8"
+                            android:fontFamily="@font/inter_semibold"
+                            android:text="@string/label_survey_data"
+                            android:textColor="@color/md_theme_primary"
+                            android:textSize="16sp" />
+
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/layoutDetails"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:layout_marginStart="@dimen/spacing_4">
+                        android:paddingBottom="@dimen/spacing_8" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 4. Survey Attachments Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/screen_horizontal_margin"
+                android:layout_marginEnd="@dimen/screen_horizontal_margin"
+                app:cardBackgroundColor="@color/md_theme_surface"
+                app:cardCornerRadius="@dimen/corner_large"
+                app:cardElevation="@dimen/elevation_1"
+                app:strokeColor="@color/md_theme_outlineVariant"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/spacing_16"
+                        android:paddingTop="@dimen/spacing_14"
+                        android:paddingEnd="@dimen/spacing_16"
+                        android:paddingBottom="@dimen/spacing_2">
 
                         <ImageView
-                            android:id="@+id/ivImage2"
-                            android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:scaleType="centerCrop"
-                            android:visibility="gone"
-                            android:background="?attr/colorSurfaceVariant" />
+                            android:id="@+id/ivAttachmentsIcon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_image"
+                            app:tint="@color/md_theme_primary" />
 
                         <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/tvImage2Label"
+                            android:id="@+id/tvAttachmentsTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=""
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:visibility="gone"
-                            android:layout_marginTop="@dimen/spacing_4" />
+                            android:layout_marginStart="@dimen/spacing_8"
+                            android:fontFamily="@font/inter_semibold"
+                            android:text="@string/label_survey_attachments"
+                            android:textColor="@color/md_theme_primary"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tvImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:padding="@dimen/spacing_16"
+                        android:text="@string/label_no_images"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                        android:textAlignment="center"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/spacing_12"
+                        android:paddingEnd="@dimen/spacing_12"
+                        android:paddingBottom="@dimen/spacing_12">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/spacing_6"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/ivImage1"
+                                android:layout_width="match_parent"
+                                android:layout_height="180dp"
+                                android:background="@drawable/bg_sheet_image_frame"
+                                android:clipToOutline="true"
+                                android:scaleType="centerCrop"
+                                android:visibility="gone" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvImage1Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_4"
+                                android:text=""
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/spacing_6"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/ivImage2"
+                                android:layout_width="match_parent"
+                                android:layout_height="180dp"
+                                android:background="@drawable/bg_sheet_image_frame"
+                                android:clipToOutline="true"
+                                android:scaleType="centerCrop"
+                                android:visibility="gone" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/tvImage2Label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_4"
+                                android:text=""
+                                android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall"
+                                android:textColor="?attr/colorOnSurfaceVariant"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
                     </LinearLayout>
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Loading -->

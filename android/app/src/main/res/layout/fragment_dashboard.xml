@@ -52,13 +52,14 @@
 
                     <!-- Circular logo -->
                     <FrameLayout
-                        android:layout_width="70dp"
+                        android:layout_width="60dp"
                         android:layout_height="60dp"
+                        android:padding="@dimen/spacing_8"
                         android:background="@drawable/bg_logo_ring">
 
                         <ImageView
-                            android:layout_width="77dp"
-                            android:layout_height="60dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
                             android:contentDescription="@string/app_name"
                             android:scaleType="fitCenter"
@@ -703,25 +704,7 @@
                         android:gravity="center_vertical">
 
                         <!-- Icon area -->
-                        <FrameLayout
-                            android:layout_width="31dp"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/bg_button_icon_area_outlined">
 
-                            <ImageView
-                                android:layout_width="31dp"
-                                android:layout_height="39dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="Search"
-                                android:src="@drawable/ic_search"
-                                android:tint="@color/md_theme_primary" />
-                        </FrameLayout>
-
-                        <!-- Divider -->
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="24dp"
-                            android:background="@color/md_theme_primary" />
 
                         <!-- Text -->
                         <com.google.android.material.textview.MaterialTextView
@@ -755,25 +738,10 @@
                         android:gravity="center_vertical">
 
                         <!-- Icon area -->
-                        <FrameLayout
-                            android:layout_width="21dp"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/bg_button_icon_area_filled">
 
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="48dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="Create"
-                                android:src="@drawable/ic_note_add"
-                                android:tint="@android:color/white" />
-                        </FrameLayout>
 
                         <!-- Divider -->
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="24dp"
-                            android:background="#55FFFFFF" />
+
 
                         <!-- Text -->
                         <com.google.android.material.textview.MaterialTextView

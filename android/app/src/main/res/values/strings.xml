@@ -70,6 +70,9 @@
     <string name="label_sr_no_lookup_hint">Enter the Sr. No from the master list</string>
     <string name="label_found_parcels">Found %1$d parcel(s) for Sr. No %2$d</string>
     <string name="label_select_parcel">Select a parcel to proceed</string>
+    <string name="label_survey_found">Survey Found</string>
+    <string name="label_survey_found_hint">Details fetched from server</string>
+    <string name="label_view_original_subtitle">Open full survey record</string>
 
     <!-- Survey Form (RTW) -->
     <string name="form_title">Edit Survey</string>
@@ -134,9 +137,32 @@
     <string name="revision_submitted">Revision submitted successfully</string>
     <string name="error_submit_failed">Submit failed: %1$s</string>
 
+    <!-- Changes to Submit sections -->
+    <string name="section_parcel_details">Parcel Details</string>
+    <string name="section_ownership_details">Ownership Details</string>
+    <string name="section_location_details">Location Details</string>
+    <string name="section_structure_details">Structure Details</string>
+    <string name="field_sr_no">Sr No.</string>
+    <string name="field_parcel_id">Parcel ID</string>
+    <string name="field_rd">RD</string>
+    <string name="field_cnic">CNIC</string>
+    <string name="field_contact_number">Contact Number</string>
+    <string name="field_khasra_no">Khasra No</string>
+    <string name="field_latitude">Latitude</string>
+    <string name="field_longitude">Longitude</string>
+    <string name="field_structure">Structure</string>
+
     <!-- Sheet -->
     <string name="sheet_title">Survey Sheet</string>
     <string name="label_survey_data">Survey Data</string>
+    <string name="label_survey_attachments">Survey Attachments</string>
+    <string name="label_status_submitted">Submitted</string>
+    <string name="value_placeholder">—</string>
+    <string name="section_01_general">01 — General Information</string>
+    <string name="section_02_location">02 — Location Details</string>
+    <string name="section_03_owner">03 — Owner Information</string>
+    <string name="section_04_land">04 — Land Details</string>
+    <string name="section_05_structure_details">05 — Structure Details</string>
     <string name="label_images">Images</string>
     <string name="btn_download_pdf">Download PDF</string>
     <string name="btn_share_pdf">Share PDF</string>

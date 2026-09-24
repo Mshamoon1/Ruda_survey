@@ -21,347 +21,222 @@
             android:paddingTop="@dimen/spacing_16"
             android:paddingBottom="@dimen/spacing_16">
 
-            <!-- ===== Survey Progress Indicator ===== -->
-            <LinearLayout
+            <!-- Survey completion: required inputs and current section -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/progressSurveyForm"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="@dimen/screen_horizontal_margin"
-                android:paddingBottom="@dimen/spacing_16">
-
-                <!-- Steps row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <!-- Step 1: Parcel -->
-                    <LinearLayout
-                        android:id="@+id/progressStepParcel"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-
-                        <FrameLayout
-                            android:layout_width="28dp"
-                            android:layout_height="28dp">
-
-                            <View
-                                android:id="@+id/progressConnectorLeft1"
-                                android:layout_width="0dp"
-                                android:layout_height="3dp"
-                                android:layout_gravity="center_vertical|start"
-                                android:background="@drawable/bg_progress_connector_inactive" />
-
-                            <View
-                                android:id="@+id/progressCircle1"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/bg_progress_step_active" />
-
-                            <TextView
-                                android:id="@+id/progressNumber1"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="1"
-                                android:textColor="@android:color/white"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/progressCheck1"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_check"
-                                android:visibility="gone"
-                                android:contentDescription="Completed" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/progressLabel1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:text="Parcel"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                            android:textColor="@color/md_theme_onSurfaceVariant"
-                            android:textSize="10sp" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_margin"
+                android:layout_marginBottom="@dimen/spacing_16"
+                app:cardCornerRadius="@dimen/corner_large" app:cardElevation="@dimen/elevation_1"
+                app:strokeWidth="1dp" app:strokeColor="@color/md_theme_outlineVariant"
+                app:cardBackgroundColor="@color/md_theme_surface">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="@dimen/spacing_16">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:layout_marginEnd="@dimen/spacing_8"
+                            android:text="@string/survey_progress_title"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.TitleSmall"
+                            android:textColor="@color/md_theme_primary" android:accessibilityHeading="true" />
+                        <TextView android:id="@+id/tvProgressPercentage"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:background="@drawable/bg_survey_progress_badge"
+                            android:paddingHorizontal="@dimen/spacing_10" android:paddingVertical="@dimen/spacing_4"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelLarge"
+                            android:textColor="@color/md_theme_onSecondaryContainer" />
                     </LinearLayout>
-
-                    <!-- Connector 1-2 -->
-                    <View
-                        android:id="@+id/progressConnector12"
-                        android:layout_width="0dp"
-                        android:layout_height="3dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_progress_connector_inactive" />
-
-                    <!-- Step 2: Coordinates -->
-                    <LinearLayout
-                        android:id="@+id/progressStepCoordinates"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-
-                        <FrameLayout
-                            android:layout_width="28dp"
-                            android:layout_height="28dp">
-
-                            <View
-                                android:id="@+id/progressCircle2"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/bg_progress_step_upcoming" />
-
-                            <TextView
-                                android:id="@+id/progressNumber2"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="2"
-                                android:textColor="@color/md_theme_outline"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/progressCheck2"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_check"
-                                android:visibility="gone"
-                                android:contentDescription="Completed" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/progressLabel2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:text="Coordinates"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                            android:textColor="@color/md_theme_onSurfaceVariant"
-                            android:textSize="10sp" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/surveyCompletionProgress"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_12" android:indeterminate="false" android:max="100"
+                        android:importantForAccessibility="no"
+                        app:trackThickness="6dp" app:trackCornerRadius="3dp"
+                        app:indicatorColor="@color/md_theme_secondary" app:trackColor="@color/md_theme_secondaryContainer" />
+                    <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_16">
+                        <!-- Equal segments connect the centers of the five equal-width steps. -->
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="2dp"
+                            android:layout_marginTop="13dp" android:orientation="horizontal"
+                            android:importantForAccessibility="noHideDescendants">
+                            <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="0.5" />
+                            <View android:id="@+id/progressConnector12"
+                                android:layout_width="0dp" android:layout_height="2dp"
+                                android:layout_weight="1" android:background="@drawable/bg_progress_connector_inactive" />
+                            <View android:id="@+id/progressConnector23"
+                                android:layout_width="0dp" android:layout_height="2dp"
+                                android:layout_weight="1" android:background="@drawable/bg_progress_connector_inactive" />
+                            <View android:id="@+id/progressConnector34"
+                                android:layout_width="0dp" android:layout_height="2dp"
+                                android:layout_weight="1" android:background="@drawable/bg_progress_connector_inactive" />
+                            <View android:id="@+id/progressConnector45"
+                                android:layout_width="0dp" android:layout_height="2dp"
+                                android:layout_weight="1" android:background="@drawable/bg_progress_connector_inactive" />
+                            <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="0.5" />
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:baselineAligned="false">
+                            <LinearLayout android:id="@+id/progressStepParcel"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:orientation="vertical"
+                                android:gravity="center_horizontal" android:importantForAccessibility="yes"
+                                android:screenReaderFocusable="true">
+                                <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
+                                    android:importantForAccessibility="noHideDescendants">
+                                    <View android:id="@+id/progressCircle1"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:background="@drawable/bg_progress_step_upcoming" />
+                                    <TextView android:id="@+id/progressNumber1"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:gravity="center" android:text="1"
+                                        android:textColor="@color/md_theme_onSurfaceVariant"
+                                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium" />
+                                    <ImageView android:id="@+id/progressCheck1"
+                                        android:layout_width="16dp" android:layout_height="16dp"
+                                        android:layout_gravity="center" android:src="@drawable/ic_check"
+                                        android:visibility="gone" android:contentDescription="@null" />
+                                </FrameLayout>
+                                <TextView android:id="@+id/progressLabel1"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_4" android:gravity="center"
+                                    android:text="@string/survey_progress_parcel" android:importantForAccessibility="no"
+                                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                                    android:textSize="@dimen/text_size_caption" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@+id/progressStepCoordinates"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:orientation="vertical"
+                                android:gravity="center_horizontal" android:importantForAccessibility="yes"
+                                android:screenReaderFocusable="true">
+                                <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
+                                    android:importantForAccessibility="noHideDescendants">
+                                    <View android:id="@+id/progressCircle2"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:background="@drawable/bg_progress_step_upcoming" />
+                                    <TextView android:id="@+id/progressNumber2"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:gravity="center" android:text="2"
+                                        android:textColor="@color/md_theme_onSurfaceVariant"
+                                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium" />
+                                    <ImageView android:id="@+id/progressCheck2"
+                                        android:layout_width="16dp" android:layout_height="16dp"
+                                        android:layout_gravity="center" android:src="@drawable/ic_check"
+                                        android:visibility="gone" android:contentDescription="@null" />
+                                </FrameLayout>
+                                <TextView android:id="@+id/progressLabel2"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_4" android:gravity="center"
+                                    android:text="@string/survey_progress_gps" android:importantForAccessibility="no"
+                                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                                    android:textSize="@dimen/text_size_caption" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@+id/progressStepOwner"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:orientation="vertical"
+                                android:gravity="center_horizontal" android:importantForAccessibility="yes"
+                                android:screenReaderFocusable="true">
+                                <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
+                                    android:importantForAccessibility="noHideDescendants">
+                                    <View android:id="@+id/progressCircle3"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:background="@drawable/bg_progress_step_upcoming" />
+                                    <TextView android:id="@+id/progressNumber3"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:gravity="center" android:text="3"
+                                        android:textColor="@color/md_theme_onSurfaceVariant"
+                                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium" />
+                                    <ImageView android:id="@+id/progressCheck3"
+                                        android:layout_width="16dp" android:layout_height="16dp"
+                                        android:layout_gravity="center" android:src="@drawable/ic_check"
+                                        android:visibility="gone" android:contentDescription="@null" />
+                                </FrameLayout>
+                                <TextView android:id="@+id/progressLabel3"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_4" android:gravity="center"
+                                    android:text="@string/survey_progress_owner" android:importantForAccessibility="no"
+                                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                                    android:textSize="@dimen/text_size_caption" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@+id/progressStepLand"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:orientation="vertical"
+                                android:gravity="center_horizontal" android:importantForAccessibility="yes"
+                                android:screenReaderFocusable="true">
+                                <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
+                                    android:importantForAccessibility="noHideDescendants">
+                                    <View android:id="@+id/progressCircle4"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:background="@drawable/bg_progress_step_upcoming" />
+                                    <TextView android:id="@+id/progressNumber4"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:gravity="center" android:text="4"
+                                        android:textColor="@color/md_theme_onSurfaceVariant"
+                                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium" />
+                                    <ImageView android:id="@+id/progressCheck4"
+                                        android:layout_width="16dp" android:layout_height="16dp"
+                                        android:layout_gravity="center" android:src="@drawable/ic_check"
+                                        android:visibility="gone" android:contentDescription="@null" />
+                                </FrameLayout>
+                                <TextView android:id="@+id/progressLabel4"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_4" android:gravity="center"
+                                    android:text="@string/survey_progress_land" android:importantForAccessibility="no"
+                                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                                    android:textSize="@dimen/text_size_caption" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@+id/progressStepStructure"
+                                android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:orientation="vertical"
+                                android:gravity="center_horizontal" android:importantForAccessibility="yes"
+                                android:screenReaderFocusable="true">
+                                <FrameLayout android:layout_width="28dp" android:layout_height="28dp"
+                                    android:importantForAccessibility="noHideDescendants">
+                                    <View android:id="@+id/progressCircle5"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:background="@drawable/bg_progress_step_upcoming" />
+                                    <TextView android:id="@+id/progressNumber5"
+                                        android:layout_width="match_parent" android:layout_height="match_parent"
+                                        android:gravity="center" android:text="5"
+                                        android:textColor="@color/md_theme_onSurfaceVariant"
+                                        android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium" />
+                                    <ImageView android:id="@+id/progressCheck5"
+                                        android:layout_width="16dp" android:layout_height="16dp"
+                                        android:layout_gravity="center" android:src="@drawable/ic_check"
+                                        android:visibility="gone" android:contentDescription="@null" />
+                                </FrameLayout>
+                                <TextView android:id="@+id/progressLabel5"
+                                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_4" android:gravity="center"
+                                    android:text="@string/survey_progress_structure" android:importantForAccessibility="no"
+                                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
+                                    android:textSize="@dimen/text_size_caption" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_12" android:orientation="horizontal">
+                        <TextView android:id="@+id/tvProgressStep"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.4"
+                            android:paddingEnd="@dimen/spacing_8"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall" />
+                        <TextView android:id="@+id/tvProgressSection"
+                            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.6"
+                            android:gravity="end" android:textAlignment="viewEnd"
+                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
+                            android:textColor="@color/md_theme_primary" />
                     </LinearLayout>
-
-                    <!-- Connector 2-3 -->
-                    <View
-                        android:id="@+id/progressConnector23"
-                        android:layout_width="0dp"
-                        android:layout_height="3dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_progress_connector_inactive" />
-
-                    <!-- Step 3: Owner -->
-                    <LinearLayout
-                        android:id="@+id/progressStepOwner"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-
-                        <FrameLayout
-                            android:layout_width="28dp"
-                            android:layout_height="28dp">
-
-                            <View
-                                android:id="@+id/progressCircle3"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/bg_progress_step_upcoming" />
-
-                            <TextView
-                                android:id="@+id/progressNumber3"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="3"
-                                android:textColor="@color/md_theme_outline"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/progressCheck3"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_check"
-                                android:visibility="gone"
-                                android:contentDescription="Completed" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/progressLabel3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:text="Owner"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                            android:textColor="@color/md_theme_onSurfaceVariant"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-
-                    <!-- Connector 3-4 -->
-                    <View
-                        android:id="@+id/progressConnector34"
-                        android:layout_width="0dp"
-                        android:layout_height="3dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_progress_connector_inactive" />
-
-                    <!-- Step 4: Land -->
-                    <LinearLayout
-                        android:id="@+id/progressStepLand"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-
-                        <FrameLayout
-                            android:layout_width="28dp"
-                            android:layout_height="28dp">
-
-                            <View
-                                android:id="@+id/progressCircle4"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/bg_progress_step_upcoming" />
-
-                            <TextView
-                                android:id="@+id/progressNumber4"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="4"
-                                android:textColor="@color/md_theme_outline"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/progressCheck4"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_check"
-                                android:visibility="gone"
-                                android:contentDescription="Completed" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/progressLabel4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:text="Land"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                            android:textColor="@color/md_theme_onSurfaceVariant"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-
-                    <!-- Connector 4-5 -->
-                    <View
-                        android:id="@+id/progressConnector45"
-                        android:layout_width="0dp"
-                        android:layout_height="3dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_progress_connector_inactive" />
-
-                    <!-- Step 5: Structure -->
-                    <LinearLayout
-                        android:id="@+id/progressStepStructure"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal">
-
-                        <FrameLayout
-                            android:layout_width="28dp"
-                            android:layout_height="28dp">
-
-                            <View
-                                android:id="@+id/progressCircle5"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/bg_progress_step_upcoming" />
-
-                            <TextView
-                                android:id="@+id/progressNumber5"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="5"
-                                android:textColor="@color/md_theme_outline"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/progressCheck5"
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_check"
-                                android:visibility="gone"
-                                android:contentDescription="Completed" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/progressLabel5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:text="Structure"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                            android:textColor="@color/md_theme_onSurfaceVariant"
-                            android:textSize="10sp" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Current step text -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:layout_marginTop="@dimen/spacing_10">
-
-                    <TextView
-                        android:id="@+id/tvProgressStep"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Step 1 of 5"
+                    <TextView android:id="@+id/tvProgressCompleted"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_6"
+                        android:textAppearance="@style/TextAppearance.RudaSurvey.BodySmall" />
+                    <TextView android:id="@+id/tvProgressReady"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_2" android:visibility="gone"
+                        android:text="@string/survey_progress_ready"
                         android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
-                        android:textColor="@color/md_theme_onSurfaceVariant"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:id="@+id/tvProgressSection"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Parcel Details"
-                        android:textAppearance="@style/TextAppearance.RudaSurvey.TitleSmall"
-                        android:textColor="@color/md_theme_onSurface" />
+                        android:textColor="@color/md_theme_secondary" />
                 </LinearLayout>
-
-            </LinearLayout>
-
+            </com.google.android.material.card.MaterialCardView>
             <!-- Divider -->
             <View
                 android:layout_width="match_parent"
@@ -966,13 +841,13 @@
                         app:startIconMinSize="24dp"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_marginBottom="@dimen/field_spacing">
-                        <AutoCompleteTextView
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/etStructureStatus"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
                             android:textAllCaps="false"
-                            android:textIsSelectable="true" />
+                            android:textIsSelectable="false" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -1052,13 +927,13 @@
                         android:hint="@string/label_construction_nature"
                         app:startIconDrawable="@drawable/ic_construction"
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-                        <AutoCompleteTextView
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/etConstructionNature"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
                             android:textAllCaps="false"
-                            android:textIsSelectable="true" />
+                            android:textIsSelectable="false" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -1088,6 +963,21 @@
             android:layout_weight="1"
             android:text="@string/btn_save_draft"
             android:textAllCaps="false"
+            android:textSize="@dimen/text_size_body"
+            android:fontFamily="@font/inter_medium"
+            android:letterSpacing="0"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/spacing_8"
+            android:paddingEnd="@dimen/spacing_8"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            app:iconSize="@dimen/icon_size_small"
+            app:iconPadding="@dimen/spacing_8"
             app:icon="@drawable/ic_save"
             app:iconGravity="textStart"
             style="@style/Widget.RudaSurvey.Button.Secondary"
@@ -1100,6 +990,21 @@
             android:layout_weight="1"
             android:text="View Changes"
             android:textAllCaps="false"
+            android:textSize="@dimen/text_size_body"
+            android:fontFamily="@font/inter_medium"
+            android:letterSpacing="0"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/spacing_8"
+            android:paddingEnd="@dimen/spacing_8"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            app:iconSize="@dimen/icon_size_small"
+            app:iconPadding="@dimen/spacing_8"
             app:icon="@drawable/ic_visibility"
             app:iconGravity="textStart"
             style="@style/Widget.RudaSurvey.Button.Primary"

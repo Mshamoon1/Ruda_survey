@@ -40,8 +40,6 @@ class NewSurveyFragment : Fragment() {
 
         setupClickListeners()
         observeStates()
-
-        binding.btnViewOriginal.visibility = View.GONE
     }
 
     private fun setupClickListeners() {
@@ -75,60 +73,68 @@ class NewSurveyFragment : Fragment() {
     private fun observeStates() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.srNoLookupState.collect { state ->
+                binding.progressBar.visibility = if (state is UiState.Loading) View.VISIBLE else View.GONE
+                binding.btnSerialLookup.isEnabled = state !is UiState.Loading
+                binding.cardResult.visibility = if (state is UiState.Success) View.VISIBLE else View.GONE
+                binding.btnViewOriginal.visibility = if (state is UiState.Success) View.VISIBLE else View.GONE
+                binding.rvSearchResults.visibility = View.GONE
                 when (state) {
-                    is UiState.Loading -> {
-                        binding.progressBar.visibility = View.VISIBLE
-                        binding.cardResult.visibility = View.GONE
-                        binding.rvSearchResults.visibility = View.GONE
-                        binding.btnSerialLookup.isEnabled = false
-                        binding.btnViewOriginal.visibility = View.GONE
+                    is UiState.Success -> showSurveyResult(state.data)
+                    is UiState.Error -> Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                    is UiState.Empty -> {
+                        binding.etSerialNumber.text?.clear()
+                        binding.layoutDetails.removeAllViews()
                     }
-                    is UiState.Success -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.btnSerialLookup.isEnabled = true
-                        val survey = state.data
-                        showSurveyResult(survey)
-                    }
-                    is UiState.Error -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.btnSerialLookup.isEnabled = true
-                        binding.cardResult.visibility = View.GONE
-                        binding.rvSearchResults.visibility = View.GONE
-                        binding.btnViewOriginal.visibility = View.GONE
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                    }
-                    is UiState.Empty -> { }
+                    else -> Unit
                 }
             }
         }
     }
 
     private fun showSurveyResult(survey: SurveyItem) {
-        binding.tvResultDetails.text = buildString {
-            appendLine("SR No: ${survey.srNo}")
-            if (survey.parcelId.isNotBlank()) appendLine("Parcel ID: ${survey.parcelId}")
-            appendLine("Village: ${survey.village}")
-            appendLine("Owner: ${survey.ownerName}")
-            if (survey.fName.isNotBlank()) appendLine("Father: ${survey.fName}")
-            if (survey.cnic.isNotBlank()) appendLine("CNIC: ${survey.cnic}")
-            if (survey.phone.isNotBlank()) appendLine("Phone: ${survey.phone}")
-            appendLine("")
-            if (survey.khasraNo.isNotBlank()) appendLine("Khasra No: ${survey.khasraNo}")
-            if (survey.electricityConnectionName.isNotBlank()) appendLine("Electricity: ${survey.electricityConnectionName}")
-            if (survey.landArea.isNotBlank()) appendLine("Land Area: ${survey.landArea}")
-            if (survey.lat != 0.0 || survey.lng != 0.0) appendLine("GPS: ${survey.lat}, ${survey.lng}")
-            appendLine("")
-            appendLine("Structure: ${survey.structuralName}")
-            appendLine("Status: ${survey.status.replace("_", " ").uppercase()}")
-            appendLine("Construction: ${survey.natureOfConstruction}")
-            if (survey.rd.isNotBlank()) appendLine("RD: ${survey.rd}")
-            if (survey.pkg.isNotBlank()) appendLine("Package: ${survey.pkg}")
-            if (survey.length.isNotBlank()) appendLine("Length: ${survey.length}")
-            if (survey.width.isNotBlank()) appendLine("Width: ${survey.width}")
-            if (survey.area.isNotBlank()) appendLine("Area: ${survey.area}")
-        }
-        binding.cardResult.visibility = View.VISIBLE
-        binding.btnViewOriginal.visibility = View.VISIBLE
+        binding.tvResultSrNo.text = "SR No: ${survey.srNo}"
+        binding.layoutDetails.removeAllViews()
+
+        // Group 1: Identity
+        addDetailRow("Sr No.", survey.srNo.toString())
+        addDetailRow("Parcel ID", survey.parcelId)
+        addDetailRow("Village", survey.village)
+        addDetailRow("Owner", survey.ownerName)
+        addDetailRow("Father", survey.fName)
+        addDetailRow("CNIC", survey.cnic)
+        addDetailRow("Phone", survey.phone)
+
+        addDetailDivider()
+
+        // Group 2: Land details
+        addDetailRow("Khasra No", survey.khasraNo)
+        addDetailRow("Electricity", survey.electricityConnectionName)
+        addDetailRow("Land Area", survey.landArea)
+        addDetailRow("GPS", if (survey.lat != 0.0 || survey.lng != 0.0) "${survey.lat}, ${survey.lng}" else null)
+
+        addDetailDivider()
+
+        // Group 3: Structure details
+        addDetailRow("Structure", survey.structuralName)
+        addDetailRow("Status", survey.status?.replace("_", " "))
+        addDetailRow("Construction", survey.natureOfConstruction)
+        addDetailRow("RD", survey.rd)
+        addDetailRow("Package", survey.pkg)
+        addDetailRow("Length", survey.length)
+        addDetailRow("Width", survey.width)
+        addDetailRow("Area", survey.area)
+
+    }
+
+    private fun addDetailRow(label: String, value: String?) {
+        val row = layoutInflater.inflate(R.layout.item_survey_detail_row, binding.layoutDetails, false)
+        row.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tvDetailLabel).text = label
+        row.findViewById<com.google.android.material.textview.MaterialTextView>(R.id.tvDetailValue).text = value?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", true) && !it.equals("undefined", true) } ?: "\u2014"
+        binding.layoutDetails.addView(row)
+    }
+
+    private fun addDetailDivider() {
+        layoutInflater.inflate(R.layout.item_survey_detail_divider, binding.layoutDetails, true)
     }
 
     override fun onDestroyView() {

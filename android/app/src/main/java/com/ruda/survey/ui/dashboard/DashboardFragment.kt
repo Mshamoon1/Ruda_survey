@@ -90,7 +90,10 @@ class DashboardFragment : Fragment() {
 
         binding.btnNewSurvey.setOnClickListener {
             it.animateTapFeedback {
-                if (isAdded) findNavController().navigate(R.id.action_dashboard_to_newSurvey)
+                if (isAdded) {
+                    surveyViewModel?.startUpdateSession()
+                    findNavController().navigate(R.id.action_dashboard_to_newSurvey)
+                }
             }
         }
 
