@@ -74,6 +74,12 @@ class SheetFragment : Fragment() {
         displaySurvey(survey)
         displayImages(survey)
         setupClickListeners(survey)
+        updateSyncLabel(survey)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.allSurveysState.collect { state ->
+                if (state is UiState.Success) state.data.find { it.id == survey.id }?.let { updateSyncLabel(it) }
+            }
+        }
 
         binding.toolbar.setNavigationOnClickListener {
             if (isAdded) findNavController().popBackStack(R.id.surveyFormFragment, false)
@@ -159,6 +165,14 @@ class SheetFragment : Fragment() {
         binding.contentLayout.visibility = View.VISIBLE
     }
 
+    private fun updateSyncLabel(survey: SurveyItem) {
+        binding.tvStatusPill.text = when (survey.syncStatus) {
+            "SYNCED" -> "Synced"
+            "FAILED", "CONFLICT" -> "Needs review"
+            else -> "Pending sync"
+        }
+    }
+
     private fun displayValue(value: String?): String =
         value?.takeIf { it.isNotBlank() } ?: getString(R.string.value_placeholder)
 
@@ -181,6 +195,19 @@ class SheetFragment : Fragment() {
     }
 
     private fun displayImages(survey: SurveyItem) {
+        if ((survey.image1Bytes == null && survey.image1LocalPath != null) ||
+            (survey.image2Bytes == null && survey.image2LocalPath != null)) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val local = withContext(Dispatchers.IO) {
+                    survey.copy(
+                        image1Bytes = survey.image1Bytes ?: survey.image1LocalPath?.let { runCatching { File(it).readBytes() }.getOrNull() },
+                        image2Bytes = survey.image2Bytes ?: survey.image2LocalPath?.let { runCatching { File(it).readBytes() }.getOrNull() },
+                        image1LocalPath = null, image2LocalPath = null)
+                }
+                if (_binding != null) displayImages(local)
+            }
+            return
+        }
         val pendingImages = viewModel.pendingImages.value
         val imageViews = mutableListOf<View>()
 
@@ -197,7 +224,7 @@ class SheetFragment : Fragment() {
                 val bitmap = withContext(Dispatchers.IO) {
                     BitmapFactory.decodeByteArray(img1Bytes, 0, img1Bytes.size)
                 }
-                if (bitmap != null) {
+                if (_binding != null && bitmap != null) {
                     binding.ivImage1.setImageBitmap(bitmap)
                     binding.ivImage1.visibility = View.VISIBLE
                     binding.tvImage1Label.visibility = View.VISIBLE
@@ -211,13 +238,13 @@ class SheetFragment : Fragment() {
                     val bitmap = withContext(Dispatchers.IO) {
                         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     }
-                    if (bitmap != null) {
+                    if (_binding != null && bitmap != null) {
                         binding.ivImage1.setImageBitmap(bitmap)
                         binding.ivImage1.visibility = View.VISIBLE
                         binding.tvImage1Label.visibility = View.VISIBLE
                         binding.tvImage1Label.text = "Door Pic"
                     }
-                } else {
+                } else if (_binding != null) {
                     binding.tvImage1Label.text = "Door Pic (server)"
                     binding.tvImage1Label.visibility = View.VISIBLE
                 }
@@ -229,7 +256,7 @@ class SheetFragment : Fragment() {
                 val bitmap = withContext(Dispatchers.IO) {
                     BitmapFactory.decodeByteArray(img2Bytes, 0, img2Bytes.size)
                 }
-                if (bitmap != null) {
+                if (_binding != null && bitmap != null) {
                     binding.ivImage2.setImageBitmap(bitmap)
                     binding.ivImage2.visibility = View.VISIBLE
                     binding.tvImage2Label.visibility = View.VISIBLE
@@ -243,13 +270,13 @@ class SheetFragment : Fragment() {
                     val bitmap = withContext(Dispatchers.IO) {
                         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     }
-                    if (bitmap != null) {
+                    if (_binding != null && bitmap != null) {
                         binding.ivImage2.setImageBitmap(bitmap)
                         binding.ivImage2.visibility = View.VISIBLE
                         binding.tvImage2Label.visibility = View.VISIBLE
                         binding.tvImage2Label.text = "Front View"
                     }
-                } else {
+                } else if (_binding != null) {
                     binding.tvImage2Label.text = "Front View (server)"
                     binding.tvImage2Label.visibility = View.VISIBLE
                 }
@@ -310,19 +337,24 @@ class SheetFragment : Fragment() {
                 }
                 val fileName = "survey_${survey.srNo}.pdf"
                 val uri = saveToDownloads(fileName, "application/pdf", pdfBytes)
-                binding.pdfProgressLayout.visibility = View.GONE
-                binding.btnDownloadPdf.isEnabled = true
-                binding.btnSharePdf.isEnabled = true
-                if (uri != null) {
-                    Snackbar.make(binding.root, "PDF saved to Downloads", Snackbar.LENGTH_SHORT).show()
-                } else {
-                    Snackbar.make(binding.root, "Failed to save PDF", Snackbar.LENGTH_LONG).show()
+                if (_binding != null) {
+                    binding.pdfProgressLayout.visibility = View.GONE
+                    binding.btnDownloadPdf.isEnabled = true
+                    binding.btnSharePdf.isEnabled = true
+                    if (uri != null) {
+                        Snackbar.make(binding.root, "PDF saved to Downloads", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        Snackbar.make(binding.root, "Failed to save PDF", Snackbar.LENGTH_LONG).show()
+                    }
                 }
             } catch (e: Exception) {
-                binding.pdfProgressLayout.visibility = View.GONE
-                binding.btnDownloadPdf.isEnabled = true
-                binding.btnSharePdf.isEnabled = true
-                Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                if (e is java.util.concurrent.CancellationException) throw e
+                if (_binding != null) {
+                    binding.pdfProgressLayout.visibility = View.GONE
+                    binding.btnDownloadPdf.isEnabled = true
+                    binding.btnSharePdf.isEnabled = true
+                    Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -354,14 +386,19 @@ class SheetFragment : Fragment() {
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 startActivity(Intent.createChooser(shareIntent, "Share PDF"))
-                binding.pdfProgressLayout.visibility = View.GONE
-                binding.btnSharePdf.isEnabled = true
-                binding.btnDownloadPdf.isEnabled = true
+                if (_binding != null) {
+                    binding.pdfProgressLayout.visibility = View.GONE
+                    binding.btnSharePdf.isEnabled = true
+                    binding.btnDownloadPdf.isEnabled = true
+                }
             } catch (e: Exception) {
-                binding.pdfProgressLayout.visibility = View.GONE
-                binding.btnSharePdf.isEnabled = true
-                binding.btnDownloadPdf.isEnabled = true
-                Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                if (e is java.util.concurrent.CancellationException) throw e
+                if (_binding != null) {
+                    binding.pdfProgressLayout.visibility = View.GONE
+                    binding.btnSharePdf.isEnabled = true
+                    binding.btnDownloadPdf.isEnabled = true
+                    Snackbar.make(binding.root, "PDF error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -376,20 +413,25 @@ class SheetFragment : Fragment() {
                 }
                 val fileName = "survey_${survey.srNo}.xlsx"
                 val uri = saveToDownloads(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelBytes)
-                binding.btnExportExcel.isEnabled = true
-                if (uri != null) {
-                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (_binding != null) {
+                    binding.btnExportExcel.isEnabled = true
+                    if (uri != null) {
+                        val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        startActivity(openIntent)
+                        Snackbar.make(binding.root, "Excel saved to Downloads", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        Snackbar.make(binding.root, "Failed to save Excel", Snackbar.LENGTH_LONG).show()
                     }
-                    startActivity(openIntent)
-                    Snackbar.make(binding.root, "Excel saved to Downloads", Snackbar.LENGTH_SHORT).show()
-                } else {
-                    Snackbar.make(binding.root, "Failed to save Excel", Snackbar.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
-                binding.btnExportExcel.isEnabled = true
-                Snackbar.make(binding.root, "Excel error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                if (e is java.util.concurrent.CancellationException) throw e
+                if (_binding != null) {
+                    binding.btnExportExcel.isEnabled = true
+                    Snackbar.make(binding.root, "Excel error: ${e.message}", Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -398,10 +440,12 @@ class SheetFragment : Fragment() {
         android.util.Log.d("SheetFragment", "resolveImages: img1Bytes=${survey.image1Bytes != null} img2Bytes=${survey.image2Bytes != null} imgOne='${survey.imgOne}' imgTwo='${survey.imgTwo}'")
         val pendingImages = viewModel.pendingImages.value
         val img1 = survey.image1Bytes
+            ?: survey.image1LocalPath?.let { runCatching { File(it).readBytes() }.getOrNull() }
             ?: pendingImages.find { it.imageType == "imgOne" }?.stampedBytes
             ?: pendingImages.find { it.imageType == "imgOne" }?.originalBytes
             ?: downloadImage(survey.imgOne)
         val img2 = survey.image2Bytes
+            ?: survey.image2LocalPath?.let { runCatching { File(it).readBytes() }.getOrNull() }
             ?: pendingImages.find { it.imageType == "imgTwo" }?.stampedBytes
             ?: pendingImages.find { it.imageType == "imgTwo" }?.originalBytes
             ?: downloadImage(survey.imgTwo)
@@ -429,6 +473,7 @@ class SheetFragment : Fragment() {
             android.util.Log.d("SheetFragment", "Image response: code=${response.code} contentLength=${response.body?.contentLength()}")
             if (response.isSuccessful) response.body?.bytes() else null
         } catch (e: Exception) {
+            if (e is java.util.concurrent.CancellationException) throw e
             android.util.Log.e("SheetFragment", "Failed to download image: $url", e)
             null
         }

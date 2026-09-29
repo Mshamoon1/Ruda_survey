@@ -5,6 +5,20 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SurveyDao {
+    @Query("SELECT * FROM cached_surveys WHERE surveyor = :owner ORDER BY fetched_at DESC")
+    suspend fun getSurveysForUser(owner: String): List<CachedSurvey>
+
+    @Query("SELECT * FROM cached_surveys WHERE surveyor = :owner ORDER BY fetched_at DESC")
+    fun observeSurveysForUser(owner: String): Flow<List<CachedSurvey>>
+
+    @Query("DELETE FROM cached_surveys WHERE surveyor = :owner AND survey_type = :type")
+    suspend fun deleteSurveyIdentity(owner: String, type: String)
+
+    @Query("DELETE FROM cached_surveys WHERE surveyor = :owner AND survey_type IN (:types)")
+    suspend fun deleteSurveyIdentities(owner: String, types: List<String>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSurveys(surveys: List<CachedSurvey>)
 
     // CachedParcel queries
     @Query("SELECT * FROM cached_parcels WHERE parcel_code = :parcelCode")
@@ -68,11 +82,14 @@ interface SurveyDao {
     @Query("UPDATE cached_images SET uploaded = 1 WHERE id = :id")
     suspend fun markImageUploaded(id: Long)
 
+    @Query("UPDATE cached_images SET uploaded = 1 WHERE file_path = :path")
+    suspend fun markPathUploaded(path: String)
+
     @Query("DELETE FROM cached_images WHERE parcel_code = :parcelCode AND uploaded = 1")
     suspend fun deleteUploadedImages(parcelCode: String)
 
     // Cleanup
-    @Query("DELETE FROM cached_surveys WHERE fetched_at < :cutoffTime")
+    @Query("DELETE FROM cached_surveys WHERE fetched_at < :cutoffTime AND source = 'server'")
     suspend fun deleteStaleSurveys(cutoffTime: Long)
 
     @Query("DELETE FROM cached_parcels WHERE fetched_at < :cutoffTime")

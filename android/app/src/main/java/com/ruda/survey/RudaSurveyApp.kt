@@ -1,17 +1,21 @@
 package com.ruda.survey
 
 import android.app.Application
+import kotlinx.coroutines.launch
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.ruda.survey.data.sync.SyncWorker
-import org.osmdroid.config.Configuration as OsmConfig
 
 class RudaSurveyApp : Application(), Configuration.Provider {
+    private val applicationScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
     override fun onCreate() {
         super.onCreate()
-        OsmConfig.getInstance().load(this, android.preference.PreferenceManager.getDefaultSharedPreferences(this))
-        OsmConfig.getInstance().userAgentValue = packageName
         SyncWorker.enqueuePeriodic(this)
+        applicationScope.launch {
+            com.ruda.survey.data.sync.ConnectivityObserver(this@RudaSurveyApp).observe().collect { online ->
+                if (online && !BuildConfig.DEMO_MODE) SyncWorker.enqueueImmediate(this@RudaSurveyApp)
+            }
+        }
     }
 
     override val workManagerConfiguration: Configuration

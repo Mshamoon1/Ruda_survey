@@ -18,6 +18,13 @@ class AuthRepositoryImpl(
                 val body = response.body()
                 if (body != null && body.success && body.user != null && body.token != null) {
                     tokenManager.saveTokens(body.token, "")
+                    tokenManager.saveUserEmail(body.user.email)
+                    tokenManager.saveUserName(body.user.user_name)
+                    val serverTime = response.headers()["Date"]?.let {
+                        runCatching { java.time.ZonedDateTime.parse(it,
+                            java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli() }.getOrNull()
+                    }
+                    tokenManager.recordOnlineAuthentication(body.user.id, body.user.role, serverTime)
                     Result.success(AuthState(
                         isLoggedIn = true,
                         username = body.user.user_name,
@@ -42,7 +49,10 @@ class AuthRepositoryImpl(
                 Result.failure(Exception(errorMessage.ifEmpty { "Login failed" }))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Result.failure(if (e is java.io.IOException) Exception(
+                "Internet connection required. Please connect to verify your account for today's offline survey session.", e
+            ) else e)
         }
     }
 
@@ -51,7 +61,7 @@ class AuthRepositoryImpl(
         return Result.success(Unit)
     }
 
-    override fun isLoggedIn(): Boolean = tokenManager.hasTokens()
+    override fun isLoggedIn(): Boolean = tokenManager.isOfflineAccessAllowed()
 
     override fun getAuthToken(): String? = tokenManager.getAccessToken()
 }

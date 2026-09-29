@@ -112,7 +112,7 @@
                                 android:id="@+id/etSerialNumber"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number"
+                                android:inputType="text"
                                 android:textSize="@dimen/text_size_body_large"
                                 android:imeOptions="actionSearch"
                                 android:fontFamily="@font/inter_medium" />

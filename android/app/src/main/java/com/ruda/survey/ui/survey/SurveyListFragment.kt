@@ -47,18 +47,8 @@ class SurveyListFragment : Fragment() {
                         binding.tvSurveyCount.text = "Loading..."
                     }
                     is UiState.Success -> {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            val allSurveys = state.data
-                            val ctx = requireContext().applicationContext
-                            val tokenMgr = RepositoryFactory.getTokenManager(ctx)
-
-                            val surveys = withContext(kotlinx.coroutines.Dispatchers.Default) {
-                                val allowedIds = tokenMgr.getUserSurveyIds()
-                                allSurveys.filter { allowedIds.contains(it.id) }
-                            }
-
-                            if (!isAdded) return@launch
-
+                        if (_binding != null && isAdded) {
+                            val surveys = repository.filterMySurveys(state.data)
                             if (surveys.isEmpty()) {
                                 binding.layoutEmpty.visibility = View.VISIBLE
                                 binding.rvSurveys.visibility = View.GONE

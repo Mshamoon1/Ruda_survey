@@ -152,8 +152,8 @@ class ReviewFragment : Fragment() {
         val img1 = pendingImages.find { it.imageType == "imgOne" }
         val img2 = pendingImages.find { it.imageType == "imgTwo" }
 
-        val hasImg1 = img1 != null || survey.image1Bytes != null
-        val hasImg2 = img2 != null || survey.image2Bytes != null
+        val hasImg1 = img1 != null || survey.image1Bytes != null || survey.image1LocalPath != null
+        val hasImg2 = img2 != null || survey.image2Bytes != null || survey.image2LocalPath != null
 
         if (hasImg1 || hasImg2) {
             binding.cardImages.visibility = View.VISIBLE
@@ -162,17 +162,19 @@ class ReviewFragment : Fragment() {
                     android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 } ?: survey.image1Bytes?.let { bytes ->
                     android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
+                } ?: survey.image1LocalPath?.let { android.graphics.BitmapFactory.decodeFile(it) }
 
                 val bmp2 = img2?.stampedBytes?.let { bytes ->
                     android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 } ?: survey.image2Bytes?.let { bytes ->
                     android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
+                } ?: survey.image2LocalPath?.let { android.graphics.BitmapFactory.decodeFile(it) }
 
                 withContext(Dispatchers.Main) {
-                    bmp1?.let { binding.ivReviewImg1.setImageBitmap(it) }
-                    bmp2?.let { binding.ivReviewImg2.setImageBitmap(it) }
+                    if (_binding != null) {
+                        bmp1?.let { binding.ivReviewImg1.setImageBitmap(it) }
+                        bmp2?.let { binding.ivReviewImg2.setImageBitmap(it) }
+                    }
                 }
             }
         }
@@ -229,6 +231,9 @@ class ReviewFragment : Fragment() {
                 val tm = RepositoryFactory.getTokenManager(ctx)
                 tm.incrementNewSurveyCount()
                 val surveyData = state.data as? com.ruda.survey.domain.model.SurveyItem
+                if (surveyData?.syncStatus?.startsWith("PENDING") == true) {
+                    Snackbar.make(requireView(), "Survey saved on this device. Pending synchronization.", Snackbar.LENGTH_LONG).show()
+                }
                 if (surveyData != null && surveyData.id.isNotBlank()) {
                     tm.addUserSurveyId(surveyData.id)
                 }
@@ -243,13 +248,7 @@ class ReviewFragment : Fragment() {
                 binding.submitProgressBar.visibility = View.GONE
                 binding.btnSubmit.text = getString(R.string.btn_confirm_submit)
                 binding.btnSubmit.isEnabled = true
-                val message = if (state.message?.contains("Unable to resolve host") == true ||
-                    state.message?.contains("timeout") == true ||
-                    state.message?.contains("ENETUNREACH") == true) {
-                    "No internet connection. Survey saved locally and will sync when online."
-                } else {
-                    state.message ?: "Submission failed"
-                }
+                val message = state.message
                 Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show()
             }
             is UiState.Empty -> { }

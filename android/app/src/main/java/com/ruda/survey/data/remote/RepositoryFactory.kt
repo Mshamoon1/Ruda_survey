@@ -45,7 +45,10 @@ object RepositoryFactory {
                 val api = ApiClient.createSurveyApi(context.applicationContext)
                 val db = SurveyDatabase.getInstance(context.applicationContext)
                 val syncDao = db.syncDao()
-                SurveyRepositoryImpl(api, tokenManager, syncDao)
+                SurveyRepositoryImpl(api, tokenManager, syncDao, db,
+                    context.applicationContext.filesDir,
+                    { com.ruda.survey.data.sync.ConnectivityObserver(context.applicationContext).isCurrentlyConnected() },
+                    { com.ruda.survey.data.sync.SyncWorker.enqueueImmediate(context.applicationContext) })
             }
             cachedSurveyRepo = repo
             return repo
@@ -72,7 +75,7 @@ object RepositoryFactory {
             val db = SurveyDatabase.getInstance(context.applicationContext)
             val syncDao = db.syncDao()
             val api = ApiClient.createSurveyApi(context.applicationContext)
-            val repo = SyncRepository(api, syncDao, tokenManager)
+            val repo = SyncRepository(api, syncDao, tokenManager, db)
             cachedSyncRepo = repo
             return repo
         }

@@ -29,5 +29,16 @@ data class SyncQueueEntry(
 
         const val OP_REVISION_CREATE = "REVISION_CREATE"
         const val OP_IMAGE_UPLOAD = "IMAGE_UPLOAD"
+        const val OP_SURVEY_CREATE = "SURVEY_CREATE"
+        const val OP_SURVEY_UPDATE = "SURVEY_UPDATE"
     }
 }
+
+/** Immutable operation snapshot: retries never manufacture a new operation ID. */
+data class QueuedSurveyPayload(
+    val ownerId: String,
+    val item: com.ruda.survey.domain.model.SurveyItem,
+    val baseItem: com.ruda.survey.domain.model.SurveyItem? = null,
+    val formatVersion: Int = 2,
+    val acknowledgedItem: com.ruda.survey.domain.model.SurveyItem? = null
+)

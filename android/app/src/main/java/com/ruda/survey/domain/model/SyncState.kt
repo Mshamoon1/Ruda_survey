@@ -3,16 +3,18 @@ package com.ruda.survey.domain.model
 data class SyncState(
     val pendingCount: Int = 0,
     val conflictCount: Int = 0,
+    val failedCount: Int = 0,
+    val authenticationRequired: Boolean = false,
     val inProgressCount: Int = 0,
     val lastSyncTime: Long? = null,
     val isSyncing: Boolean = false,
     val lastError: String? = null,
     val isOnline: Boolean = true
 ) {
-    val hasPendingItems: Boolean get() = pendingCount > 0
+    val hasPendingItems: Boolean get() = pendingCount > 0 || failedCount > 0
     val hasConflicts: Boolean get() = conflictCount > 0
     val canSync: Boolean get() = isOnline && !isSyncing
-    val totalActionable: Int get() = pendingCount + conflictCount
+    val totalActionable: Int get() = pendingCount + failedCount + conflictCount
 }
 
 sealed class SyncOutcome {

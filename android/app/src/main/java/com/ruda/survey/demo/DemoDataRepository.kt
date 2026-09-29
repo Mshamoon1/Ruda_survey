@@ -10,6 +10,11 @@ class DemoDataRepository(
     private val tokenManager: TokenManager
 ) : SurveyRepository {
 
+    override fun filterMySurveys(items: List<SurveyItem>): List<SurveyItem> {
+        val ids = tokenManager.getUserSurveyIds()
+        return items.filter { it.id in ids || it.serverId in ids }
+    }
+
     private val prefs by lazy {
         context.getSharedPreferences("demo_session", Context.MODE_PRIVATE)
     }

@@ -55,6 +55,7 @@ class ProfileFragment : Fragment() {
         builder.setMessage(getString(R.string.btn_logout_confirm))
         builder.setPositiveButton(getString(R.string.btn_logout_confirm_action)) { _, _ ->
             RepositoryFactory.getTokenManager(requireContext().applicationContext).resetNewSurveyCount()
+            RepositoryFactory.getTokenManager(requireContext().applicationContext).clearTokens()
             if (isAdded) findNavController().navigate(R.id.action_profile_to_login)
         }
         builder.setNegativeButton(getString(R.string.btn_logout_cancel), null)

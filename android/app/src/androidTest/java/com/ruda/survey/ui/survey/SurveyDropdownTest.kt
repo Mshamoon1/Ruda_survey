@@ -168,6 +168,7 @@ class SurveyDropdownTest {
 
     /** Exercise the real form, selection mapping and save path without contacting a server. */
     private class MemoryRepository(@Volatile var saved: SurveyItem) : SurveyRepository {
+        override suspend fun saveDraft(item: SurveyItem) = Result.success(item).also { saved = item }
         override suspend fun getAllSurveys(forceRefresh: Boolean) = Result.success(listOf(saved))
         override suspend fun getSurveyById(id: String) = Result.success(saved)
         override suspend fun getSurveyBySrNo(srNo: Int) = Result.success(saved)

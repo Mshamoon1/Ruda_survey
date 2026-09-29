@@ -5,6 +5,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SyncDao {
+    @Query("SELECT * FROM sync_queue ORDER BY id ASC")
+    suspend fun getAllEntries(): List<SyncQueueEntry>
+
+    @Query("SELECT * FROM sync_queue ORDER BY id ASC")
+    fun observeEntries(): Flow<List<SyncQueueEntry>>
+
+    @Query("UPDATE sync_queue SET status = 'IN_PROGRESS', updated_at = :now WHERE id = :id AND status IN ('PENDING', 'FAILED') AND next_retry_at <= :now")
+    suspend fun claim(id: Long, now: Long = System.currentTimeMillis()): Int
 
     @Query("SELECT * FROM sync_queue WHERE status = 'PENDING' OR status = 'FAILED' ORDER BY created_at ASC")
     suspend fun getPendingItems(): List<SyncQueueEntry>
@@ -60,7 +68,7 @@ interface SyncDao {
     @Query("UPDATE sync_queue SET data_json = :dataJson, updated_at = :updatedAt WHERE id = :id")
     suspend fun updateData(id: Long, dataJson: String, updatedAt: Long = System.currentTimeMillis())
 
-    @Query("DELETE FROM sync_queue WHERE status = 'SYNCED'")
+    @Query("DELETE FROM sync_queue WHERE status = 'SYNCED' AND parcel_code NOT IN (SELECT parcel_code FROM sync_queue WHERE status != 'SYNCED')")
     suspend fun deleteSynced()
 
     @Query("DELETE FROM sync_queue WHERE id = :id")

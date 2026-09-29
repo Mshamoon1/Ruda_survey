@@ -35,8 +35,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     }
 
     fun checkExistingSession() {
-        if (repository.isLoggedIn()) {
-            _uiState.value = UiState.Success(AuthState(isLoggedIn = true))
+        viewModelScope.launch {
+            if (withContext(Dispatchers.IO) { repository.isLoggedIn() }) {
+                _uiState.value = UiState.Success(AuthState(isLoggedIn = true))
+            }
         }
     }
 

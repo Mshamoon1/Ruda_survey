@@ -64,10 +64,10 @@
     <string name="btn_search_details">Search by Details</string>
     <string name="loading_options">Loading options…</string>
     <string name="error_load_options">Unable to load search options</string>
-    <string name="hint_serial_number">Serial Number (Sr. No)</string>
+    <string name="hint_serial_number">Sr. No, Parcel Code or Khasra No</string>
     <string name="btn_lookup">Look Up</string>
     <string name="label_sr_no_lookup">Find by Serial Number</string>
-    <string name="label_sr_no_lookup_hint">Enter the Sr. No from the master list</string>
+    <string name="label_sr_no_lookup_hint">Search surveys available on this device or connect to download a survey</string>
     <string name="label_found_parcels">Found %1$d parcel(s) for Sr. No %2$d</string>
     <string name="label_select_parcel">Select a parcel to proceed</string>
     <string name="label_survey_found">Survey Found</string>
@@ -252,4 +252,6 @@
     <string name="desc_no_surveys">No surveys</string>
     <string name="label_no_surveys_yet">No surveys yet</string>
     <string name="label_create_survey_hint">Create a survey from the dashboard to get started</string>
+    <string name="nespak_website_link">NESPAK — open website</string>
+    <string name="no_browser_available">No browser is available to open this website.</string>
 </resources>

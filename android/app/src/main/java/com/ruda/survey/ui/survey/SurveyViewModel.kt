@@ -30,6 +30,8 @@ class SurveyViewModel(
     private val _srNoLookupState = MutableStateFlow<UiState<SurveyItem>>(UiState.Empty)
     val srNoLookupState: StateFlow<UiState<SurveyItem>> = _srNoLookupState.asStateFlow()
     private var lookupJob: Job? = null
+    private var localObserver: Job? = null
+    private var loadSurveysJob: Job? = null
 
     private val _allSurveysState = MutableStateFlow<UiState<List<SurveyItem>>>(UiState.Empty)
     val allSurveysState: StateFlow<UiState<List<SurveyItem>>> = _allSurveysState.asStateFlow()
@@ -66,23 +68,23 @@ class SurveyViewModel(
     fun lookupBySrNo(srNo: String) {
         resetSrNoLookup()
         currentSurvey = null
-        val parsed = srNo.trim().toIntOrNull()
-        if (parsed == null || parsed <= 0) {
-            _srNoLookupState.value = UiState.Error("VALIDATION_ERROR", "Enter a valid serial number")
+        if (srNo.isBlank()) {
+            _srNoLookupState.value = UiState.Error("VALIDATION_ERROR", "Enter a serial number, parcel code or Khasra number")
             return
         }
         _srNoLookupState.value = UiState.Loading
         lookupJob = viewModelScope.launch {
             val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                repository.getSurveyBySrNo(parsed)
+                repository.findSurvey(srNo)
             }
             _srNoLookupState.value = result.fold(
                 onSuccess = {
-                    currentSurvey = it
+                    currentSurvey = it.copy(editBase = it.copy(editBase = null))
                     repository.saveSurveyId(it.id)
                     UiState.Success(it)
                 },
                 onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
                     UiState.Error("NOT_FOUND", it.message ?: "Survey not found")
                 }
             )
@@ -112,17 +114,23 @@ class SurveyViewModel(
     }
 
     fun loadAllSurveys(forceRefresh: Boolean = false) {
+        if (localObserver == null) localObserver = viewModelScope.launch {
+            repository.observeLocalSurveys().collect { _allSurveysState.value = UiState.Success(it) }
+        }
         val current = _allSurveysState.value
         if (!forceRefresh && current is UiState.Success) return
-        if (current is UiState.Loading) return
-        _allSurveysState.value = UiState.Loading
-        viewModelScope.launch {
+        if (loadSurveysJob?.isActive == true) return
+        if (current !is UiState.Success) _allSurveysState.value = UiState.Loading
+        loadSurveysJob = viewModelScope.launch {
             val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
-                repository.getAllSurveys()
+                repository.getAllSurveys(forceRefresh)
             }
             _allSurveysState.value = result.fold(
                 onSuccess = { UiState.Success(it) },
-                onFailure = { UiState.Error("NETWORK_ERROR", it.message ?: "Failed to load surveys") }
+                onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
+                    UiState.Error("NETWORK_ERROR", it.message ?: "Failed to load surveys")
+                }
             )
         }
     }
@@ -135,15 +143,19 @@ class SurveyViewModel(
             }
             _surveyState.value = result.fold(
                 onSuccess = {
-                    currentSurvey = it
+                    currentSurvey = it.copy(editBase = it.copy(editBase = null))
                     UiState.Success(it)
                 },
-                onFailure = { UiState.Error("LOAD_ERROR", it.message ?: "Failed to load survey") }
+                onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
+                    UiState.Error("LOAD_ERROR", it.message ?: "Failed to load survey")
+                }
             )
         }
     }
 
     fun createSurvey(item: SurveyItem) {
+        if (_createState.value is UiState.Loading) return
         _createState.value = UiState.Loading
         viewModelScope.launch {
             val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -152,15 +164,19 @@ class SurveyViewModel(
             _createState.value = result.fold(
                 onSuccess = {
                     currentSurvey = it
-                    loadAllSurveys(forceRefresh = true)
+                    loadAllSurveys()
                     UiState.Success(it)
                 },
-                onFailure = { UiState.Error("CREATE_FAILED", it.message ?: "Failed to create survey") }
+                onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
+                    UiState.Error("CREATE_FAILED", it.message ?: "Failed to create survey")
+                }
             )
         }
     }
 
     fun updateSurvey(item: SurveyItem) {
+        if (_updateState.value is UiState.Loading) return
         _updateState.value = UiState.Loading
         viewModelScope.launch {
             val result = withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -171,10 +187,13 @@ class SurveyViewModel(
                     // Keep the updated item for the receipt/PDF, but retire the lookup result.
                     resetSrNoLookup()
                     currentSurvey = it
-                    loadAllSurveys(forceRefresh = true)
+                    loadAllSurveys()
                     UiState.Success(it)
                 },
-                onFailure = { UiState.Error("UPDATE_FAILED", it.message ?: "Failed to update survey") }
+                onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
+                    UiState.Error("UPDATE_FAILED", it.message ?: "Failed to update survey")
+                }
             )
         }
     }
@@ -191,13 +210,51 @@ class SurveyViewModel(
                     loadAllSurveys(forceRefresh = true)
                     UiState.Success(Unit)
                 },
-                onFailure = { UiState.Error("DELETE_FAILED", it.message ?: "Failed to delete survey") }
+                onFailure = {
+                    if (it is java.util.concurrent.CancellationException) throw it
+                    UiState.Error("DELETE_FAILED", it.message ?: "Failed to delete survey")
+                }
             )
         }
     }
 
     fun saveFormState(item: SurveyItem) {
-        currentSurvey = item
+        val original = currentSurvey?.takeIf { it.id == item.id }
+        val base = if (item.id.isBlank()) null else item.editBase ?: original?.editBase
+            ?: (original ?: item).copy(editBase = null)
+        currentSurvey = item.copy(clientUuid = item.clientUuid ?: java.util.UUID.randomUUID().toString(), editBase = base)
+    }
+
+    fun clearSessionState() {
+        loadSurveysJob?.cancel()
+        loadSurveysJob = null
+        localObserver?.cancel()
+        localObserver = null
+        startUpdateSession()
+        _allSurveysState.value = UiState.Empty
+    }
+
+    suspend fun persistDraft(): Result<SurveyItem> {
+        val item = currentSurvey ?: return Result.failure(Exception("No survey data"))
+        val result = withContext(kotlinx.coroutines.Dispatchers.IO) { repository.saveDraft(item) }
+        result.onSuccess { saved ->
+            withContext(kotlinx.coroutines.Dispatchers.Main) { currentSurvey = saved }
+        }
+        return result
+    }
+
+    suspend fun persistCapturedImage(image: PendingImage): Result<SurveyItem> {
+        val item = currentSurvey ?: withContext(kotlinx.coroutines.Dispatchers.IO) { repository.getDraft() }
+            ?: return Result.failure(Exception("Reopen the survey form before capturing evidence"))
+        val metadata = ImageMetadata(image.imageType, image.latitude, image.longitude, image.accuracy,
+            image.areaName, image.capturedAt, image.pointId)
+        val updated = item.copy(
+            image1Bytes = if (image.imageType == "imgOne") image.stampedBytes else item.image1Bytes,
+            image2Bytes = if (image.imageType == "imgTwo") image.stampedBytes else item.image2Bytes,
+            imageMetadata = item.imageMetadata.filterNot { it.imageType == image.imageType } + metadata)
+        val result = withContext(kotlinx.coroutines.Dispatchers.IO) { repository.saveDraft(updated) }
+        result.onSuccess { saved -> withContext(kotlinx.coroutines.Dispatchers.Main) { currentSurvey = saved } }
+        return result
     }
 
     fun queueGpsImage(pending: PendingImage) {

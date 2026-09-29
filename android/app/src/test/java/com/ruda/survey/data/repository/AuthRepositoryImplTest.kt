@@ -38,6 +38,7 @@ class AuthRepositoryImplTest {
         assertTrue(authState.isLoggedIn)
         assertEquals("Shamoon", authState.username)
         verify(tokenManager).saveTokens("test-token", "")
+        verify(tokenManager).recordOnlineAuthentication("id123", "admin", null)
     }
 
     @Test
@@ -48,5 +49,12 @@ class AuthRepositoryImplTest {
 
         assertTrue(result.isFailure)
         verify(tokenManager, never()).saveTokens(any(), any())
+        verify(tokenManager, never()).recordOnlineAuthentication(any(), any(), anyOrNull())
+    }
+
+    @Test fun `offline login reports connection requirement and preserves session`() = runTest {
+        whenever(api.login(any())).thenAnswer { throw java.io.IOException("offline") }
+        assertTrue(repository.login("a@b.com", "password").exceptionOrNull()!!.message!!.contains("Internet connection required"))
+        verify(tokenManager, never()).clearTokens()
     }
 }

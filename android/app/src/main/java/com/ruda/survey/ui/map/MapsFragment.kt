@@ -2,12 +2,8 @@ package com.ruda.survey.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,19 +17,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.mapbox.maps.MapView
+import com.google.android.material.snackbar.Snackbar
 import com.ruda.survey.R
 import com.ruda.survey.data.remote.RepositoryFactory
 import com.ruda.survey.databinding.FragmentMapsBinding
 import com.ruda.survey.domain.model.SurveyItem
+import com.ruda.survey.domain.model.hasMapLocation
 import com.ruda.survey.ui.survey.SurveyViewModel
 import com.ruda.survey.ui.survey.SurveyViewModelFactory
 import kotlinx.coroutines.launch
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.text.NumberFormat
+import java.util.Locale
 
 class MapsFragment : Fragment() {
 
@@ -41,25 +36,11 @@ class MapsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var mapView: MapView? = null
-    private var locationOverlay: MyLocationNewOverlay? = null
-    private var sharedInfoWindow: SurveyInfoWindow? = null
     private lateinit var viewModel: SurveyViewModel
     private var allSurveys: List<SurveyItem> = emptyList()
-    private val markerMap = mutableMapOf<String, Marker>()
+    private var mapController: SurveyMapController? = null
     private var listAdapter: SurveyMapAdapter? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var isLoading = false
-
-    private val lahoreCenter = GeoPoint(31.5204, 74.3587)
-
-    private val markerClickListener = Marker.OnMarkerClickListener { m, map ->
-        val item = m.relatedObject as? SurveyItem
-        if (item != null) {
-            m.showInfoWindow()
-            map.controller.animateTo(m.position, 15.0, 300L)
-        }
-        true
-    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -98,30 +79,12 @@ class MapsFragment : Fragment() {
 
     private fun setupMap() {
         mapView = binding.mapView
-        mapView?.apply {
-            setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK)
-            setMultiTouchControls(true)
-            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            controller.setZoom(12.0)
-            controller.setCenter(lahoreCenter)
-
-            sharedInfoWindow = SurveyInfoWindow(this) { item ->
-                onSurveyDetailsClick(item)
-            }
-
-            setOnTouchListener { v, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                        v.parent?.requestDisallowInterceptTouchEvent(true)
-                    }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        v.parent?.requestDisallowInterceptTouchEvent(false)
-                    }
-                }
-                false
-            }
-        }
-
+        mapController = SurveyMapController(binding.mapView, viewLifecycleOwner.lifecycleScope,
+            onDetails = ::onSurveyDetailsClick,
+            onError = {
+                if (_binding != null) Snackbar.make(binding.root,
+                    "Map could not load. Check your connection and reopen the map.", Snackbar.LENGTH_LONG).show()
+            }).also { it.initialize() }
         loadSurveys()
         checkLocationPermission()
     }
@@ -137,68 +100,14 @@ class MapsFragment : Fragment() {
                 }
             }
         }
-        viewModel.loadAllSurveys()
+        viewModel.loadAllSurveys(forceRefresh = true)
     }
 
     private fun prepareAndPlaceMarkers(all: List<SurveyItem>) {
-        val map = mapView ?: return
         allSurveys = all
         updateChipCount()
-        listAdapter?.submitList(allSurveys)
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            val (markerPairs, avgPoint) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                val validSurveys = all.filter { it.lat != 0.0 && it.lng != 0.0 }
-                if (validSurveys.isEmpty()) return@withContext Pair(emptyList<Pair<String, Marker>>(), null)
-
-                val markerIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_map_marker_green)
-                val markerDrawable = markerIcon?.let {
-                    val bmp = Bitmap.createBitmap(
-                        it.intrinsicWidth.coerceAtLeast(24),
-                        it.intrinsicHeight.coerceAtLeast(24),
-                        Bitmap.Config.ARGB_8888
-                    )
-                    val canvas = Canvas(bmp)
-                    it.setBounds(0, 0, canvas.width, canvas.height)
-                    it.draw(canvas)
-                    BitmapDrawable(resources, bmp)
-                }
-
-                val avgLat = validSurveys.map { it.lat }.average()
-                val avgLng = validSurveys.map { it.lng }.average()
-
-                val pairs = validSurveys.map { item ->
-                    val marker = Marker(map)
-                    marker.position = GeoPoint(item.lat, item.lng)
-                    marker.relatedObject = item
-                    marker.infoWindow = sharedInfoWindow
-                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    markerDrawable?.let { marker.icon = it }
-                    marker.setOnMarkerClickListener(markerClickListener)
-                    Pair(item.id, marker)
-                }
-                Pair(pairs, GeoPoint(avgLat, avgLng))
-            }
-
-            if (!isAdded || mapView == null) return@launch
-
-            map.overlays.clear()
-            markerMap.clear()
-            locationOverlay?.let { map.overlays.add(it) }
-
-            markerPairs.forEach { (id, marker) ->
-                map.overlays.add(marker)
-                markerMap[id] = marker
-            }
-
-            if (avgPoint != null) {
-                map.controller.setCenter(avgPoint)
-            } else {
-                map.controller.setCenter(lahoreCenter)
-            }
-            map.controller.setZoom(12.0)
-            map.invalidate()
-        }
+        if (binding.cardList.visibility == View.VISIBLE) listAdapter?.submitList(all)
+        mapController?.submit(all)
     }
 
     private fun onSurveyDetailsClick(item: SurveyItem) {
@@ -207,14 +116,14 @@ class MapsFragment : Fragment() {
     }
 
     private fun updateChipCount() {
-        binding.chipStatus.text = "${allSurveys.size} surveys"
+        val mapped = allSurveys.count { it.hasMapLocation }
+        val format = NumberFormat.getIntegerInstance(Locale.US)
+        binding.chipStatus.text = "${format.format(mapped)} mapped / ${format.format(allSurveys.size)} surveys"
     }
 
     private fun setupList() {
         listAdapter = SurveyMapAdapter { item ->
-            val position = GeoPoint(item.lat, item.lng)
-            mapView?.controller?.animateTo(position, 15.0, 300L)
-            markerMap[item.id]?.showInfoWindow()
+            mapController?.showSurvey(item)
             binding.cardList.visibility = View.GONE
         }
 
@@ -227,6 +136,7 @@ class MapsFragment : Fragment() {
     }
 
     private fun setupFabs() {
+        binding.fabMapStyle.setOnClickListener { mapController?.toggleStyle() }
         binding.fabList.setOnClickListener {
             if (binding.cardList.visibility == View.VISIBLE) {
                 binding.cardList.visibility = View.GONE
@@ -237,11 +147,11 @@ class MapsFragment : Fragment() {
         }
 
         binding.fabMyLocation.setOnClickListener {
-            checkLocationPermission()
+            checkLocationPermission(centerOnLocation = true)
         }
     }
 
-    private fun checkLocationPermission() {
+    private fun checkLocationPermission(centerOnLocation: Boolean = false) {
         val fine = ContextCompat.checkSelfPermission(
             requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
         )
@@ -250,7 +160,7 @@ class MapsFragment : Fragment() {
         )
 
         if (fine == PackageManager.PERMISSION_GRANTED || coarse == PackageManager.PERMISSION_GRANTED) {
-            enableMyLocation()
+            enableMyLocation(centerOnLocation)
         } else {
             requestPermissionLauncher.launch(
                 arrayOf(
@@ -261,40 +171,23 @@ class MapsFragment : Fragment() {
         }
     }
 
-    private fun enableMyLocation() {
-        val map = mapView ?: return
+    private fun enableMyLocation(centerOnLocation: Boolean = false) {
+        val controller = mapController ?: return
         try {
-            if (locationOverlay == null) {
-                locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(requireContext()), map)
-                locationOverlay?.enableMyLocation()
-                map.overlays.add(0, locationOverlay)
+            controller.enableLocation()
+            if (centerOnLocation) fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (mapController !== controller || _binding == null) return@addOnSuccessListener
+                if (location != null) controller.centerOn(location.latitude, location.longitude)
+                else Snackbar.make(binding.root, "Location unavailable. Please enable GPS.", Snackbar.LENGTH_SHORT).show()
             }
-
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val geoPoint = GeoPoint(location.latitude, location.longitude)
-                    map.controller.animateTo(geoPoint, 14.0, 300L)
-                }
-            }
-        } catch (_: SecurityException) {}
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mapView?.onResume()
-        locationOverlay?.enableMyLocation()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView?.onPause()
-        locationOverlay?.disableMyLocation()
+        } catch (_: SecurityException) { }
     }
 
     override fun onDestroyView() {
+        mapController?.close()
+        mapController = null
+        mapView = null
         super.onDestroyView()
         _binding = null
-        mapView = null
-        locationOverlay = null
     }
 }

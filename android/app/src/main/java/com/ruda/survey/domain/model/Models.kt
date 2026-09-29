@@ -41,7 +41,27 @@ data class SurveyItem(
     val image1Bytes: ByteArray? = null,
     val image2Bytes: ByteArray? = null,
     val landOwnerDocBytes: ByteArray? = null,
-    val landOwnerDocName: String? = null
+    val landOwnerDocName: String? = null,
+    val serverId: String? = null,
+    val syncStatus: String = "SYNCED",
+    val image1LocalPath: String? = null,
+    val image2LocalPath: String? = null,
+    val documentLocalPath: String? = null,
+    val imageMetadata: List<ImageMetadata> = emptyList(),
+    val clientUuid: String? = null,
+    val editBase: SurveyItem? = null,
+    // Local participation, independent of which account downloaded this record.
+    val workedOnByUserId: String? = null
+)
+
+data class ImageMetadata(
+    val imageType: String,
+    val latitude: Double?,
+    val longitude: Double?,
+    val accuracy: Float?,
+    val areaName: String?,
+    val capturedAt: Long,
+    val pointId: String?
 )
 
 data class EditableDraft(

@@ -37,8 +37,7 @@ class SecureTokenManager private constructor(context: Context) : TokenManager {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     } catch (e: Exception) {
-        Log.e("SecureTokenManager", "EncryptedSharedPreferences failed, falling back to plain", e)
-        context.getSharedPreferences("ruda_plain_prefs", Context.MODE_PRIVATE)
+        throw IllegalStateException("Secure session storage is unavailable. Please restart the app.", e)
     }
 
     override fun saveTokens(access: String, refresh: String) {
@@ -46,6 +45,15 @@ class SecureTokenManager private constructor(context: Context) : TokenManager {
             .putString("access_token", access)
             .putString("refresh_token", refresh)
             .apply()
+    }
+
+    override fun getBackendSurveyTotal(userId: String): Int? {
+        val key = "backend_survey_total:$userId"
+        return if (prefs.contains(key)) prefs.getInt(key, 0) else null
+    }
+
+    override fun saveBackendSurveyTotal(userId: String, total: Int) {
+        prefs.edit().putInt("backend_survey_total:$userId", total).apply()
     }
 
     override fun getAccessToken(): String? = try {
@@ -64,12 +72,47 @@ class SecureTokenManager private constructor(context: Context) : TokenManager {
 
     override fun clearTokens() {
         prefs.edit()
+            .remove("online_auth_at")
+            .remove("last_observed_at")
+            .remove("authenticated_user_id")
+            .remove("authenticated_role")
+            .remove("auth_required")
             .remove("access_token")
             .remove("refresh_token")
             .apply()
     }
 
     override fun hasTokens(): Boolean = getAccessToken() != null
+
+    override fun recordOnlineAuthentication(userId: String, role: String, serverTime: Long?) {
+        val now = System.currentTimeMillis()
+        check(prefs.edit()
+            .putString("authenticated_user_id", userId)
+            .putString("authenticated_role", role)
+            .putLong("online_auth_at", serverTime ?: now)
+            .putLong("last_observed_at", now)
+            .putBoolean("auth_required", false)
+            .commit()) { "Could not persist the daily session" }
+    }
+
+    override fun getAuthenticatedUserId(): String? = prefs.getString("authenticated_user_id", null)
+
+    @Synchronized
+    override fun isOfflineAccessAllowed(): Boolean {
+        val now = System.currentTimeMillis()
+        val previous = prefs.getLong("last_observed_at", 0)
+        val allowed = hasTokens() && !getAuthenticatedUserId().isNullOrBlank() &&
+            com.ruda.survey.domain.model.OfflineSessionPolicy.allows(
+                prefs.getLong("online_auth_at", 0), previous, now)
+        if (now > previous) prefs.edit().putLong("last_observed_at", now).apply()
+        return allowed
+    }
+
+    override fun requireOnlineAuthentication() {
+        prefs.edit().putBoolean("auth_required", true).apply()
+    }
+
+    override fun isOnlineAuthenticationRequired(): Boolean = prefs.getBoolean("auth_required", false)
 
     override fun saveSurveyId(id: String) {
         prefs.edit().putString("last_survey_id", id).apply()
@@ -104,23 +147,25 @@ class SecureTokenManager private constructor(context: Context) : TokenManager {
 
     override fun getUserName(): String? = prefs.getString("user_name", null)
 
+    private fun ownedIdsKey(): String = "owned_survey_ids_v3:${getAuthenticatedUserId() ?: "none"}"
+
     override fun addUserSurveyId(id: String) {
-        val current = prefs.getStringSet("owned_survey_ids_v2", emptySet())?.toMutableSet() ?: mutableSetOf()
+        val current = prefs.getStringSet(ownedIdsKey(), emptySet())?.toMutableSet() ?: mutableSetOf()
         current.add(id)
-        prefs.edit().putStringSet("owned_survey_ids_v2", current).apply()
+        prefs.edit().putStringSet(ownedIdsKey(), current).apply()
     }
 
     override fun getUserSurveyIds(): Set<String> {
-        return prefs.getStringSet("owned_survey_ids_v2", emptySet()) ?: emptySet()
+        return prefs.getStringSet(ownedIdsKey(), emptySet()) ?: emptySet()
     }
 
     override fun addUserSurveyIds(ids: Collection<String>) {
-        val current = prefs.getStringSet("owned_survey_ids_v2", emptySet())?.toMutableSet() ?: mutableSetOf()
+        val current = prefs.getStringSet(ownedIdsKey(), emptySet())?.toMutableSet() ?: mutableSetOf()
         current.addAll(ids)
-        prefs.edit().putStringSet("owned_survey_ids_v2", current).apply()
+        prefs.edit().putStringSet(ownedIdsKey(), current).apply()
     }
 
     override fun clearUserSurveyIds() {
-        prefs.edit().remove("owned_survey_ids_v2").apply()
+        prefs.edit().remove(ownedIdsKey()).apply()
     }
 }

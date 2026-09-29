@@ -9,9 +9,10 @@
     android:background="@color/md_surface"
     tools:context=".ui.map.MapsFragment">
 
-    <!-- OpenStreetMap -->
-    <org.osmdroid.views.MapView
+    <!-- Native Mapbox map -->
+    <com.mapbox.maps.MapView
         android:id="@+id/mapView"
+        app:mapbox_mapSurface="texture_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
@@ -53,6 +54,30 @@
         app:chipStrokeColor="@color/md_theme_outlineVariant"
         android:text="0 surveys"
         tools:text="12 surveys" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="104dp"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="6dp"
+        android:background="@color/md_surface"
+        android:text="Green: surveyed   |   Red: pending"
+        android:textColor="@color/md_theme_onSurface"
+        android:textSize="12sp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMapStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="72dp"
+        android:src="@drawable/ic_layers"
+        android:contentDescription="Switch streets or satellite map"
+        app:backgroundTint="@color/md_surface"
+        app:tint="@color/md_theme_primary" />
 
     <!-- List toggle FAB -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton

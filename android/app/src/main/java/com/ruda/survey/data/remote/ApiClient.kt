@@ -56,17 +56,23 @@ object ApiClient {
             val isLoginRequest = url.contains("/login")
             val isRegisterRequest = url.contains("/register")
             val token = if (!isLoginRequest && !isRegisterRequest) tokenManager.getAccessToken() else null
-            val request = if (token != null) {
+            val request = if (token != null && original.header("Authorization") == null) {
                 original.newBuilder()
                     .addHeader("Authorization", "Bearer $token")
                     .build()
             } else {
                 original
             }
-            chain.proceed(request)
+            chain.proceed(request).also { response ->
+                if (response.code == 401 && !isLoginRequest && !isRegisterRequest &&
+                    request.header("Authorization") == "Bearer ${tokenManager.getAccessToken()}") {
+                    tokenManager.requireOnlineAuthentication()
+                }
+            }
         }
 
         val builder = OkHttpClient.Builder()
+            .retryOnConnectionFailure(false)
             .addInterceptor(authInterceptor)
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
@@ -75,6 +81,7 @@ object ApiClient {
         if (BuildConfig.DEBUG) {
             val logging = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.HEADERS
+                redactHeader("Authorization")
             }
             builder.addInterceptor(logging)
         }

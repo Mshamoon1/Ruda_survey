@@ -52,9 +52,8 @@
 
                     <!-- Circular logo -->
                     <FrameLayout
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:padding="@dimen/spacing_8"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
                         android:background="@drawable/bg_logo_ring">
 
                         <ImageView
@@ -97,7 +96,7 @@
 
                 </LinearLayout>
 
-                <!-- Welcome text block -->
+                <!-- Welcome text and clickable NESPAK logo -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="94dp"
@@ -107,15 +106,42 @@
                     android:paddingEnd="@dimen/screen_horizontal_margin"
                     android:paddingBottom="@dimen/spacing_20">
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/tvWelcome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_semibold"
-                        android:letterSpacing="0.01"
-                        android:textColor="@android:color/white"
-                        android:textSize="@dimen/text_size_title"
-                        tools:text="Welcome, Surveyor" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tvWelcome"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:fontFamily="@font/inter_semibold"
+                            android:letterSpacing="0.01"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/text_size_title"
+                            android:maxLines="1"
+                            app:autoSizeTextType="uniform"
+                            app:autoSizeMinTextSize="14sp"
+                            app:autoSizeMaxTextSize="24sp"
+                            app:autoSizeStepGranularity="1sp"
+                            tools:text="Welcome, Surveyor" />
+
+                        <ImageView
+                            android:id="@+id/imgNespakLink"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/nespak_dashboard_logo"
+                            android:contentDescription="@string/nespak_website_link"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground" />
+                    </LinearLayout>
 
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tvRole"
@@ -125,7 +151,6 @@
                         android:textAppearance="@style/TextAppearance.RudaSurvey.BodyMedium"
                         android:textColor="@color/text_on_dark_secondary"
                         tools:text="Role: Field Surveyor" />
-
                 </LinearLayout>
 
                 <!-- Rounded bottom overlay for content below -->
@@ -371,21 +396,11 @@
                     android:layout_height="match_parent"
                     android:clipToOutline="true">
 
-                    <org.osmdroid.views.MapView
+                    <com.mapbox.maps.MapView
                         android:id="@+id/mapView"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" >
-
-                        <com.google.android.material.textview.MaterialTextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_4"
-                            android:alpha="0.8"
-                            android:fontStyle="italic"
-                            android:text="@string/app_name"
-                            android:textAppearance="@style/TextAppearance.RudaSurvey.LabelMedium"
-                            android:textColor="@color/text_on_dark_secondary" />
-                    </org.osmdroid.views.MapView>
+                        android:layout_height="match_parent"
+                        app:mapbox_mapSurface="texture_view" />
 
                     <!-- Empty state overlay -->
                     <LinearLayout
@@ -490,7 +505,7 @@
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Completed"
+                    android:text="Surveyed"
                     android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
                     android:textColor="@color/md_theme_onSurfaceVariant"
                     android:layout_marginEnd="@dimen/spacing_12" />
@@ -498,27 +513,15 @@
                 <View
                     android:layout_width="8dp"
                     android:layout_height="8dp"
-                    android:background="@drawable/bg_legend_dot_navy"
+                    android:background="@drawable/bg_legend_dot_red"
                     android:layout_marginEnd="@dimen/spacing_4" />
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="In Progress"
+                    android:text="Pending survey"
                     android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
                     android:textColor="@color/md_theme_onSurfaceVariant"
                     android:layout_marginEnd="@dimen/spacing_12" />
-
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:background="@drawable/bg_legend_dot_gray"
-                    android:layout_marginEnd="@dimen/spacing_4" />
-                <com.google.android.material.textview.MaterialTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Not Started"
-                    android:textAppearance="@style/TextAppearance.RudaSurvey.LabelSmall"
-                    android:textColor="@color/md_theme_onSurfaceVariant" />
 
             </LinearLayout>
 

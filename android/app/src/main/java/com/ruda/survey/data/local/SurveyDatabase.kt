@@ -34,10 +34,24 @@ abstract class SurveyDatabase : RoomDatabase() {
                     SurveyDatabase::class.java,
                     "ruda_survey.db"
                 )
-                .fallbackToDestructiveMigration()
+                .addMigrations(MIGRATION_1_2)
                 .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("""CREATE TABLE IF NOT EXISTS sync_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    operation_type TEXT NOT NULL, parcel_code TEXT NOT NULL,
+                    client_uuid TEXT NOT NULL, revision_no INTEGER,
+                    data_json TEXT NOT NULL, file_path TEXT, image_type TEXT,
+                    status TEXT NOT NULL, retry_count INTEGER NOT NULL,
+                    last_error TEXT, error_code TEXT, next_retry_at INTEGER NOT NULL,
+                    created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+                )""")
             }
         }
     }

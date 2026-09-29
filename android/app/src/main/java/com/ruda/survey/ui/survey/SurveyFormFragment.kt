@@ -92,8 +92,9 @@ class SurveyFormFragment : Fragment() {
         setupDropdowns()
 
         val survey = viewModel.currentSurvey
-        if (survey != null && survey.id.isNotBlank()) {
+        if (survey != null && (survey.id.isNotBlank() || survey.srNo > 0 || survey.clientUuid != null)) {
             populateFields(survey)
+            if (survey.srNo <= 0) viewModel.fetchNextSrNo()
             animateSectionsIn()
         } else {
             binding.tvParcelCode.text = "New Survey"
@@ -226,14 +227,11 @@ class SurveyFormFragment : Fragment() {
         binding.btnSaveDraft.setOnClickListener {
             it.animateTapFeedback {
                 saveCurrentFormState()
-                val survey = viewModel.currentSurvey ?: buildSurveyItem()
-                val existing = viewModel.currentSurvey
-                if (existing != null && existing.id.isNotBlank()) {
-                    viewModel.updateSurvey(survey.copy(id = existing.id))
-                } else {
-                    viewModel.createSurvey(survey)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val result = viewModel.persistDraft()
+                    Snackbar.make(binding.root, if (result.isSuccess) "Draft saved on this device"
+                        else result.exceptionOrNull()?.message ?: "Could not save draft", Snackbar.LENGTH_LONG).show()
                 }
-                Snackbar.make(binding.root, "Survey saved", Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -241,7 +239,7 @@ class SurveyFormFragment : Fragment() {
             it.animateTapFeedback {
                 saveCurrentFormState()
                 viewModel.selectedImageType = "imgOne"
-                findNavController().navigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgOne"))
+                persistThenNavigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgOne"))
             }
         }
 
@@ -249,7 +247,7 @@ class SurveyFormFragment : Fragment() {
             it.animateTapFeedback {
                 saveCurrentFormState()
                 viewModel.selectedImageType = "imgTwo"
-                findNavController().navigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgTwo"))
+                persistThenNavigate(R.id.action_form_to_camera, bundleOf("imageType" to "imgTwo"))
             }
         }
 
@@ -257,7 +255,7 @@ class SurveyFormFragment : Fragment() {
             if (!validateForm()) return@setOnClickListener
             saveCurrentFormState()
             it.animateTapFeedback {
-                findNavController().navigate(R.id.action_form_to_review)
+                persistThenNavigate(R.id.action_form_to_review)
             }
         }
 
@@ -316,20 +314,44 @@ class SurveyFormFragment : Fragment() {
         }
     }
 
-    private fun handleDocumentSelection(uri: android.net.Uri) {
-        try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val bytes = inputStream?.readBytes()
-            val name = getFileName(uri)
-            viewModel.setPendingDoc(bytes, name)
-            binding.tvLandDocStatus.text = name ?: "File selected"
-            Log.d("SurveyForm", "Document selected: name='$name' bytes=${bytes?.size}")
-        } catch (e: Exception) {
-            Log.e("SurveyForm", "Failed to read document", e)
-            Snackbar.make(binding.root, "Failed to read file", Snackbar.LENGTH_SHORT).show()
+    private fun persistThenNavigate(destination: Int, args: Bundle? = null) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val saved = viewModel.persistDraft()
+            if (saved.isSuccess && isAdded) findNavController().navigate(destination, args)
+            else if (isAdded) Snackbar.make(binding.root,
+                saved.exceptionOrNull()?.message ?: "Could not save draft", Snackbar.LENGTH_LONG).show()
         }
     }
 
+    private fun handleDocumentSelection(uri: android.net.Uri) {
+        saveCurrentFormState()
+        val context = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val (bytes, name) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    val bytes = context.contentResolver.openInputStream(uri)?.use { input ->
+                        val output = java.io.ByteArrayOutputStream()
+                        val buffer = ByteArray(8192)
+                        while (true) {
+                            val count = input.read(buffer)
+                            if (count < 0) break
+                            require(output.size() + count <= 20 * 1024 * 1024) { "Document must be 20 MB or smaller" }
+                            output.write(buffer, 0, count)
+                        }
+                        output.toByteArray()
+                    } ?: error("Cannot read document")
+                    bytes to getFileName(uri)
+                }
+                viewModel.setPendingDoc(bytes, name)
+                saveCurrentFormState()
+                viewModel.persistDraft().getOrThrow()
+                binding.tvLandDocStatus.text = name ?: "File saved"
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                Snackbar.make(binding.root, e.message ?: "Failed to save file", Snackbar.LENGTH_LONG).show()
+            }
+        }
+    }
     private fun getFileName(uri: android.net.Uri): String? {
         var result: String? = null
         if (uri.scheme == "content") {
@@ -456,8 +478,8 @@ class SurveyFormFragment : Fragment() {
 
     private fun updateImageButtonText() {
         val pending = viewModel.pendingImages.value
-        val hasPoint1 = pending.any { it.imageType == "imgOne" }
-        val hasPoint2 = pending.any { it.imageType == "imgTwo" }
+        val hasPoint1 = pending.any { it.imageType == "imgOne" } || viewModel.currentSurvey?.image1LocalPath != null
+        val hasPoint2 = pending.any { it.imageType == "imgTwo" } || viewModel.currentSurvey?.image2LocalPath != null
 
         binding.btnPointImage1.text = if (hasPoint1) "Door Pic (captured)" else "Door Pic"
         binding.btnPointImage2.text = if (hasPoint2) "Front View (captured)" else "Front View"
@@ -482,7 +504,7 @@ class SurveyFormFragment : Fragment() {
         if (img1 != null) Log.d("SurveyForm", "img1 original=${img1.originalBytes.size} stamped=${img1.stampedBytes.size}")
         if (img2 != null) Log.d("SurveyForm", "img2 original=${img2.originalBytes.size} stamped=${img2.stampedBytes.size}")
 
-        return SurveyItem(
+        return (existing ?: SurveyItem()).copy(
             id = existing?.id ?: "",
             srNo = binding.etSrNo.text.toString().toIntOrNull() ?: existing?.srNo ?: 0,
             parcelId = binding.etParcelCode.text.toString().ifBlank { existing?.parcelId ?: "" },

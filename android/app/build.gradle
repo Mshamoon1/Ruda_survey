@@ -22,7 +22,8 @@ android {
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "API_BASE_URL", "\"${localProperties.getProperty('API_BASE_URL', 'https://api.ruda-surv.nespakprogresscenter.com/api/')}\""
-        buildConfigField "Boolean", "DEMO_MODE", localProperties.getProperty('DEMO_MODE', 'true')
+        buildConfigField "Boolean", "DEMO_MODE", localProperties.getProperty('DEMO_MODE', 'false')
+        resValue 'string', 'mapbox_access_token', localProperties.getProperty('MAPBOX_ACCESS_TOKEN', project.findProperty('MAPBOX_ACCESS_TOKEN') ?: '')
     }
 
     buildTypes {
@@ -105,8 +106,8 @@ dependencies {
     // QR Code generation (ZXing)
     implementation 'com.google.zxing:core:3.5.3'
 
-    // OpenStreetMap (OSMDroid) - Free, no API key, no auth needed
-    implementation 'org.osmdroid:osmdroid-android:6.1.20'
+    // Native vector map with 16 KB page-size-compatible binaries.
+    implementation 'com.mapbox.maps:android-ndk27:11.10.3'
 
     // Location (GPS)
     implementation 'com.google.android.gms:play-services-location:21.2.0'

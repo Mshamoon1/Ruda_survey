@@ -42,7 +42,9 @@ interface SurveyApi {
         @Part("nature_of_construction") natureOfConstruction: RequestBody?,
         @Part landOwnerDoc: MultipartBody.Part?,
         @Part imgOne: MultipartBody.Part?,
-        @Part imgTwo: MultipartBody.Part?
+        @Part imgTwo: MultipartBody.Part?,
+        @Header("Idempotency-Key") operationId: String? = null,
+        @Header("Authorization") authorization: String? = null
     ): Response<CreateSurveyResponse>
 
     @Multipart
@@ -71,7 +73,10 @@ interface SurveyApi {
         @Part("area") area: RequestBody?,
         @Part landOwnerDoc: MultipartBody.Part?,
         @Part imgOne: MultipartBody.Part?,
-        @Part imgTwo: MultipartBody.Part?
+        @Part imgTwo: MultipartBody.Part?,
+        @Header("Idempotency-Key") operationId: String? = null,
+        @Header("Authorization") authorization: String? = null,
+        @Header("If-Match") ifMatch: String? = null
     ): Response<CreateSurveyResponse>
 
     @DELETE("survey/{id}")

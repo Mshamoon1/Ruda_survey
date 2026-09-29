@@ -24,6 +24,9 @@ import com.ruda.survey.utils.MotionConstants
 import com.ruda.survey.utils.shake
 import com.ruda.survey.utils.isReducedMotionEnabled
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import com.ruda.survey.data.sync.ConnectivityObserver
 
 class LoginFragment : Fragment() {
     private var _binding: FragmentLoginBinding? = null
@@ -40,8 +43,22 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val repository = RepositoryFactory.createAuthRepository(requireContext().applicationContext)
+        binding.btnLogin.isEnabled = false
+        viewLifecycleOwner.lifecycleScope.launch {
+        val context = requireContext().applicationContext
+        val repository = try {
+            withContext(Dispatchers.IO) { RepositoryFactory.createAuthRepository(context) }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            binding.tvError.text = e.message ?: "Secure session storage unavailable"
+            binding.tvError.visibility = View.VISIBLE
+            return@launch
+        }
         viewModel = AuthViewModel(repository)
+        binding.btnLogin.isEnabled = true
+        if (arguments?.getBoolean("forceLogin") != true || !ConnectivityObserver(context).isCurrentlyConnected()) {
+            viewModel.checkExistingSession()
+        }
 
         // Screen entrance: stagger top-to-bottom
         animateEntrance()
@@ -66,7 +83,21 @@ class LoginFragment : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        launch {
+            ConnectivityObserver(context).observe().collect { online ->
+                binding.tilEmail.isEnabled = online
+                binding.tilPassword.isEnabled = online
+                if (!online && !repository.isLoggedIn()) {
+                    binding.tvError.text = "Internet connection required\nPlease connect to the internet once to verify your account for today's offline survey session."
+                    binding.tvError.visibility = View.VISIBLE
+                    binding.btnLogin.text = "Retry"
+                } else if (online) {
+                    binding.btnLogin.text = getString(R.string.btn_login)
+                    binding.tvError.visibility = View.GONE
+                }
+            }
+        }
+        launch {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is UiState.Loading -> {
@@ -79,25 +110,45 @@ class LoginFragment : Fragment() {
                     is UiState.Success -> {
                         binding.buttonProgressBar.visibility = View.GONE
                         binding.btnLogin.text = getString(R.string.btn_login)
-                        if (isAdded) {
+                        if (isAdded && findNavController().currentDestination?.id == R.id.loginFragment) {
                             try {
-                                val surveyRepo = RepositoryFactory.createSurveyRepository(requireContext().applicationContext)
+                                binding.btnLogin.isEnabled = false
+                                binding.buttonProgressBar.visibility = View.VISIBLE
+                                val surveyRepo = withContext(Dispatchers.IO) { RepositoryFactory.createSurveyRepository(context) }
+                                if (state.data.username != null) {
+                                    val preload = withContext(Dispatchers.IO) { surveyRepo.getAllSurveys(forceRefresh = true) }
+                                    if (preload.isFailure) Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                        "Signed in. Survey data could not be refreshed; only saved records are available offline.", Snackbar.LENGTH_LONG).show()
+                                }
                                 val surveyFactory = SurveyViewModelFactory(surveyRepo)
                                 val surveyViewModel = ViewModelProvider(requireActivity(), surveyFactory)[SurveyViewModel::class.java]
-                                surveyViewModel.loadAllSurveys(forceRefresh = true)
-                            } catch (_: Exception) {}
-                            findNavController().navigate(R.id.action_login_to_dashboard)
+                                surveyViewModel.clearSessionState()
+                                surveyViewModel.loadAllSurveys()
+                                com.ruda.survey.data.sync.SyncWorker.enqueueImmediate(context)
+                            } catch (e: Exception) {
+                                if (e is kotlinx.coroutines.CancellationException) throw e
+                                binding.tvError.text = e.message ?: "Unable to prepare offline storage"
+                                binding.tvError.visibility = View.VISIBLE
+                                binding.btnLogin.isEnabled = true
+                                binding.buttonProgressBar.visibility = View.GONE
+                                return@collect
+                            }
+                            if (findNavController().currentDestination?.id == R.id.loginFragment) {
+                                findNavController().navigate(R.id.action_login_to_dashboard)
+                            }
                         }
                     }
                     is UiState.Error -> {
                         binding.btnLogin.isEnabled = true
                         binding.buttonProgressBar.visibility = View.GONE
-                        binding.btnLogin.text = getString(R.string.btn_login)
+                        binding.btnLogin.text = if (ConnectivityObserver(context).isCurrentlyConnected()) getString(R.string.btn_login) else "Retry"
                         binding.btnLogin.setIconResource(R.drawable.ic_login)
 
                         // Shake the fields + fade in error text
-                        binding.tilEmail.shake()
-                        binding.tilPassword.shake()
+                        if (ConnectivityObserver(context).isCurrentlyConnected()) {
+                            binding.tilEmail.shake()
+                            binding.tilPassword.shake()
+                        }
                         binding.tvError.text = state.message
                         binding.tvError.alpha = 0f
                         binding.tvError.visibility = View.VISIBLE
@@ -109,14 +160,22 @@ class LoginFragment : Fragment() {
                     is UiState.Empty -> {
                         binding.btnLogin.isEnabled = true
                         binding.buttonProgressBar.visibility = View.GONE
-                        binding.btnLogin.text = getString(R.string.btn_login)
+                        binding.btnLogin.text = if (ConnectivityObserver(context).isCurrentlyConnected()) getString(R.string.btn_login) else "Retry"
                     }
                 }
             }
         }
+        }
     }
 
     private fun performLogin() {
+        if (!ConnectivityObserver(requireContext()).isCurrentlyConnected()) {
+            binding.tvError.text = "Internet connection required\nPlease connect to verify your account for today's offline survey session."
+            binding.tvError.visibility = View.VISIBLE
+            binding.btnLogin.text = "Retry"
+            viewModel.checkExistingSession()
+            return
+        }
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString()
 
@@ -143,8 +202,6 @@ class LoginFragment : Fragment() {
         }
 
         if (isValid) {
-            android.util.Log.d("LoginFragment", "Performing login for email: [$email] with password length: ${password.length}")
-            RepositoryFactory.getTokenManager(requireContext().applicationContext).saveUserEmail(email)
             viewModel.login(email, password)
         }
     }

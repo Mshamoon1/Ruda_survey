@@ -1,6 +1,13 @@
 package com.ruda.survey.utils
 
 interface TokenManager {
+    fun getBackendSurveyTotal(userId: String): Int? = null
+    fun saveBackendSurveyTotal(userId: String, total: Int) {}
+    fun recordOnlineAuthentication(userId: String, role: String, serverTime: Long?) {}
+    fun isOfflineAccessAllowed(): Boolean = false
+    fun getAuthenticatedUserId(): String? = null
+    fun requireOnlineAuthentication() {}
+    fun isOnlineAuthenticationRequired(): Boolean = false
     fun saveTokens(access: String, refresh: String)
     fun getAccessToken(): String?
     fun getRefreshToken(): String?

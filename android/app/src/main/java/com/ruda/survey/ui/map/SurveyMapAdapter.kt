@@ -37,9 +37,8 @@ class SurveyMapAdapter(
             tvOwnerName.text = item.ownerName.ifEmpty { "Unknown Owner" }
             tvVillage.text = item.village.ifEmpty { "-" }
 
-            // Color dot: green if has GPS, red if no GPS
-            val hasGps = item.lat != 0.0 && item.lng != 0.0
-            val dotColor = if (hasGps) {
+            // Match the map legend; GPS presence alone does not mean a survey is complete.
+            val dotColor = if (item.isSurveyed) {
                 ContextCompat.getColor(itemView.context, R.color.status_success)
             } else {
                 ContextCompat.getColor(itemView.context, R.color.status_error)

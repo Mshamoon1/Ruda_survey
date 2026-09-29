@@ -309,7 +309,8 @@ class CameraFragment : Fragment() {
         executor.execute {
             val evidenceId = UUID.randomUUID().toString()
             val survey = viewModel.currentSurvey
-            val parcelCode = survey?.village ?: "UNKNOWN"
+            val parcelCode = survey?.parcelId?.takeIf { it.isNotBlank() } ?: survey?.clientUuid ?: "UNASSIGNED"
+            val captureTime = file.lastModified().takeIf { it > 0 } ?: System.currentTimeMillis()
 
             val qrBitmap = QrCodeGenerator.generate(
                 evidenceId = evidenceId,
@@ -318,7 +319,7 @@ class CameraFragment : Fragment() {
                 pointId = imageType,
                 latitude = gpsLocation.latitude,
                 longitude = gpsLocation.longitude,
-                capturedAt = gpsLocation.timestamp
+                capturedAt = captureTime
             )
 
             val stampData = ImageStampProcessor.StampData(
@@ -326,7 +327,7 @@ class CameraFragment : Fragment() {
                 longitude = gpsLocation.longitude,
                 accuracy = gpsLocation.accuracy,
                 areaName = gpsLocation.areaName,
-                capturedAt = gpsLocation.timestamp,
+                capturedAt = captureTime,
                 parcelCode = parcelCode,
                 pointId = imageType,
                 qrBitmap = qrBitmap
@@ -393,7 +394,12 @@ class CameraFragment : Fragment() {
                 pointId = stampData.pointId
             )
 
+            val persisted = viewModel.persistCapturedImage(pending)
             withContext(Dispatchers.Main) {
+                if (persisted.isFailure) {
+                    Snackbar.make(binding.root, persisted.exceptionOrNull()?.message ?: "Could not save photo", Snackbar.LENGTH_LONG).show()
+                    return@withContext
+                }
                 viewModel.queueGpsImage(pending)
 
                 Snackbar.make(binding.root, "Photo saved ($imageType)", Snackbar.LENGTH_SHORT).show()

@@ -42,7 +42,7 @@ data class SurveyListResponse(
     val totalSurveysUnderscore: Int? = null
 ) {
     fun getTotalCount(): Int {
-        val explicitTotal = total ?: count ?: totalSurveys ?: totalSurveysUnderscore
+        val explicitTotal = total ?: totalSurveys ?: totalSurveysUnderscore ?: count
         return explicitTotal ?: data.size
     }
 }

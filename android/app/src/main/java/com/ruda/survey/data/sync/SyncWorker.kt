@@ -13,27 +13,27 @@ class SyncWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (com.ruda.survey.BuildConfig.DEMO_MODE) return Result.success()
+        if (!ConnectivityObserver(applicationContext).isCurrentlyConnected()) return Result.retry()
         return try {
             val database = SurveyDatabase.getInstance(applicationContext)
             val repository = SyncRepository(
                 api = ApiClient.createSurveyApi(applicationContext),
                 dao = database.syncDao(),
-                tokenManager = SecureTokenManager.getInstance(applicationContext)
+                tokenManager = SecureTokenManager.getInstance(applicationContext),
+                database = database
             )
 
             val result = repository.processQueue()
 
-            if (result.failed > 0 && result.synced == 0) {
+            if (result.retryNeeded && !result.authenticationRequired) {
                 Result.retry()
             } else {
                 Result.success()
             }
         } catch (e: Exception) {
-            if (runAttemptCount < 3) {
-                Result.retry()
-            } else {
-                Result.failure()
-            }
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Result.retry()
         }
     }
 
@@ -60,7 +60,7 @@ class SyncWorker(
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(
                     WORK_NAME,
-                    ExistingWorkPolicy.REPLACE,
+                    ExistingWorkPolicy.APPEND_OR_REPLACE,
                     request
                 )
         }
@@ -72,8 +72,7 @@ class SyncWorker(
                 .build()
 
             val request = PeriodicWorkRequestBuilder<SyncWorker>(
-                6, TimeUnit.HOURS,
-                30, TimeUnit.MINUTES
+                15, TimeUnit.MINUTES
             )
                 .setConstraints(constraints)
                 .addTag("sync_periodic")

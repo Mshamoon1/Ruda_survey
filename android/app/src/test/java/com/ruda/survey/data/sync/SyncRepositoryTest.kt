@@ -27,6 +27,7 @@ class SyncRepositoryTest {
 
     @Test
     fun `processQueue returns zero counts (stub)`() = runTest {
+        whenever(dao.getAllEntries()).thenReturn(emptyList())
         val result = repository.processQueue()
 
         assertEquals(0, result.synced)

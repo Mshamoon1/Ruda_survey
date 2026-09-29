@@ -159,9 +159,9 @@ class SurveyRepositoryImplTest {
 
     @Test
     fun `isLoggedIn delegates to TokenManager`() {
-        whenever(tokenManager.hasTokens()).thenReturn(true)
+        whenever(tokenManager.isOfflineAccessAllowed()).thenReturn(true)
         assertTrue(repository.isLoggedIn())
-        whenever(tokenManager.hasTokens()).thenReturn(false)
+        whenever(tokenManager.isOfflineAccessAllowed()).thenReturn(false)
         assertFalse(repository.isLoggedIn())
     }
 }
